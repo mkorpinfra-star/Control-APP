@@ -6,12 +6,12 @@ export function Modal({ isOpen, onClose, children, className }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 pb-32 bg-black/60 overflow-y-auto"
       onClick={onClose}
     >
       <div
         className={cn(
-          'bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden',
+          'bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden my-8',
           className
         )}
         onClick={(e) => e.stopPropagation()}

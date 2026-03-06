@@ -75,107 +75,94 @@ export default function Clients() {
     );
 
     return (
-        <div className="w-full p-4 sm:p-6 bg-white min-h-screen pb-24">
+        <div className="min-h-screen bg-white pb-24">
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-gray-200">
+            <div className="px-4 pt-6 pb-4 flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 uppercase tracking-wide">
-                        Clientes
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-1 uppercase">Gestión de clientes y datos de facturación</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
+                    <p className="text-sm text-gray-500 mt-0.5">Gestión de clientes</p>
                 </div>
-                <Button variant="danger" onClick={openNewModal}>
-                    <Plus size={18} /> Nuevo Cliente
-                </Button>
+                <button
+                    onClick={openNewModal}
+                    className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg"
+                >
+                    <Plus size={24} strokeWidth={2.5} />
+                </button>
             </div>
 
             {/* Search */}
-            <div className="relative mb-6 max-w-2xl">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                    type="text"
-                    placeholder="Buscar cliente..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
-                />
+            <div className="px-4 mb-4">
+                <div className="relative">
+                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Buscar cliente..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    />
+                </div>
             </div>
 
             {/* Content */}
             {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="px-4 space-y-3">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-40 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 animate-pulse rounded-lg border-2 border-gray-700"></div>
+                        <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-2xl"></div>
                     ))}
                 </div>
             ) : filteredClients.length === 0 ? (
                 <div className="text-center py-16 px-4">
-                    <div className="text-6xl mb-4">🏢</div>
-                    <h3 className="text-xl font-bold text-white mb-2">
+                    <Building2 size={48} className="mx-auto text-gray-300 mb-3" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-1">
                         {searchTerm ? 'Sin resultados' : 'No hay clientes'}
                     </h3>
-                    <p className="text-gray-400">{searchTerm ? 'Intenta con otra búsqueda' : 'Añade tu primer cliente'}</p>
+                    <p className="text-gray-500 text-sm">{searchTerm ? 'Intenta con otra búsqueda' : 'Añade tu primer cliente'}</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="px-4 space-y-3">
                     {filteredClients.map((client) => (
-                        <Card key={client.id} variant="nubank" className="hover:shadow-md transition-shadow">
-                            <CardBody>
-                                <div className="flex items-start gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-black shrink-0">
-                                        <Building2 size={24} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-lg font-bold text-black truncate">{client.nome}</h3>
-                                    </div>
+                        <div key={client.id} className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gray-900 shrink-0">
+                                    <Building2 size={24} />
                                 </div>
-
-                                <div className="space-y-2 mb-4">
-                                    {client.email && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Mail size={14} className="shrink-0" />
-                                            <span className="truncate">{client.email}</span>
-                                        </div>
-                                    )}
-                                    {client.telefone && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Phone size={14} className="shrink-0" />
-                                            <span>{client.telefone}</span>
-                                        </div>
-                                    )}
-                                    {client.email_financeiro && (
-                                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                                            <Mail size={14} className="text-success shrink-0" />
-                                            <span className="text-xs text-success font-semibold truncate">
-                                                {client.email_financeiro}
-                                            </span>
-                                        </div>
-                                    )}
-                                    {client.endereco && (
-                                        <div className="flex items-start gap-2 text-sm text-gray-600">
-                                            <MapPin size={14} className="shrink-0 mt-0.5" />
-                                            <span className="line-clamp-2">{client.endereco}</span>
-                                        </div>
-                                    )}
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-gray-900 text-base">{client.nome}</h3>
                                 </div>
-
-                                <div className="flex gap-2 pt-3">
-                                    <button
-                                        onClick={() => handleEdit(client)}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-gray-300 text-gray-700 hover:border-j2s-red hover:text-j2s-red rounded-lg transition-all font-semibold text-sm"
-                                    >
+                                <div className="flex gap-2 shrink-0">
+                                    <button onClick={() => handleEdit(client)}
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors">
                                         <Edit size={16} />
-                                        Editar
                                     </button>
-                                    <button
-                                        onClick={() => handleDelete(client)}
-                                        className="flex items-center justify-center py-2 px-3 border border-red-300 text-j2s-red hover:bg-red-50 rounded-lg transition-all"
-                                    >
+                                    <button onClick={() => handleDelete(client)}
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors">
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
-                            </CardBody>
-                        </Card>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                {client.email && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Mail size={14} className="shrink-0" />
+                                        <span className="truncate">{client.email}</span>
+                                    </div>
+                                )}
+                                {client.telefone && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Phone size={14} className="shrink-0" />
+                                        <span>{client.telefone}</span>
+                                    </div>
+                                )}
+                                {client.endereco && (
+                                    <div className="flex items-start gap-2 text-sm text-gray-600">
+                                        <MapPin size={14} className="shrink-0 mt-0.5" />
+                                        <span className="line-clamp-1">{client.endereco}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     ))}
                 </div>
             )}

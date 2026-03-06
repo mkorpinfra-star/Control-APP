@@ -132,18 +132,17 @@ export default function Employees() {
     return (
         <div className="min-h-screen bg-white pb-24">
             {/* Header */}
-            <div className="px-4 pt-4 pb-3">
-                <div className="flex items-center justify-between mb-2">
-                    <h1 className="text-2xl font-bold text-gray-900">Usuarios & Personal</h1>
+            <div className="px-4 pt-6 pb-4 flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Usuarios</h1>
+                    <p className="text-sm text-gray-500 mt-0.5">Gestión de personal</p>
                 </div>
-                <p className="text-sm text-gray-600">Gestión de accesos y empleados</p>
-            </div>
-
-            {/* Button */}
-            <div className="px-4 mb-4">
-                <Button variant="danger" onClick={openNew} className="w-auto">
-                    <Plus size={18} /> Nuevo Usuario
-                </Button>
+                <button
+                    onClick={openNew}
+                    className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg"
+                >
+                    <Plus size={24} strokeWidth={2.5} />
+                </button>
             </div>
 
             {/* Filters */}
@@ -183,26 +182,26 @@ export default function Employees() {
             ) : (
                 <div className="px-4 space-y-3">
                     {filtered.map(emp => (
-                        <div key={emp.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                        <div key={emp.id} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100 text-gray-900 font-bold text-lg shrink-0">
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white text-gray-900 font-bold text-lg shrink-0">
                                     {emp.nome?.charAt(0)?.toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900 truncate text-base">{emp.nome}</p>
+                                    <p className="font-semibold text-gray-900 text-base">{emp.nome}</p>
                                     <p className="text-sm text-gray-600">{emp.passaporte}</p>
                                     <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${typeColor(emp.tipo)}`}>
                                         {typeLabel(emp.tipo)}
                                     </span>
                                 </div>
-                                <div className="flex gap-1 shrink-0">
+                                <div className="flex gap-2 shrink-0">
                                     <button onClick={() => handleEdit(emp)}
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors">
-                                        <Edit size={14} />
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors">
+                                        <Edit size={16} />
                                     </button>
                                     <button onClick={() => handleDelete(emp)}
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-red-100 text-red-400 hover:border-red-300 hover:text-red-600 transition-colors">
-                                        <Trash2 size={14} />
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors">
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -229,9 +228,9 @@ export default function Employees() {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 bg-black/50 overflow-y-auto"
+                <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 pb-32 bg-black/50 overflow-y-auto"
                     onClick={() => setShowModal(false)}>
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md"
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mb-8"
                         onClick={e => e.stopPropagation()}>
 
                         {/* Modal Header */}

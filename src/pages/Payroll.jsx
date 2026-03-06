@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from '../components/Toast';
-import { DollarSign, Download, FileText, Mail, Printer, Trash2, Trash } from 'lucide-react';
+import { Plus, Download, Mail, Printer, Trash2, Trash } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
@@ -242,75 +242,75 @@ export default function Payroll() {
 
     return (
         <div className="min-h-screen bg-white pb-24">
-            <div className="px-4 pt-4 pb-3 mb-4">
-                <h1 className="text-2xl font-bold text-gray-900">Folha de Pagamento</h1>
-            </div>
-            <div className="px-4 mb-4">
-                <div className="flex flex-wrap gap-2">
+            <div className="px-4 pt-6 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Folha de Pagamento</h1>
+                        <p className="text-sm text-gray-500 mt-0.5">Gestión de nóminas</p>
+                    </div>
                     <button
                         onClick={handleGenerate}
                         disabled={loading}
-                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors font-semibold rounded-lg disabled:opacity-50"
+                        className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg disabled:opacity-50"
                     >
-                        Generar Folha
+                        <Plus size={24} strokeWidth={2.5} />
                     </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
                     <button
                         onClick={handleExportCSV}
                         disabled={folhas.length === 0}
-                        title="Exportar CSV"
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-green-600 text-white hover:bg-green-700 transition-colors font-semibold rounded-lg disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Download size={16} /> CSV
+                        <Download size={14} /> CSV
                     </button>
                     <button
                         onClick={handleExportPDF}
                         disabled={folhas.length === 0}
-                        title="Ver / Imprimir PDF"
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white hover:bg-blue-700 transition-colors font-semibold rounded-lg disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Printer size={16} /> PDF
+                        <Printer size={14} /> PDF
                     </button>
                     <button
                         onClick={handleSendEmail}
                         disabled={folhas.length === 0}
-                        title="Enviar por Email"
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-purple-600 text-white hover:bg-purple-700 transition-colors font-semibold rounded-lg disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Mail size={16} /> Email
+                        <Mail size={14} /> Email
                     </button>
                     <button
                         onClick={handleDeleteMes}
                         disabled={folhas.length === 0}
-                        title="Apagar folha do mês selecionado"
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-red-700 text-white hover:bg-red-800 transition-colors font-semibold rounded-lg disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Trash size={16} /> Limpar Mês
+                        <Trash size={14} /> Limpar
                     </button>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="px-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                        <label className="block text-sm font-semibold mb-2 text-black">
+                        <label className="block text-sm font-medium mb-1.5 text-gray-700">
                             Mes de Referencia
                         </label>
                         <input
                             type="month"
                             value={mesReferencia}
                             onChange={(e) => setMesReferencia(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-gray-300 focus:border-[#CE0201] focus:outline-none text-black"
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold mb-2 text-black">
+                        <label className="block text-sm font-medium mb-1.5 text-gray-700">
                             Obra
                         </label>
                         <select
                             value={obraId}
                             onChange={(e) => setObraId(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-gray-300 focus:border-[#CE0201] focus:outline-none text-black"
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
                         >
                             <option value="all">Todas las obras</option>
                             {obras.map(obra => (
@@ -325,29 +325,29 @@ export default function Payroll() {
 
             {/* Summary */}
             {totais && (
-                <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                        <div>
-                            <div className="text-sm text-gray-600 mb-2">
+                <div className="px-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="text-sm text-gray-600 mb-1">
                                 Funcionários
                             </div>
-                            <div className="text-3xl font-bold text-gray-900">
+                            <div className="text-2xl font-bold text-gray-900">
                                 {totais.total_funcionarios}
                             </div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-600 mb-2">
+                        <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="text-sm text-gray-600 mb-1">
                                 Total Líquido a Pagar
                             </div>
-                            <div className="text-3xl font-bold text-gray-900">
+                            <div className="text-2xl font-bold text-gray-900">
                                 {formatCurrency(totais.total_liquido)}
                             </div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-600 mb-2">
+                        <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="text-sm text-gray-600 mb-1">
                                 Custo Total Empresa
                             </div>
-                            <div className="text-3xl font-bold text-gray-900">
+                            <div className="text-2xl font-bold text-gray-900">
                                 {formatCurrency(totais.total_custo_empresa)}
                             </div>
                         </div>
@@ -357,19 +357,23 @@ export default function Payroll() {
 
             {/* Payroll Cards */}
             {loading ? (
-                <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center">
-                    <p className="text-gray-500 text-lg">Cargando...</p>
+                <div className="px-4">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
+                        <p className="text-gray-600 text-base">Cargando...</p>
+                    </div>
                 </div>
             ) : folhas.length === 0 ? (
-                <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center">
-                    <p className="text-gray-500 text-lg">
-                        No hay datos de folha para este período.
-                        <br />
-                        Haga clic en "Generar Folha del Mes" para crear.
-                    </p>
+                <div className="px-4">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
+                        <p className="text-gray-600 text-base">
+                            No hay datos de folha para este período.
+                            <br />
+                            Haga clic en "Generar Folha del Mes" para crear.
+                        </p>
+                    </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6">
+                <div className="px-4 space-y-3">
                     {folhas.map(folha => {
                         const isEditing     = editingId === folha.id;
                         const salarioBase   = parseFloat(folha.salario_base    || 0);
@@ -388,36 +392,36 @@ export default function Payroll() {
                         const totalHoras    = horasN + horasE + horasNoc;
 
                         return (
-                            <div key={folha.id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                                {/* Header: nome amarelo igual à planilha */}
-                                <div className="bg-amber-400 px-5 py-3 flex items-center justify-between">
-                                    <div>
-                                        <div className="font-bold text-black text-base uppercase tracking-wide">{folha.funcionario_nome}</div>
-                                        <div className="text-xs text-black/70 mt-0.5">{folha.obra_numero} — {folha.obra_nome}</div>
+                            <div key={folha.id} className="bg-[#F5F5F5] rounded-2xl overflow-hidden">
+                                {/* Header */}
+                                <div className="bg-gray-900 px-4 py-3 flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-bold text-white text-base">{folha.funcionario_nome}</div>
+                                        <div className="text-xs text-gray-300 mt-0.5">{folha.obra_numero} — {folha.obra_nome}</div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="bg-black text-white text-xs font-bold px-3 py-1 rounded-full">
-                                            TOTAL: {totalHoras}h
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <span className="bg-white text-gray-900 text-xs font-bold px-3 py-1 rounded-full">
+                                            {totalHoras}h
                                         </span>
                                         {isEditing ? (
                                             <div className="flex gap-2">
-                                                <button onClick={() => handleSave(folha.id)} className="px-3 py-1 bg-green-600 text-white hover:bg-green-700 font-bold rounded text-sm">✓ Salvar</button>
-                                                <button onClick={handleCancel} className="px-3 py-1 bg-gray-500 text-white hover:bg-gray-600 font-bold rounded text-sm">✕</button>
+                                                <button onClick={() => handleSave(folha.id)} className="w-8 h-8 flex items-center justify-center bg-green-600 text-white hover:bg-green-700 font-bold rounded-full text-sm">✓</button>
+                                                <button onClick={handleCancel} className="w-8 h-8 flex items-center justify-center bg-gray-600 text-white hover:bg-gray-700 font-bold rounded-full text-sm">✕</button>
                                             </div>
                                         ) : (
                                             <div className="flex gap-1">
-                                                <button onClick={() => handleEdit(folha)} className="px-3 py-1 bg-blue-600 text-white hover:bg-blue-700 font-bold rounded text-xs">Editar</button>
-                                                <button onClick={() => handleDeleteRow(folha.id, folha.funcionario_nome)} className="px-2 py-1 bg-red-700 text-white hover:bg-red-800 rounded" title="Deletar"><Trash2 size={14}/></button>
+                                                <button onClick={() => handleEdit(folha)} className="px-3 py-1.5 bg-white text-gray-900 hover:bg-gray-100 font-medium rounded-full text-xs">Editar</button>
+                                                <button onClick={() => handleDeleteRow(folha.id, folha.funcionario_nome)} className="w-8 h-8 flex items-center justify-center bg-red-600 text-white hover:bg-red-700 rounded-full" title="Deletar"><Trash2 size={14}/></button>
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+                                <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
 
                                     {/* ── Col 1: Horas ── */}
-                                    <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                                        <div className="bg-gray-100 px-3 py-2 font-bold text-xs text-gray-600 uppercase tracking-wide border-b border-gray-200">
+                                    <div className="bg-white rounded-xl overflow-hidden">
+                                        <div className="bg-gray-100 px-3 py-2 font-semibold text-xs text-gray-700 border-b border-gray-200">
                                             Horas Trabalhadas
                                         </div>
                                         <div className="p-3 space-y-2 text-sm">
@@ -451,8 +455,8 @@ export default function Payroll() {
                                     </div>
 
                                     {/* ── Col 2: Resumo de Folha ── */}
-                                    <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
-                                        <div className="bg-gray-600 px-3 py-2 font-bold text-xs text-white uppercase tracking-wide">
+                                    <div className="bg-white rounded-xl overflow-hidden">
+                                        <div className="bg-gray-900 px-3 py-2 font-semibold text-xs text-white">
                                             Resumo de Folha
                                         </div>
                                         <div className="p-3 space-y-2 text-sm">
@@ -492,8 +496,8 @@ export default function Payroll() {
                                     </div>
 
                                     {/* ── Col 3: CASS (vermelho) ── */}
-                                    <div className="border-2 border-red-200 rounded-lg overflow-hidden">
-                                        <div className="bg-red-600 px-3 py-2 font-bold text-xs text-white uppercase tracking-wide">
+                                    <div className="bg-white rounded-xl overflow-hidden">
+                                        <div className="bg-red-600 px-3 py-2 font-semibold text-xs text-white">
                                             CASS — Segurança Social
                                         </div>
                                         <div className="p-3 space-y-2 text-sm">
@@ -534,20 +538,22 @@ export default function Payroll() {
             )}
 
             {/* Legend */}
-            <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-4 mt-6">
-                <div className="flex flex-wrap gap-6 text-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-purple-600 rounded"/>
-                        <span className="text-black font-semibold">Resumo de Folha</span>
-                        <span className="text-gray-500 text-xs">— sal. base + moradia + bonificação − CASS func.</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-600 rounded"/>
-                        <span className="text-black font-semibold">CASS</span>
-                        <span className="text-gray-500 text-xs">— calculado apenas sobre salário base declarado</span>
-                    </div>
-                    <div className="ml-auto text-xs text-gray-500 italic">
-                        Extra: ×1.4 · Noturna: ×1.6 · CASS func: 6,5% · CASS empresa: 15,5%
+            <div className="px-4 mt-4">
+                <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                    <div className="flex flex-wrap gap-6 text-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-gray-900 rounded"/>
+                            <span className="text-gray-900 font-semibold">Resumo de Folha</span>
+                            <span className="text-gray-600 text-xs">— sal. base + moradia + bonificação − CASS func.</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-red-600 rounded"/>
+                            <span className="text-gray-900 font-semibold">CASS</span>
+                            <span className="text-gray-600 text-xs">— calculado apenas sobre salário base declarado</span>
+                        </div>
+                        <div className="ml-auto text-xs text-gray-600">
+                            Extra: ×1.4 · Noturna: ×1.6 · CASS func: 6,5% · CASS empresa: 15,5%
+                        </div>
                     </div>
                 </div>
             </div>
