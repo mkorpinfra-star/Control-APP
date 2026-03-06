@@ -276,7 +276,7 @@ export default function Settings() {
                                                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${imp.ativo ? 'translate-x-5' : ''}`} />
                                             </button>
                                             {/* Percentual */}
-                                            <div className="relative w-24">
+                                            <div className="relative w-20">
                                                 <input
                                                     type="number"
                                                     step="0.01"
@@ -285,16 +285,16 @@ export default function Settings() {
                                                     value={imp.percentual}
                                                     onChange={e => handleImpostoChange(imp.id, 'percentual', e.target.value)}
                                                     disabled={!imp.ativo}
-                                                    className="w-full pr-6 pl-3 py-2 border-0 bg-white rounded-lg text-right font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    className="w-full pr-5 pl-2 py-2 border-0 bg-white rounded-lg text-right font-semibold text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
                                                 />
-                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-xs">%</span>
+                                                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-xs">%</span>
                                             </div>
                                             {/* Save button */}
                                             <button
                                                 type="button"
                                                 onClick={() => saveImposto(imp)}
                                                 disabled={savingImposto === imp.id}
-                                                className="px-3 py-2 text-xs font-semibold rounded-full bg-white text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                                className="px-4 py-2 text-xs font-semibold rounded-full bg-white text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50 min-w-[70px]"
                                             >
                                                 {savingImposto === imp.id ? '...' : 'Salvar'}
                                             </button>

@@ -251,148 +251,143 @@ export default function Timesheet() {
     ];
 
     return (
-        <div className="w-full">
+        <div className="min-h-screen bg-white pb-24">
             {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-white mb-2">{t('timesheet.title')}</h1>
-                <p className="text-sm text-gray-400">{t('timesheet.subtitle')}</p>
+            <div className="px-4 pt-6 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">{t('timesheet.title')}</h1>
+                        <p className="text-sm text-gray-500 mt-0.5">{t('timesheet.subtitle')}</p>
+                    </div>
+                    {/* Status Badge */}
+                    {apontamento && (
+                        <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold ${
+                            apontamento.status === 'aprovado'
+                                ? 'bg-green-100 text-green-700'
+                                : apontamento.status === 'enviado'
+                                ? 'bg-blue-100 text-blue-700'
+                                : apontamento.status === 'rejeitado'
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-gray-100 text-gray-700'
+                        }`}>
+                            {t(`status.${apontamento.status}`)}
+                        </span>
+                    )}
+                </div>
             </div>
 
-            {/* Status Badge */}
-            {apontamento && (
-                <div className="mb-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        apontamento.status === 'aprovado'
-                            ? 'bg-success-light text-success'
-                            : apontamento.status === 'enviado'
-                            ? 'bg-info-light text-info'
-                            : apontamento.status === 'rejeitado'
-                            ? 'bg-danger-light text-danger'
-                            : 'bg-gray-100 text-gray-700'
+            <div className="px-4 space-y-4">
+
+                {/* Rejection Alert */}
+                {apontamento?.status === 'rejeitado' && apontamento.observacao_rejeicao && (
+                    <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <strong className="text-red-900 font-semibold">{t('timesheet.rejectionReason')}:</strong>
+                                <p className="mt-1 text-sm text-red-700">{apontamento.observacao_rejeicao}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Message */}
+                {message && (
+                    <div className={`rounded-2xl p-4 ${
+                        message.type === 'success' ? 'bg-green-50 border border-green-200' :
+                        message.type === 'warning' ? 'bg-amber-50 border border-amber-200' :
+                        'bg-red-50 border border-red-200'
                     }`}>
-                        {t(`status.${apontamento.status}`)}
-                    </span>
-                </div>
-            )}
-
-            {/* Rejection Alert */}
-            {apontamento?.status === 'rejeitado' && apontamento.observacao_rejeicao && (
-                <Alert variant="danger" className="mb-4">
-                    <div className="flex items-start gap-2">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <div>
-                            <strong>{t('timesheet.rejectionReason')}:</strong>
-                            <p className="mt-1">{apontamento.observacao_rejeicao}</p>
+                        <div className="flex items-center gap-3">
+                            {message.type === 'success' ?
+                                <CheckCircle className="w-5 h-5 text-green-600" /> :
+                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                            }
+                            <span className={`text-sm font-medium ${
+                                message.type === 'success' ? 'text-green-900' :
+                                message.type === 'warning' ? 'text-amber-900' :
+                                'text-red-900'
+                            }`}>{message.text}</span>
                         </div>
                     </div>
-                </Alert>
-            )}
+                )}
 
-            {/* Message */}
-            {message && (
-                <Alert variant={message.type === 'success' ? 'success' : message.type === 'warning' ? 'warning' : 'danger'} className="mb-4">
-                    <div className="flex items-center gap-2">
-                        {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                        <span>{message.text}</span>
-                    </div>
-                </Alert>
-            )}
-
-            {/* Week Selector */}
-            <div className="bg-white rounded-lg p-4 mb-4 flex items-center justify-between border-2 border-gray-200">
-                <button
-                    onClick={prevWeek}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    aria-label="Semana anterior"
-                >
-                    <ChevronLeft className="w-5 h-5" />
-                </button>
-                <div className="text-center">
-                    <div className="font-semibold text-gray-900">{formatWeekRange(weekStart)}</div>
-                    <div className="text-xs text-gray-500">{weekStart.getFullYear()}</div>
-                </div>
-                <button
-                    onClick={nextWeek}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    aria-label="Semana siguiente"
-                >
-                    <ChevronRight className="w-5 h-5" />
-                </button>
-            </div>
-
-            {/* Obra Selector */}
-            {obras.length > 1 && (
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-white mb-2">{t('timesheet.selectProject')}</label>
-                    <select
-                        value={selectedObra}
-                        onChange={(e) => setSelectedObra(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white"
-                        disabled={isReadOnly}
+                {/* Week Selector */}
+                <div className="bg-[#F5F5F5] rounded-2xl p-4 flex items-center justify-between">
+                    <button
+                        onClick={prevWeek}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-100 transition-colors text-gray-700"
+                        aria-label="Semana anterior"
                     >
-                        {obras.map((obra) => (
-                            <option key={obra.id} value={obra.id}>
-                                {obra.numero} - {obra.nome}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
-
-            {loading ? (
-                <div className="text-center py-16">
-                    <div className="animate-spin w-12 h-12 border-4 border-j2s-red border-t-transparent rounded-full mx-auto"></div>
-                    <p className="text-gray-400 mt-4">{t('app.loading')}</p>
-                </div>
-            ) : (
-                <>
-                    {/* Legend */}
-                    <div className="flex gap-3 mb-4 flex-wrap text-xs">
-                        <div className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-green-500 rounded"></span>
-                            <span className="text-gray-300">{t('timesheet.normalHours')} (8-17h)</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-orange-500 rounded"></span>
-                            <span className="text-gray-300">{t('timesheet.extraHours')} (17-22h)</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-indigo-500 rounded"></span>
-                            <span className="text-gray-300">{t('timesheet.nightHours')} (22-6h)</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <span className="w-5 h-4 bg-amber-400 rounded flex items-center justify-center text-[9px] font-bold text-amber-900">F</span>
-                            <span className="text-gray-300">Festivo (empresa paga 8h, cliente €0)</span>
-                        </div>
+                        <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div className="text-center flex-1">
+                        <div className="font-semibold text-gray-900">{formatWeekRange(weekStart)}</div>
+                        <div className="text-xs text-gray-600">{weekStart.getFullYear()}</div>
                     </div>
+                    <button
+                        onClick={nextWeek}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-100 transition-colors text-gray-700"
+                        aria-label="Semana siguiente"
+                    >
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
+                </div>
 
-                    {/* Hours Grid */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm bg-white rounded-lg shadow overflow-hidden">
-                            <thead>
-                                <tr className="bg-gray-50">
-                                    <th className="px-3 py-2 text-left text-xs font-semibold border-b-2 border-gray-200 w-20">
-                                        {t('timesheet.day')}
-                                    </th>
-                                    <th className="px-2 py-2 text-center text-xs font-semibold border-b-2 border-gray-200 bg-amber-50 text-amber-700 w-12">
-                                        <div>F</div>
-                                        <div className="text-[9px] font-normal">Festivo</div>
-                                    </th>
-                                    <th className="px-3 py-2 text-center text-xs font-semibold border-b-2 border-gray-200 bg-green-100 text-green-700">
-                                        <div>{t('timesheet.normal')}</div>
-                                        <div className="text-[9px] font-normal">8-17h</div>
-                                    </th>
-                                    <th className="px-3 py-2 text-center text-xs font-semibold border-b-2 border-gray-200 bg-yellow-100 text-yellow-700">
-                                        <div>{t('timesheet.extra')}</div>
-                                        <div className="text-[9px] font-normal">17-22h</div>
-                                    </th>
-                                    <th className="px-3 py-2 text-center text-xs font-semibold border-b-2 border-gray-200 bg-indigo-100 text-indigo-700">
-                                        <div>{t('timesheet.night')}</div>
-                                        <div className="text-[9px] font-normal">22-6h</div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                {/* Obra Selector */}
+                {obras.length > 1 && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('timesheet.selectProject')}</label>
+                        <select
+                            value={selectedObra}
+                            onChange={(e) => setSelectedObra(e.target.value)}
+                            className="w-full px-4 py-3 border-0 bg-[#F5F5F5] text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
+                            disabled={isReadOnly}
+                        >
+                            {obras.map((obra) => (
+                                <option key={obra.id} value={obra.id}>
+                                    {obra.numero} - {obra.nome}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
+                        <div className="animate-spin w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full mx-auto"></div>
+                        <p className="text-gray-600 mt-4">{t('app.loading')}</p>
+                    </div>
+                ) : (
+                    <>
+
+                        {/* Hours Grid */}
+                        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-[#F5F5F5]">
+                                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-200">
+                                                {t('timesheet.day')}
+                                            </th>
+                                            <th className="px-2 py-3 text-center text-xs font-semibold text-gray-700 border-b border-gray-200 w-12">
+                                                <div>🎉</div>
+                                            </th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-700 border-b border-gray-200">
+                                                <div>{t('timesheet.normal')}</div>
+                                                <div className="text-[10px] font-normal text-gray-500">8-17h</div>
+                                            </th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-700 border-b border-gray-200">
+                                                <div>{t('timesheet.extra')}</div>
+                                                <div className="text-[10px] font-normal text-gray-500">17-22h</div>
+                                            </th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-700 border-b border-gray-200">
+                                                <div>{t('timesheet.night')}</div>
+                                                <div className="text-[10px] font-normal text-gray-500">22-6h</div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                 {days.map((day) => {
                                     const isFestivo = !!hours[day.key]?.festivo;
                                     return (
@@ -429,7 +424,7 @@ export default function Timesheet() {
                                                         onChange={(e) => handleHourChange(day.key, 'normal', e.target.value)}
                                                         disabled={isReadOnly}
                                                         placeholder="0"
-                                                        className="w-14 px-2 py-1 border border-gray-300 rounded text-center text-sm disabled:bg-gray-100"
+                                                        className="w-16 px-2 py-2 border-0 bg-[#F5F5F5] rounded-lg text-center text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-300 disabled:opacity-50"
                                                     />
                                                 )}
                                             </td>
@@ -443,7 +438,7 @@ export default function Timesheet() {
                                                         onChange={(e) => handleHourChange(day.key, 'extra', e.target.value)}
                                                         disabled={isReadOnly}
                                                         placeholder="0"
-                                                        className="w-14 px-2 py-1 border border-gray-300 rounded text-center text-sm disabled:bg-gray-100"
+                                                        className="w-16 px-2 py-2 border-0 bg-[#F5F5F5] rounded-lg text-center text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-300 disabled:opacity-50"
                                                     />
                                                 )}
                                             </td>
@@ -457,31 +452,32 @@ export default function Timesheet() {
                                                         onChange={(e) => handleHourChange(day.key, 'noturna', e.target.value)}
                                                         disabled={isReadOnly}
                                                         placeholder="0"
-                                                        className="w-14 px-2 py-1 border border-gray-300 rounded text-center text-sm disabled:bg-gray-100"
+                                                        className="w-16 px-2 py-2 border-0 bg-[#F5F5F5] rounded-lg text-center text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-50"
                                                     />
                                                 )}
                                             </td>
                                         </tr>
                                     );
                                 })}
-                                {/* Totals Row */}
-                                <tr className="bg-gray-50 font-semibold">
-                                    <td className="px-3 py-2 text-xs">TOTAL</td>
-                                    <td className="px-2 py-2 text-center">
-                                        {totals.festivos > 0 && (
-                                            <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">{totals.festivos}F</span>
-                                        )}
-                                    </td>
-                                    <td className="px-3 py-2 text-center text-green-700">{totals.normal}h</td>
-                                    <td className="px-3 py-2 text-center text-yellow-700">{totals.extra}h</td>
-                                    <td className="px-3 py-2 text-center text-indigo-700">{totals.noturna}h</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                        {/* Totals Row */}
+                                        <tr className="bg-gray-900">
+                                            <td className="px-3 py-3 text-xs font-bold text-white">TOTAL</td>
+                                            <td className="px-2 py-3 text-center">
+                                                {totals.festivos > 0 && (
+                                                    <span className="text-xs bg-amber-400 text-amber-900 px-2 py-1 rounded-full font-bold">{totals.festivos}</span>
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-3 text-center text-white font-bold">{totals.normal}h</td>
+                                            <td className="px-3 py-3 text-center text-white font-bold">{totals.extra}h</td>
+                                            <td className="px-3 py-3 text-center text-white font-bold">{totals.noturna}h</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-                    {/* Grand Total */}
-                    <div className="mt-4 p-4 bg-gradient-to-r from-j2s-red to-red-700 rounded-lg text-white">
+                        {/* Grand Total */}
+                        <div className="bg-gray-900 rounded-2xl p-5 text-white">
                         <div className="flex justify-between items-center">
                             <span className="font-semibold">{t('timesheet.totalHours')}</span>
                             <span className="text-2xl font-bold">{totals.total}h</span>
@@ -497,65 +493,64 @@ export default function Timesheet() {
                         )}
                     </div>
 
-                    {/* Actions */}
-                    {!isReadOnly && (
-                        <div className="flex flex-col gap-3 mt-6">
-                            <Button
-                                onClick={handleSubmit}
-                                disabled={submitting || saving || totals.total === 0}
-                                size="lg"
-                                className="w-full"
-                            >
-                                {submitting ? (
-                                    <>
-                                        <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                                        {t('app.loading')}
-                                    </>
-                                ) : (
-                                    <>
-                                        <Send className="w-5 h-5" />
-                                        {t('timesheet.submit')}
-                                    </>
-                                )}
-                            </Button>
+                        {/* Actions */}
+                        {!isReadOnly && (
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={submitting || saving || totals.total === 0}
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                                            {t('app.loading')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Send className="w-5 h-5" />
+                                            {t('timesheet.submit')}
+                                        </>
+                                    )}
+                                </button>
 
-                            <Button
-                                onClick={handleSave}
-                                disabled={saving || submitting}
-                                variant="secondary"
-                                className="w-full"
-                            >
-                                {saving ? (
-                                    <>
-                                        <div className="animate-spin w-5 h-5 border-2 border-current border-t-transparent rounded-full"></div>
-                                        {t('app.loading')}
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="w-5 h-5" />
-                                        {t('timesheet.saveDraft')}
-                                    </>
-                                )}
-                            </Button>
-                        </div>
-                    )}
-
-                    {/* Read-only message */}
-                    {isReadOnly && (
-                        <Alert variant="success" className="mt-4">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="w-5 h-5" />
-                                <span>
-                                    {apontamento.status === 'enviado'
-                                        ? t('timesheet.pendingApproval')
-                                        : t('timesheet.alreadyApproved')
-                                    }
-                                </span>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={saving || submitting}
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#F5F5F5] text-gray-900 rounded-xl hover:bg-gray-200 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <div className="animate-spin w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full"></div>
+                                            {t('app.loading')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-5 h-5" />
+                                            {t('timesheet.saveDraft')}
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                        </Alert>
-                    )}
-                </>
-            )}
+                        )}
+
+                        {/* Read-only message */}
+                        {isReadOnly && (
+                            <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
+                                <div className="flex items-center gap-3">
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                    <span className="text-sm font-medium text-green-900">
+                                        {apontamento.status === 'enviado'
+                                            ? t('timesheet.pendingApproval')
+                                            : t('timesheet.alreadyApproved')
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     );
 }

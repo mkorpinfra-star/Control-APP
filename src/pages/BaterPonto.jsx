@@ -293,38 +293,37 @@ export default function BaterPonto() {
 
     return (
         <div className="min-h-screen bg-white pb-32">
-            {/* Header Fixo com z-index menor que menu */}
+            {/* Header Fixo */}
             <div className="bg-white shadow-sm relative z-10">
-                <div className="px-4 py-3 border-b border-gray-200">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                <div className="px-4 pt-6 pb-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
                                 <ClockIcon className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold text-gray-900">Bater Ponto</h1>
-                                <p className="text-xs text-gray-500">{user?.nome}</p>
+                                <h1 className="text-2xl font-bold text-gray-900">Bater Ponto</h1>
+                                <p className="text-sm text-gray-500">{user?.nome}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             {autoSaving && (
-                                <div className="flex items-center gap-2 text-gray-600 text-sm">
-                                    <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse"></div>
+                                <div className="flex items-center gap-2 text-gray-600 text-xs">
+                                    <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
                                     Guardando...
                                 </div>
                             )}
                             <button
                                 onClick={logout}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm font-medium"
+                                className="w-9 h-9 flex items-center justify-center bg-[#F5F5F5] hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
                                 title="Cerrar sesión"
                             >
-                                <LogOut size={16} />
-                                <span className="text-xs">Salir</span>
+                                <LogOut size={18} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Seleção Obra - NUNCA bloqueado, sempre pode trocar */}
+                    {/* Seleção Obra */}
                     <select
                         value={obraId}
                         onChange={(e) => {
@@ -332,7 +331,7 @@ export default function BaterPonto() {
                             setSemanaInicio(getMonday(new Date()))
                             setDiaAtual(0)
                         }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-semibold text-base focus:border-red-600 focus:outline-none bg-white cursor-pointer"
+                        className="w-full px-4 py-3 border-0 bg-[#F5F5F5] rounded-xl font-semibold text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     >
                         {obras.map(o => (
                             <option key={o.id} value={o.id}>{o.numero} - {o.nome}</option>
@@ -363,16 +362,16 @@ export default function BaterPonto() {
 
                 {/* Status */}
                 {apontamento && (
-                    <div className={`px-4 py-2 text-center text-sm font-semibold ${
-                        apontamento.status === 'aprovado' ? 'bg-gray-200 text-gray-800' :
-                        apontamento.status === 'enviado' ? 'bg-gray-200 text-gray-800' :
+                    <div className={`px-4 py-2.5 text-center text-xs font-semibold ${
+                        apontamento.status === 'aprovado' ? 'bg-green-100 text-green-800' :
+                        apontamento.status === 'enviado' ? 'bg-blue-100 text-blue-800' :
                         apontamento.status === 'rejeitado' ? 'bg-red-100 text-red-800' :
                         'bg-gray-100 text-gray-700'
                     }`}>
                         {apontamento.status === 'aprovado' && '✅ APROBADO'}
                         {apontamento.status === 'enviado' && '⏳ ENVIADO - Esperando aprobación'}
                         {apontamento.status === 'rejeitado' && '❌ RECHAZADO: ' + (apontamento.observacao_rejeicao || '')}
-                        {apontamento.status === 'rascunho' && '📝 BORRADOR - Guardado automáticamente'}
+                        {apontamento.status === 'rascunho' && '💾 Guardado automáticamente'}
                     </div>
                 )}
             </div>
@@ -396,13 +395,13 @@ export default function BaterPonto() {
                 {/* Presets Rápidos */}
                 {!bloqueado && (
                     <div className="mb-6">
-                        <p className="text-xs text-gray-500 mb-2 text-center font-semibold">RELLENO RÁPIDO</p>
+                        <p className="text-xs text-gray-600 mb-3 text-center font-semibold">Relleno rápido</p>
                         <div className="grid grid-cols-3 gap-2">
                             {PRESETS_HORAS.map((preset, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => aplicarPreset(preset)}
-                                    className="bg-white border-2 border-gray-300 hover:border-red-600 hover:bg-red-50 py-3 px-2 rounded-xl font-bold text-sm transition-all active:scale-95"
+                                    className="bg-[#F5F5F5] hover:bg-red-600 hover:text-white py-3.5 px-2 rounded-xl font-bold text-sm text-gray-900 transition-all active:scale-95"
                                 >
                                     {preset.label}
                                 </button>
@@ -537,23 +536,23 @@ export default function BaterPonto() {
                     </div>
                 </div>
 
-                {/* Navegação Entre Dias com MAIS ESPAÇO */}
-                <div className="flex items-center justify-between gap-4 mt-12 mb-8">
+                {/* Navegação Entre Dias */}
+                <div className="flex items-center justify-between gap-3 mt-12 mb-8">
                     <button
                         onClick={prevDay}
                         disabled={diaAtual === 0}
-                        className="flex-1 bg-gray-800 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform flex items-center justify-center gap-2"
+                        className="flex-1 bg-gray-900 text-white py-4 rounded-xl font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform flex items-center justify-center gap-2"
                     >
-                        <ChevronLeft className="w-6 h-6" />
+                        <ChevronLeft className="w-5 h-5" />
                         Anterior
                     </button>
                     <button
                         onClick={nextDay}
                         disabled={diaAtual === 5}
-                        className="flex-1 bg-gray-800 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform flex items-center justify-center gap-2"
+                        className="flex-1 bg-gray-900 text-white py-4 rounded-xl font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform flex items-center justify-center gap-2"
                     >
                         Siguiente
-                        <ChevronRight className="w-6 h-6" />
+                        <ChevronRight className="w-5 h-5" />
                     </button>
                 </div>
             </div>
