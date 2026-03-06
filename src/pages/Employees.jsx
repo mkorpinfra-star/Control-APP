@@ -124,8 +124,8 @@ export default function Employees() {
 
     const typeLabel = (t) => ({ admin: 'Admin', encarregado: 'Encargado' }[t] || 'Empleado');
     const typeColor = (t) => ({
-        admin: 'bg-red-100 text-red-700',
-        encarregado: 'bg-blue-100 text-blue-700',
+        admin: 'bg-gray-100 text-gray-600',
+        encarregado: 'bg-gray-100 text-gray-600',
         funcionario: 'bg-gray-100 text-gray-600'
     }[t] || 'bg-gray-100 text-gray-600');
 
@@ -206,13 +206,13 @@ export default function Employees() {
                             {(emp.salario_base > 0 || emp.salario_base_mensal > 0 || emp.salario_hora > 0 || emp.valor_hora_venda > 0) && (
                                 <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-500">
                                     {(emp.salario_base > 0 || emp.salario_base_mensal > 0) && (
-                                        <span>Base CASS: <strong className="text-purple-700">{parseFloat(emp.salario_base || emp.salario_base_mensal).toLocaleString('de-DE', {minimumFractionDigits:2})} €</strong></span>
+                                        <span>Base CASS: <strong className="text-gray-700">{parseFloat(emp.salario_base || emp.salario_base_mensal).toLocaleString('de-DE', {minimumFractionDigits:2})} €</strong></span>
                                     )}
                                     {emp.salario_hora > 0 && (
-                                        <span>Custo/h: <strong className="text-purple-700">{parseFloat(emp.salario_hora).toFixed(2)} €</strong></span>
+                                        <span>Custo/h: <strong className="text-gray-700">{parseFloat(emp.salario_hora).toFixed(2)} €</strong></span>
                                     )}
                                     {emp.valor_hora_venda > 0 && (
-                                        <span>Venda/h: <strong className="text-blue-700">{parseFloat(emp.valor_hora_venda).toFixed(2)} €</strong></span>
+                                        <span>Venda/h: <strong className="text-gray-700">{parseFloat(emp.valor_hora_venda).toFixed(2)} €</strong></span>
                                     )}
                                     {emp.vale_moradia > 0 && (
                                         <span>Moradia: <strong className="text-gray-700">{parseFloat(emp.vale_moradia).toLocaleString('de-DE', {minimumFractionDigits:2})} €</strong></span>
@@ -279,8 +279,8 @@ export default function Employees() {
                                 </Field>
 
                                 {/* Bloco financeiro — separado por contexto */}
-                                <div className="rounded-lg border border-purple-200 bg-purple-50 p-3 space-y-3">
-                                    <p className="text-xs font-bold text-purple-700 uppercase tracking-wide">Folha de Pagamento (interno)</p>
+                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-3">
+                                    <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Folha de Pagamento (interno)</p>
                                     <div className="grid grid-cols-2 gap-3">
                                         <Field label="Salário Base (base CASS) €">
                                             <input type="number" step="0.01" min="0" className={inputCls}
@@ -312,8 +312,8 @@ export default function Employees() {
                                     </Field>
                                 </div>
 
-                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                                    <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-2">Faturamento (cobrado ao cliente)</p>
+                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <p className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Faturamento (cobrado ao cliente)</p>
                                     <Field label="Valor Hora Venda (€/h)">
                                         <input type="number" step="0.01" min="0" className={inputCls}
                                             placeholder="24.00" value={formData.valor_hora_venda}
@@ -344,7 +344,7 @@ export default function Employees() {
                                     </div>
                                     <button type="button"
                                         onClick={() => setFormData({ ...formData, biometria: !formData.biometria })}
-                                        className={`relative w-11 h-6 rounded-full transition-colors ${formData.biometria ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                        className={`relative w-11 h-6 rounded-full transition-colors ${formData.biometria ? 'bg-gray-600' : 'bg-gray-300'}`}>
                                         <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${formData.biometria ? 'translate-x-5' : ''}`} />
                                     </button>
                                 </div>

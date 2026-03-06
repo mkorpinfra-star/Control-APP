@@ -1,4 +1,4 @@
-import { Home, Briefcase, Users, User, ClipboardCheck, Clock } from 'lucide-react';
+import { Home, Briefcase, Users, Settings, ClipboardCheck, Clock } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -63,8 +63,8 @@ export default function BottomNav() {
         activePaths: ['/clients']
       },
       {
-        id: 'profile',
-        icon: User,
+        id: 'settings',
+        icon: Settings,
         path: '/settings',
         activePaths: ['/settings']
       }
@@ -78,7 +78,7 @@ export default function BottomNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 safe-area-bottom z-40 pb-6 px-6 pointer-events-none">
+    <div className="fixed bottom-0 left-0 right-0 safe-area-bottom z-40 pb-8 px-6 pointer-events-none">
       <nav className="bg-white rounded-3xl shadow-sm max-w-md mx-auto pointer-events-auto">
         <div className="flex items-center justify-around h-14 px-2">
           {navItems.map((item) => {

@@ -232,7 +232,7 @@ export default function Settings() {
             {/* Impostos & Contribuições */}
             <Card variant="nubank-no-shadow" className="mb-6 p-6">
                 <div className="flex items-center gap-2 mb-1">
-                    <Percent className="w-5 h-5 text-orange-600" />
+                    <Percent className="w-5 h-5 text-gray-600" />
                     <h2 className="text-base font-semibold text-gray-900">Impostos & Contribuições</h2>
                 </div>
                 <p className="text-xs text-gray-500 mb-4">
@@ -270,7 +270,7 @@ export default function Settings() {
                                             value={imp.percentual}
                                             onChange={e => handleImpostoChange(imp.id, 'percentual', e.target.value)}
                                             disabled={!imp.ativo}
-                                            className="w-full pr-7 pl-3 py-2 border-2 border-orange-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 bg-orange-50 rounded-lg text-right font-semibold text-gray-900 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+                                            className="w-full pr-7 pl-3 py-2 border-2 border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 bg-gray-50 rounded-lg text-right font-semibold text-gray-900 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed"
                                         />
                                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-sm">%</span>
                                     </div>
@@ -279,7 +279,7 @@ export default function Settings() {
                                         type="button"
                                         onClick={() => saveImposto(imp)}
                                         disabled={savingImposto === imp.id}
-                                        className="px-3 py-2 text-xs font-semibold rounded-lg border-2 border-orange-400 text-orange-700 hover:bg-orange-50 transition-colors disabled:opacity-50"
+                                        className="px-3 py-2 text-xs font-semibold rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
                                     >
                                         {savingImposto === imp.id ? '...' : 'Guardar'}
                                     </button>
