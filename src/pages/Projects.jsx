@@ -333,7 +333,7 @@ export default function Projects() {
                             <CardBody>
                                 {/* Header com ID e Nome */}
                                 <div className="flex items-start gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 shrink-0">
+                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-black shrink-0">
                                         <Briefcase size={24} />
                                     </div>
                                     <div className="flex-1 min-w-0">

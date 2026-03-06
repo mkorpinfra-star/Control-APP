@@ -323,28 +323,28 @@ export default function Analytics() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <Card className="p-4 bg-[#F5F5F5]">
                             <div className="flex items-center gap-2 mb-2">
-                                <Clock className="w-5 h-5 text-gray-600" />
+                                <Clock className="w-5 h-5 text-black" />
                                 <p className="text-sm font-medium text-gray-600">Horas Totales</p>
                             </div>
                             <p className="text-2xl font-bold text-gray-900">{data.totals.horas_total}h</p>
                         </Card>
                         <Card className="p-4 bg-[#F5F5F5]">
                             <div className="flex items-center gap-2 mb-2">
-                                <DollarSign className="w-5 h-5 text-gray-600" />
+                                <DollarSign className="w-5 h-5 text-black" />
                                 <p className="text-sm font-medium text-gray-600">Costo Total</p>
                             </div>
                             <p className="text-2xl font-bold text-gray-900">€{data.costs.total.toFixed(2)}</p>
                         </Card>
                         <Card className="p-4 bg-[#F5F5F5]">
                             <div className="flex items-center gap-2 mb-2">
-                                <Users className="w-5 h-5 text-gray-600" />
+                                <Users className="w-5 h-5 text-black" />
                                 <p className="text-sm font-medium text-gray-600">Empleados</p>
                             </div>
                             <p className="text-2xl font-bold text-gray-900">{data.totals.funcionarios}</p>
                         </Card>
                         <Card className="p-4 bg-[#F5F5F5]">
                             <div className="flex items-center gap-2 mb-2">
-                                <Building2 className="w-5 h-5 text-gray-600" />
+                                <Building2 className="w-5 h-5 text-black" />
                                 <p className="text-sm font-medium text-gray-600">Obras</p>
                             </div>
                             <p className="text-2xl font-bold text-gray-900">{data.totals.obras}</p>

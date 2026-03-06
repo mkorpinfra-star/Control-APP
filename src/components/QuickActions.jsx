@@ -10,56 +10,56 @@ export default function QuickActions() {
       label: 'Obras',
       icon: Briefcase,
       path: '/projects',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'clients',
       label: 'Clientes',
       icon: Users,
       path: '/clients',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'employees',
       label: 'Empleados',
       icon: UserCircle,
       path: '/employees',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'payroll',
       label: 'Folha',
       icon: DollarSign,
       path: '/payroll',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'billing',
       label: 'Faturamento',
       icon: Receipt,
       path: '/billing',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'analytics',
       label: 'Análisis',
       icon: BarChart3,
       path: '/analytics',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'reports',
       label: 'Informes',
       icon: FileText,
       path: '/reports',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'settings',
       label: 'Ajustes',
       icon: Settings,
       path: '/settings',
-      color: 'bg-[#F5F5F5] text-gray-600'
+      color: 'bg-[#F5F5F5] text-black'
     }
   ];
 
