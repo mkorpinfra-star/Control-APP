@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { ChevronLeft, ChevronRight, Send, Clock as ClockIcon, LogOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Send, Clock as ClockIcon, LogOut, Minus, Plus } from 'lucide-react'
 
 const DIAS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 const DIAS_NOME = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -422,18 +422,36 @@ export default function BaterPonto() {
                             </span>
                             <span className="block text-green-600 text-xs mt-1">8:00 - 17:00</span>
                         </label>
-                        <input
-                            type="number"
-                            inputMode="decimal"
-                            step="0.5"
-                            min="0"
-                            max="24"
-                            value={horasDia.normal}
-                            onChange={(e) => updateHora('normal', e.target.value)}
-                            disabled={bloqueado}
-                            placeholder="0"
-                            className="w-full text-center text-5xl font-black py-6 px-4 rounded-xl border-4 border-green-500 focus:border-green-700 focus:outline-none disabled:bg-gray-200 disabled:text-gray-500"
-                        />
+                        <div className="flex items-center justify-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => updateHora('normal', Math.max(0, parseFloat(horasDia.normal || 0) - 0.5))}
+                                disabled={bloqueado || horasDia.normal <= 0}
+                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-green-700 hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                            >
+                                <Minus size={20} strokeWidth={3} />
+                            </button>
+                            <input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.5"
+                                min="0"
+                                max="24"
+                                value={horasDia.normal}
+                                onChange={(e) => updateHora('normal', e.target.value)}
+                                disabled={bloqueado}
+                                placeholder="0"
+                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-200 disabled:text-gray-500"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => updateHora('normal', Math.min(24, parseFloat(horasDia.normal || 0) + 0.5))}
+                                disabled={bloqueado || horasDia.normal >= 24}
+                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-green-700 hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                            >
+                                <Plus size={20} strokeWidth={3} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Extra */}
@@ -445,18 +463,36 @@ export default function BaterPonto() {
                             </span>
                             <span className="block text-yellow-600 text-xs mt-1">17:00 - 22:00</span>
                         </label>
-                        <input
-                            type="number"
-                            inputMode="decimal"
-                            step="0.5"
-                            min="0"
-                            max="24"
-                            value={horasDia.extra}
-                            onChange={(e) => updateHora('extra', e.target.value)}
-                            disabled={bloqueado}
-                            placeholder="0"
-                            className="w-full text-center text-5xl font-black py-6 px-4 rounded-xl border-4 border-yellow-500 focus:border-yellow-700 focus:outline-none disabled:bg-gray-200 disabled:text-gray-500"
-                        />
+                        <div className="flex items-center justify-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => updateHora('extra', Math.max(0, parseFloat(horasDia.extra || 0) - 0.5))}
+                                disabled={bloqueado || horasDia.extra <= 0}
+                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-yellow-700 hover:bg-yellow-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                            >
+                                <Minus size={20} strokeWidth={3} />
+                            </button>
+                            <input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.5"
+                                min="0"
+                                max="24"
+                                value={horasDia.extra}
+                                onChange={(e) => updateHora('extra', e.target.value)}
+                                disabled={bloqueado}
+                                placeholder="0"
+                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:bg-gray-200 disabled:text-gray-500"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => updateHora('extra', Math.min(24, parseFloat(horasDia.extra || 0) + 0.5))}
+                                disabled={bloqueado || horasDia.extra >= 24}
+                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-yellow-700 hover:bg-yellow-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                            >
+                                <Plus size={20} strokeWidth={3} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Noturna */}
@@ -468,18 +504,36 @@ export default function BaterPonto() {
                             </span>
                             <span className="block text-blue-600 text-xs mt-1">22:00 - 6:00</span>
                         </label>
-                        <input
-                            type="number"
-                            inputMode="decimal"
-                            step="0.5"
-                            min="0"
-                            max="24"
-                            value={horasDia.noturna}
-                            onChange={(e) => updateHora('noturna', e.target.value)}
-                            disabled={bloqueado}
-                            placeholder="0"
-                            className="w-full text-center text-5xl font-black py-6 px-4 rounded-xl border-4 border-blue-500 focus:border-blue-700 focus:outline-none disabled:bg-gray-200 disabled:text-gray-500"
-                        />
+                        <div className="flex items-center justify-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => updateHora('noturna', Math.max(0, parseFloat(horasDia.noturna || 0) - 0.5))}
+                                disabled={bloqueado || horasDia.noturna <= 0}
+                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-blue-700 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                            >
+                                <Minus size={20} strokeWidth={3} />
+                            </button>
+                            <input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.5"
+                                min="0"
+                                max="24"
+                                value={horasDia.noturna}
+                                onChange={(e) => updateHora('noturna', e.target.value)}
+                                disabled={bloqueado}
+                                placeholder="0"
+                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200 disabled:text-gray-500"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => updateHora('noturna', Math.min(24, parseFloat(horasDia.noturna || 0) + 0.5))}
+                                disabled={bloqueado || horasDia.noturna >= 24}
+                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-blue-700 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                            >
+                                <Plus size={20} strokeWidth={3} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
