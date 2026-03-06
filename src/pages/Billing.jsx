@@ -187,7 +187,7 @@ export default function Billing() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+        <div className="min-h-screen bg-white p-4 md:p-6">
             <div className="w-full mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                     <FileText className="w-8 h-8 text-red-600" /> Faturamento / Facturas
@@ -265,19 +265,19 @@ export default function Billing() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
                         <div>
                             <div className="text-sm text-gray-600 mb-2">Obras Facturadas</div>
-                            <div className="text-3xl font-bold text-purple-600">{totais.total_obras}</div>
+                            <div className="text-3xl font-bold text-gray-900">{totais.total_obras}</div>
                         </div>
                         <div>
                             <div className="text-sm text-gray-600 mb-2">Total Servicios</div>
-                            <div className="text-3xl font-bold text-blue-600">{formatCurrency(totais.total_servicos)}</div>
+                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(totais.total_servicos)}</div>
                         </div>
                         <div>
                             <div className="text-sm text-gray-600 mb-2">IGI (4.5%)</div>
-                            <div className="text-3xl font-bold text-orange-600">{formatCurrency(totais.total_igi)}</div>
+                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(totais.total_igi)}</div>
                         </div>
                         <div>
                             <div className="text-sm text-gray-600 mb-2">Total a Recibir</div>
-                            <div className="text-4xl font-bold text-green-600">{formatCurrency(totais.total_faturamento)}</div>
+                            <div className="text-4xl font-bold text-gray-900">{formatCurrency(totais.total_faturamento)}</div>
                         </div>
                     </div>
                 </div>
@@ -308,9 +308,9 @@ export default function Billing() {
                                 <th className="px-3 py-2 text-left text-xs font-semibold text-black">Valor/Hora N</th>
                                 <th className="px-3 py-2 text-left text-xs font-semibold text-black">Valor/Hora E</th>
                                 <th className="px-3 py-2 text-left text-xs font-semibold text-black">Valor/Hora Noct</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black bg-blue-50">Total Servicios</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black bg-orange-50">IGI (4.5%)</th>
-                                <th className="px-3 py-2 text-left text-sm font-bold text-black bg-green-50">TOTAL FACTURA</th>
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-black bg-gray-100">Total Servicios</th>
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-black bg-gray-100">IGI (4.5%)</th>
+                                <th className="px-3 py-2 text-left text-sm font-bold text-black bg-gray-100">TOTAL FACTURA</th>
                                 <th className="px-3 py-2 text-center text-xs font-semibold text-black">Ações</th>
                             </tr>
                         </thead>

@@ -1,9 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+import {
     BarChart3, Clock, DollarSign, Users, Building2,
     TrendingUp, Download, Mail
 } from 'lucide-react';
+
+// Register Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Loading } from '../components/ui/Loading';

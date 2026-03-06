@@ -181,8 +181,7 @@ export default function Employees() {
                     {filtered.map(emp => (
                         <div key={emp.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                                    style={{ backgroundColor: '#CE0201' }}>
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 font-bold text-sm shrink-0">
                                     {emp.nome?.charAt(0)?.toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">

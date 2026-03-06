@@ -241,7 +241,7 @@ export default function Payroll() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+        <div className="min-h-screen bg-white p-4 md:p-6">
             <div className="w-full mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                     <DollarSign className="w-8 h-8 text-red-600" /> Folha de Pagamento
@@ -331,7 +331,7 @@ export default function Payroll() {
                             <div className="text-sm text-gray-600 mb-2">
                                 Funcionários
                             </div>
-                            <div className="text-3xl font-bold text-blue-600">
+                            <div className="text-3xl font-bold text-gray-900">
                                 {totais.total_funcionarios}
                             </div>
                         </div>
@@ -339,7 +339,7 @@ export default function Payroll() {
                             <div className="text-sm text-gray-600 mb-2">
                                 Total Líquido a Pagar
                             </div>
-                            <div className="text-3xl font-bold text-green-600">
+                            <div className="text-3xl font-bold text-gray-900">
                                 {formatCurrency(totais.total_liquido)}
                             </div>
                         </div>
@@ -347,7 +347,7 @@ export default function Payroll() {
                             <div className="text-sm text-gray-600 mb-2">
                                 Custo Total Empresa
                             </div>
-                            <div className="text-3xl font-bold text-orange-600">
+                            <div className="text-3xl font-bold text-gray-900">
                                 {formatCurrency(totais.total_custo_empresa)}
                             </div>
                         </div>
@@ -440,19 +440,19 @@ export default function Payroll() {
                                                         onChange={e => setEditValues({...editValues, salario_hora: e.target.value})}
                                                         className="w-24 px-1 py-0.5 border-2 border-purple-500 text-black text-right text-sm font-bold rounded"/>
                                                 ) : (
-                                                    <span className="font-bold text-purple-700">{formatCurrency(salarioHora)}/h</span>
+                                                    <span className="font-bold text-gray-700">{formatCurrency(salarioHora)}/h</span>
                                                 )}
                                             </div>
-                                            <div className="flex justify-between bg-orange-50 -mx-3 px-3 py-2 border-t-2 border-orange-300 mt-1">
-                                                <span className="font-bold text-orange-800">Subtotal Horas</span>
-                                                <span className="font-bold text-orange-700">{formatCurrency(subtotalHoras)}</span>
+                                            <div className="flex justify-between bg-gray-100 -mx-3 px-3 py-2 border-t-2 border-gray-300 mt-1">
+                                                <span className="font-bold text-gray-800">Subtotal Horas</span>
+                                                <span className="font-bold text-gray-700">{formatCurrency(subtotalHoras)}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* ── Col 2: Resumo de Folha (roxo) ── */}
-                                    <div className="border-2 border-purple-300 rounded-lg overflow-hidden">
-                                        <div className="bg-purple-600 px-3 py-2 font-bold text-xs text-white uppercase tracking-wide">
+                                    {/* ── Col 2: Resumo de Folha ── */}
+                                    <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+                                        <div className="bg-gray-600 px-3 py-2 font-bold text-xs text-white uppercase tracking-wide">
                                             Resumo de Folha
                                         </div>
                                         <div className="p-3 space-y-2 text-sm">
@@ -484,9 +484,9 @@ export default function Payroll() {
                                                 <span>CASS <span className="text-xs text-gray-400">(6,5% s/ base)</span></span>
                                                 <span className="font-bold">− {formatCurrency(casFuncValor)}</span>
                                             </div>
-                                            <div className="flex justify-between bg-purple-50 -mx-3 px-3 py-2 border-t-2 border-purple-300 mt-1">
-                                                <span className="font-bold text-purple-800">Total a Pagar</span>
-                                                <span className="font-bold text-purple-700 text-base">{formatCurrency(totalLiquido)}</span>
+                                            <div className="flex justify-between bg-gray-100 -mx-3 px-3 py-2 border-t-2 border-gray-300 mt-1">
+                                                <span className="font-bold text-gray-800">Total a Pagar</span>
+                                                <span className="font-bold text-gray-700 text-base">{formatCurrency(totalLiquido)}</span>
                                             </div>
                                         </div>
                                     </div>

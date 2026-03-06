@@ -13,8 +13,8 @@ const variantStyles = {
     hoverStyle: { backgroundColor: '#CE0201', color: 'white' }
   },
   secondary: {
-    base: 'text-white border-2 font-semibold transition-all',
-    style: { backgroundColor: '#1f2937', borderColor: '#CE0201' }
+    base: 'text-gray-700 border-2 font-semibold transition-all',
+    style: { backgroundColor: '#F5F5F5', borderColor: '#E5E7EB' }
   },
   danger: {
     base: 'text-white border-2 font-bold shadow-lg transition-all',
