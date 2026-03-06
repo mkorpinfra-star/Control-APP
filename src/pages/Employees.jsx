@@ -130,34 +130,38 @@ export default function Employees() {
     }[t] || 'bg-gray-100 text-gray-600');
 
     return (
-        <div className="w-full">
+        <div className="min-h-screen bg-white pb-24">
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                <div>
+            <div className="px-4 pt-4 pb-3">
+                <div className="flex items-center justify-between mb-2">
                     <h1 className="text-2xl font-bold text-gray-900">Usuarios & Personal</h1>
-                    <p className="text-sm text-gray-500">Gestión de accesos y empleados</p>
                 </div>
-                <Button variant="danger" onClick={openNew}>
+                <p className="text-sm text-gray-600">Gestión de accesos y empleados</p>
+            </div>
+
+            {/* Button */}
+            <div className="px-4 mb-4">
+                <Button variant="danger" onClick={openNew} className="w-auto">
                     <Plus size={18} /> Nuevo Usuario
                 </Button>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 mb-5">
-                <div className="relative flex-1 min-w-[200px]">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="px-4 mb-4 flex flex-col gap-3">
+                <div className="relative">
+                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Buscar por nombre o pasaporte..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
+                        className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     />
                 </div>
                 <select
                     value={filterType}
                     onChange={e => setFilterType(e.target.value)}
-                    className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
                     <option value="all">Todos</option>
                     <option value="funcionario">Empleados</option>
@@ -166,27 +170,27 @@ export default function Employees() {
                 </select>
             </div>
 
-            {/* Grid */}
+            {/* List */}
             {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[1,2,3,4,5,6].map(i => <div key={i} className="h-28 bg-gray-100 animate-pulse rounded-xl" />)}
+                <div className="px-4 space-y-3">
+                    {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-gray-100 animate-pulse rounded-xl" />)}
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="text-center py-16">
+                <div className="text-center py-16 px-4">
                     <User size={48} className="mx-auto text-gray-300 mb-3" />
                     <p className="text-gray-500">{searchTerm ? 'Sin resultados' : 'No hay usuarios. Añade el primero.'}</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="px-4 space-y-3">
                     {filtered.map(emp => (
-                        <div key={emp.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                            <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 font-bold text-sm shrink-0">
+                        <div key={emp.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100 text-gray-900 font-bold text-lg shrink-0">
                                     {emp.nome?.charAt(0)?.toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900 truncate">{emp.nome}</p>
-                                    <p className="text-xs text-gray-500">{emp.passaporte}</p>
+                                    <p className="font-semibold text-gray-900 truncate text-base">{emp.nome}</p>
+                                    <p className="text-sm text-gray-600">{emp.passaporte}</p>
                                     <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${typeColor(emp.tipo)}`}>
                                         {typeLabel(emp.tipo)}
                                     </span>

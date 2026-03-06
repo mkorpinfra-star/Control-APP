@@ -241,16 +241,16 @@ export default function Payroll() {
     };
 
     return (
-        <div className="min-h-screen bg-white p-4 md:p-6">
-            <div className="w-full mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                    <DollarSign className="w-8 h-8 text-red-600" /> Folha de Pagamento
-                </h1>
-                <div className="flex flex-wrap gap-2 w-full md:w-auto">
+        <div className="min-h-screen bg-white pb-24">
+            <div className="px-4 pt-4 pb-3 mb-4">
+                <h1 className="text-2xl font-bold text-gray-900">Folha de Pagamento</h1>
+            </div>
+            <div className="px-4 mb-4">
+                <div className="flex flex-wrap gap-2">
                     <button
                         onClick={handleGenerate}
                         disabled={loading}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors font-semibold rounded-lg disabled:opacity-50"
+                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors font-semibold rounded-lg disabled:opacity-50"
                     >
                         Generar Folha
                     </button>

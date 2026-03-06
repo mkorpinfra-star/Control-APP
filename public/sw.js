@@ -1,5 +1,5 @@
 // Service Worker para PWA
-const CACHE_NAME = 'j2s-obras-v1';
+const CACHE_NAME = 'j2s-obras-v2';
 const urlsToCache = [
   '/',
   '/index.html',

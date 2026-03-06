@@ -187,11 +187,11 @@ export default function Billing() {
     };
 
     return (
-        <div className="min-h-screen bg-white p-4 md:p-6">
-            <div className="w-full mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-red-600" /> Faturamento / Facturas
-                </h1>
+        <div className="min-h-screen bg-white pb-24">
+            <div className="px-4 pt-4 pb-3 mb-4">
+                <h1 className="text-2xl font-bold text-gray-900">Faturamento / Facturas</h1>
+            </div>
+            <div className="px-4 mb-4">
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={handleExportExcel}

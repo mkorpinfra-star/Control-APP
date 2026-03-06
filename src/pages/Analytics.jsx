@@ -283,35 +283,30 @@ export default function Analytics() {
     return (
         <div className="w-full">
             {/* Header */}
-            <div className="mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <BarChart3 className="w-8 h-8 text-j2s-red" />
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-                            <p className="text-sm text-gray-500 mt-1">Análisis en tiempo real con IA predictiva</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={handleExportExcel}
-                            disabled={exporting || !filters}
-                        >
-                            <Download className="w-4 h-4" />
-                            {exporting ? 'Generando...' : 'Exportar Excel'}
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={handleSendEmail}
-                            disabled={!filters}
-                        >
-                            <Mail className="w-4 h-4" />
-                            Enviar Email
-                        </Button>
-                    </div>
+            <div className="px-4 pt-4 pb-3 mb-4">
+                <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+                <p className="text-sm text-gray-600 mt-1">Análisis en tiempo real con IA predictiva</p>
+            </div>
+            <div className="px-4 mb-4">
+                <div className="flex gap-2 flex-wrap">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleExportExcel}
+                        disabled={exporting || !filters}
+                    >
+                        <Download className="w-4 h-4" />
+                        {exporting ? 'Generando...' : 'Exportar Excel'}
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleSendEmail}
+                        disabled={!filters}
+                    >
+                        <Mail className="w-4 h-4" />
+                        Enviar Email
+                    </Button>
                 </div>
             </div>
 
