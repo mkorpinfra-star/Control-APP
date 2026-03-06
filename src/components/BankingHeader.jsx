@@ -12,7 +12,7 @@ export default function BankingHeader() {
   };
 
   const getSystemTitle = () => {
-    if (user?.tipo === 'admin') return 'Menu de Administração';
+    if (user?.tipo === 'admin') return 'Painel de Administração';
     if (user?.tipo === 'encarregado') return 'Painel do Supervisor';
     return 'Painel do Funcionário';
   };
@@ -60,8 +60,8 @@ export default function BankingHeader() {
 
         {/* Account Info */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-          <p className="text-xs opacity-80 mb-1">J2S Enginyeria</p>
-          <p className="text-2xl font-bold tracking-tight">
+          <p className="text-xs opacity-80 mb-1">J2S Hores by PuntoClicks.com</p>
+          <p className="text-lg font-bold tracking-tight">
             {getSystemTitle()}
           </p>
         </div>
