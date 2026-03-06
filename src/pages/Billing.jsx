@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from '../components/Toast';
-import { FileText, Trash2, Trash } from 'lucide-react';
+import { Plus, Download, Mail, Trash2, Trash } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
@@ -188,65 +188,68 @@ export default function Billing() {
 
     return (
         <div className="min-h-screen bg-white pb-24">
-            <div className="px-4 pt-4 pb-3 mb-4">
-                <h1 className="text-2xl font-bold text-gray-900">Faturamento / Facturas</h1>
-            </div>
-            <div className="px-4 mb-4">
+            <div className="px-4 pt-6 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Faturamento</h1>
+                        <p className="text-sm text-gray-500 mt-0.5">Gestión de facturas</p>
+                    </div>
+                    <button
+                        onClick={handleGenerate}
+                        disabled={loading}
+                        className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg disabled:opacity-50"
+                    >
+                        <Plus size={24} strokeWidth={2.5} />
+                    </button>
+                </div>
+
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={handleExportExcel}
                         disabled={exporting || loading}
-                        className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors font-semibold rounded-lg disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        {exporting ? 'Exportando...' : 'Exportar Excel'}
+                        <Download size={14} /> {exporting ? 'Exportando...' : 'Excel'}
                     </button>
                     <button
                         onClick={handleSendEmail}
                         disabled={sendingEmail || loading}
-                        className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors font-semibold rounded-lg disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        {sendingEmail ? 'Enviando...' : 'Enviar Email'}
-                    </button>
-                    <button
-                        onClick={handleGenerate}
-                        disabled={loading}
-                        className="px-6 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors font-semibold rounded-lg disabled:opacity-50"
-                    >
-                        Generar Facturas
+                        <Mail size={14} /> {sendingEmail ? 'Enviando...' : 'Email'}
                     </button>
                     <button
                         onClick={handleDeleteMes}
                         disabled={faturas.length === 0}
-                        title="Apagar faturamento do mês"
-                        className="flex items-center gap-1.5 px-4 py-2 bg-red-700 text-white hover:bg-red-800 transition-colors font-semibold rounded-lg disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Trash size={16} /> Limpar Mês
+                        <Trash size={14} /> Limpar
                     </button>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="px-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                        <label className="block text-sm font-semibold mb-2 text-black">
+                        <label className="block text-sm font-medium mb-1.5 text-gray-700">
                             Mes de Referencia
                         </label>
                         <input
                             type="month"
                             value={mesReferencia}
                             onChange={(e) => setMesReferencia(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-gray-300 focus:border-[#CE0201] focus:outline-none text-black"
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold mb-2 text-black">
+                        <label className="block text-sm font-medium mb-1.5 text-gray-700">
                             Obra
                         </label>
                         <select
                             value={obraId}
                             onChange={(e) => setObraId(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-gray-300 focus:border-[#CE0201] focus:outline-none text-black"
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
                         >
                             <option value="all">Todas las obras</option>
                             {obras.map(obra => (
@@ -261,23 +264,23 @@ export default function Billing() {
 
             {/* Summary */}
             {totais && (
-                <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-                        <div>
-                            <div className="text-sm text-gray-600 mb-2">Obras Facturadas</div>
-                            <div className="text-3xl font-bold text-gray-900">{totais.total_obras}</div>
+                <div className="px-4 mb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="text-sm text-gray-600 mb-1">Obras</div>
+                            <div className="text-2xl font-bold text-gray-900">{totais.total_obras}</div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-600 mb-2">Total Servicios</div>
-                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(totais.total_servicos)}</div>
+                        <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="text-sm text-gray-600 mb-1">Servicios</div>
+                            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totais.total_servicos)}</div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-600 mb-2">IGI (4.5%)</div>
-                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(totais.total_igi)}</div>
+                        <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="text-sm text-gray-600 mb-1">IGI (4.5%)</div>
+                            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totais.total_igi)}</div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-600 mb-2">Total a Recibir</div>
-                            <div className="text-4xl font-bold text-gray-900">{formatCurrency(totais.total_faturamento)}</div>
+                        <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                            <div className="text-sm text-gray-600 mb-1">Total</div>
+                            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totais.total_faturamento)}</div>
                         </div>
                     </div>
                 </div>
@@ -285,86 +288,96 @@ export default function Billing() {
 
             {/* Billing Table */}
             {loading ? (
-                <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center">
-                    <p className="text-gray-500 text-lg">Cargando...</p>
+                <div className="px-4">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
+                        <p className="text-gray-600 text-base">Cargando...</p>
+                    </div>
                 </div>
             ) : faturas.length === 0 ? (
-                <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center">
-                    <p className="text-gray-500 text-lg">
-                        No hay facturas para este período.
-                        <br />
-                        Haga clic en "Generar Facturas del Mes" para crear.
-                    </p>
+                <div className="px-4">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
+                        <p className="text-gray-600 text-base">
+                            No hay facturas para este período.
+                            <br />
+                            Haga clic en "Generar Facturas del Mes" para crear.
+                        </p>
+                    </div>
                 </div>
             ) : (
-                <div className="w-full overflow-x-auto bg-white border border-gray-200 rounded-lg shadow-sm">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-gray-100 border-b-2 border-gray-300">
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black">Obra / Cliente</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black">Horas Normales</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black">Horas Extra</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black">Horas Nocturnas</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black">Valor/Hora N</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black">Valor/Hora E</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black">Valor/Hora Noct</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black bg-gray-100">Total Servicios</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-black bg-gray-100">IGI (4.5%)</th>
-                                <th className="px-3 py-2 text-left text-sm font-bold text-black bg-gray-100">TOTAL FACTURA</th>
-                                <th className="px-3 py-2 text-center text-xs font-semibold text-black">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {faturas.map(fatura => (
-                                <tr key={fatura.id} className="border-b border-gray-200 hover:bg-gray-50">
-                                    <td className="px-3 py-2">
-                                        <div className="font-bold text-sm text-black">{fatura.obra_numero}</div>
-                                        <div className="text-sm text-gray-700">{fatura.obra_nome}</div>
-                                        {fatura.cliente_nome && (
-                                            <div className="text-xs text-gray-500 mt-1">Cliente: {fatura.cliente_nome}</div>
-                                        )}
-                                    </td>
-                                    <td className="px-3 py-2 text-black">{formatHours(fatura.horas_normais)}</td>
-                                    <td className="px-3 py-2 text-black">{formatHours(fatura.horas_extra)}</td>
-                                    <td className="px-3 py-2 text-black">{formatHours(fatura.horas_noturna)}</td>
-                                    <td className="px-3 py-2 text-black">{formatCurrency(fatura.valor_hora_normal)}</td>
-                                    <td className="px-3 py-2 text-black">{formatCurrency(fatura.valor_hora_extra)}</td>
-                                    <td className="px-3 py-2 text-black">{formatCurrency(fatura.valor_hora_noturna)}</td>
-                                    <td className="px-3 py-2 bg-blue-50 font-semibold text-blue-700">
-                                        {formatCurrency(fatura.valor_total_servicos)}
-                                    </td>
-                                    <td className="px-3 py-2 bg-orange-50 font-semibold text-orange-700">
-                                        {formatCurrency(fatura.igi_valor)}
-                                    </td>
-                                    <td className="px-3 py-2 bg-green-50 font-bold text-lg text-green-700">
-                                        {formatCurrency(fatura.valor_total_fatura)}
-                                    </td>
-                                    <td className="px-3 py-2 text-center">
-                                        <button
-                                            onClick={() => handleDeleteRow(fatura.id, fatura.obra_nome)}
-                                            className="px-2 py-1 bg-red-600 text-white hover:bg-red-700 rounded"
-                                            title="Deletar"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="px-4 mb-4">
+                    <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-[#F5F5F5] border-b border-gray-200">
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">Obra / Cliente</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">Horas N</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">Horas E</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">Horas Noct</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">€/h N</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">€/h E</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">€/h Noct</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">Servicios</th>
+                                        <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700">IGI</th>
+                                        <th className="px-3 py-3 text-left text-xs font-bold text-gray-900">TOTAL</th>
+                                        <th className="px-3 py-3 text-center text-xs font-semibold text-gray-700">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {faturas.map(fatura => (
+                                        <tr key={fatura.id} className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-3 py-3">
+                                                <div className="font-semibold text-sm text-gray-900">{fatura.obra_numero}</div>
+                                                <div className="text-sm text-gray-600">{fatura.obra_nome}</div>
+                                                {fatura.cliente_nome && (
+                                                    <div className="text-xs text-gray-500 mt-0.5">Cliente: {fatura.cliente_nome}</div>
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-3 text-gray-700 text-sm">{formatHours(fatura.horas_normais)}</td>
+                                            <td className="px-3 py-3 text-gray-700 text-sm">{formatHours(fatura.horas_extra)}</td>
+                                            <td className="px-3 py-3 text-gray-700 text-sm">{formatHours(fatura.horas_noturna)}</td>
+                                            <td className="px-3 py-3 text-gray-700 text-sm">{formatCurrency(fatura.valor_hora_normal)}</td>
+                                            <td className="px-3 py-3 text-gray-700 text-sm">{formatCurrency(fatura.valor_hora_extra)}</td>
+                                            <td className="px-3 py-3 text-gray-700 text-sm">{formatCurrency(fatura.valor_hora_noturna)}</td>
+                                            <td className="px-3 py-3 font-semibold text-gray-900 text-sm">
+                                                {formatCurrency(fatura.valor_total_servicos)}
+                                            </td>
+                                            <td className="px-3 py-3 font-semibold text-gray-900 text-sm">
+                                                {formatCurrency(fatura.igi_valor)}
+                                            </td>
+                                            <td className="px-3 py-3 font-bold text-gray-900 text-base">
+                                                {formatCurrency(fatura.valor_total_fatura)}
+                                            </td>
+                                            <td className="px-3 py-3 text-center">
+                                                <button
+                                                    onClick={() => handleDeleteRow(fatura.id, fatura.obra_nome)}
+                                                    className="w-8 h-8 flex items-center justify-center bg-red-600 text-white hover:bg-red-700 rounded-full mx-auto"
+                                                    title="Deletar"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {/* Info Card */}
-            <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-6 mt-6">
-                <h3 className="text-lg font-semibold mb-3 text-black">Sobre el Faturamento</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                    <li>Los valores de <strong>faturamento</strong> son diferentes de los valores de <strong>folha</strong></li>
-                    <li>Faturamento = Lo que cobramos al cliente (con markup/ganancia)</li>
-                    <li>Folha = Lo que pagamos al empleado (costo)</li>
-                    <li>IGI (4.5%) se calcula automáticamente sobre el total de servicios</li>
-                    <li>Configure los valores de faturamento en: <strong>Configuración → Valores de Faturamento</strong></li>
-                </ul>
+            <div className="px-4 mt-4">
+                <div className="bg-[#F5F5F5] rounded-2xl p-5">
+                    <h3 className="text-base font-semibold mb-3 text-gray-900">Sobre el Faturamento</h3>
+                    <ul className="space-y-2 text-sm text-gray-700">
+                        <li>Los valores de <strong>faturamento</strong> son diferentes de los valores de <strong>folha</strong></li>
+                        <li>Faturamento = Lo que cobramos al cliente (con markup/ganancia)</li>
+                        <li>Folha = Lo que pagamos al empleado (costo)</li>
+                        <li>IGI (4.5%) se calcula automáticamente sobre el total de servicios</li>
+                        <li>Configure los valores de faturamento en: <strong>Configuración → Valores de Faturamento</strong></li>
+                    </ul>
+                </div>
             </div>
 
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
