@@ -11,6 +11,12 @@ export default function BankingHeader() {
     return 'Boa noite';
   };
 
+  const getSystemTitle = () => {
+    if (user?.tipo === 'admin') return 'Menu de Administração';
+    if (user?.tipo === 'encarregado') return 'Painel do Supervisor';
+    return 'Painel do Funcionário';
+  };
+
   const getUserInitials = () => {
     if (!user?.nome) return 'U';
     const names = user.nome.split(' ');
@@ -56,7 +62,7 @@ export default function BankingHeader() {
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
           <p className="text-xs opacity-80 mb-1">J2S Enginyeria</p>
           <p className="text-2xl font-bold tracking-tight">
-            Sistema de Obras
+            {getSystemTitle()}
           </p>
         </div>
       </div>

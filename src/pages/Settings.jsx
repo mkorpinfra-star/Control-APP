@@ -152,8 +152,8 @@ export default function Settings() {
     }
 
     return (
-        <div className="w-full max-w-2xl">
-            <div className="mb-6 flex items-center gap-3">
+        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen pb-24">
+            <div className="mb-8 pb-4 border-b-2 border-gray-200 flex items-center gap-3">
                 <SettingsIcon className="w-8 h-8" style={{ color: '#CE0201' }} />
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
@@ -178,7 +178,7 @@ export default function Settings() {
             )}
 
             {/* Faturamento ao cliente */}
-            <Card className="mb-5 p-6">
+            <Card variant="nubank-no-shadow" className="mb-5 p-6">
                 <div className="flex items-center gap-2 mb-1">
                     <TrendingUp className="w-5 h-5 text-blue-600" />
                     <h2 className="text-base font-semibold text-gray-900">Faturamento — Cobrado ao Cliente</h2>

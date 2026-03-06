@@ -75,7 +75,7 @@ export default function Clients() {
     );
 
     return (
-        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen">
+        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen pb-24">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-gray-200">
                 <div>
@@ -119,7 +119,7 @@ export default function Clients() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredClients.map((client) => (
-                        <Card key={client.id} className="hover:shadow-2xl transition-shadow">
+                        <Card key={client.id} variant="nubank" className="hover:shadow-2xl transition-shadow">
                             <CardBody>
                                 <div className="flex items-start gap-3 mb-4">
                                     <div className="w-12 h-12 bg-j2s-red rounded-full flex items-center justify-center text-white shrink-0">

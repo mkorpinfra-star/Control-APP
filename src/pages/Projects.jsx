@@ -289,7 +289,7 @@ export default function Projects() {
     );
 
     return (
-        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen">
+        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen pb-24">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-gray-200">
                 <div>
@@ -316,7 +316,7 @@ export default function Projects() {
             </div>
 
             {/* Table Container */}
-            <Card className="overflow-x-auto">
+            <Card variant="nubank" className="overflow-x-auto">
                 {loading ? (
                     <div className="p-10 text-center">
                         <Loading size="lg" text="CARGANDO DATOS..." />
