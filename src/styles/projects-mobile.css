@@ -1,0 +1,286 @@
+/**
+ * RESPONSIVIDADE MOBILE - PÁGINA PROJECTS/OBRAS
+ */
+
+/* ==================== PROJECTS CARDS ==================== */
+@media (max-width: 768px) {
+    /* Cards de obra - stack vertical */
+    .projects-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    /* Card individual */
+    .project-card {
+        width: 100% !important;
+        padding: 16px !important;
+    }
+
+    /* Header do card - ajustar flex */
+    .project-card-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    /* Número da obra - maior */
+    .project-number {
+        font-size: 20px !important;
+        padding: 12px 16px !important;
+    }
+
+    /* Nome da obra - quebrar linha */
+    .project-name {
+        font-size: 16px !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+    }
+
+    /* Info grid - 1 coluna */
+    .project-info-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    /* Badge de status - maior */
+    .project-status-badge {
+        font-size: 14px !important;
+        padding: 8px 16px !important;
+    }
+
+    /* Botões de ação - stack */
+    .project-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .project-actions button {
+        width: 100% !important;
+        justify-content: center !important;
+        min-height: 44px !important;
+    }
+}
+
+/* ==================== SEARCH BAR ==================== */
+@media (max-width: 768px) {
+    .projects-search {
+        width: 100% !important;
+        margin-bottom: 16px !important;
+    }
+
+    .projects-search input {
+        width: 100% !important;
+        font-size: 16px !important;
+        padding: 14px !important;
+    }
+}
+
+/* ==================== MODAL VINCULAR FUNCIONÁRIOS ==================== */
+@media (max-width: 768px) {
+    /* Lista de funcionários - cards */
+    .employee-list {
+        max-height: 400px !important;
+        overflow-y: auto !important;
+    }
+
+    .employee-item {
+        padding: 16px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .employee-checkbox {
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    /* Info funcionário */
+    .employee-info {
+        flex: 1 !important;
+        padding-left: 12px !important;
+    }
+
+    .employee-name {
+        font-size: 16px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .employee-details {
+        font-size: 14px !important;
+        color: #6b7280 !important;
+    }
+}
+
+/* ==================== EMPTY STATE ==================== */
+@media (max-width: 768px) {
+    .projects-empty {
+        padding: 40px 20px !important;
+        text-align: center !important;
+    }
+
+    .projects-empty h2 {
+        font-size: 20px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .projects-empty p {
+        font-size: 14px !important;
+        margin-bottom: 20px !important;
+    }
+}
+
+/* ==================== HEADER ==================== */
+@media (max-width: 768px) {
+    .projects-header {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    .projects-header h1 {
+        font-size: 24px !important;
+    }
+
+    .projects-header-actions {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    .projects-header-actions button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* ==================== TABLE MODE (se usar tabela) ==================== */
+@media (max-width: 768px) {
+    /* Forçar scroll horizontal */
+    .projects-table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .projects-table {
+        min-width: 800px !important;
+    }
+
+    .projects-table th,
+    .projects-table td {
+        font-size: 14px !important;
+        padding: 12px 8px !important;
+    }
+
+    /* Primeira coluna sticky */
+    .projects-table th:first-child,
+    .projects-table td:first-child {
+        position: sticky !important;
+        left: 0 !important;
+        background: white !important;
+        z-index: 2 !important;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.05) !important;
+    }
+}
+
+/* ==================== FORM MODAL ==================== */
+@media (max-width: 768px) {
+    .project-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    .project-form-input {
+        width: 100% !important;
+        font-size: 16px !important;
+        padding: 14px !important;
+        min-height: 48px !important;
+    }
+
+    .project-form-select {
+        width: 100% !important;
+        font-size: 16px !important;
+        padding: 14px !important;
+        min-height: 48px !important;
+    }
+
+    .project-form-textarea {
+        width: 100% !important;
+        font-size: 16px !important;
+        padding: 14px !important;
+        min-height: 120px !important;
+    }
+}
+
+/* ==================== STEPPER MODAL ==================== */
+@media (max-width: 768px) {
+    .project-stepper {
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .project-step {
+        width: 100% !important;
+        padding: 12px !important;
+        font-size: 14px !important;
+    }
+
+    .project-step-number {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 16px !important;
+    }
+}
+
+/* ==================== TOUCH IMPROVEMENTS ==================== */
+@media (max-width: 768px) {
+    /* Área de toque maior */
+    .project-clickable {
+        min-height: 48px !important;
+        padding: 12px !important;
+    }
+
+    /* Espaçamento entre elementos clicáveis */
+    .project-action-button + .project-action-button {
+        margin-top: 8px !important;
+    }
+
+    /* Feedback visual ao tocar */
+    .project-card:active {
+        transform: scale(0.98) !important;
+        transition: transform 0.1s !important;
+    }
+}
+
+/* ==================== LANDSCAPE MOBILE ==================== */
+@media (max-width: 768px) and (orientation: landscape) {
+    .projects-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .project-card {
+        min-height: auto !important;
+    }
+}
+
+/* ==================== SMALL PHONES ==================== */
+@media (max-width: 400px) {
+    .projects-header h1 {
+        font-size: 20px !important;
+    }
+
+    .project-number {
+        font-size: 18px !important;
+        padding: 10px 14px !important;
+    }
+
+    .project-name {
+        font-size: 14px !important;
+    }
+
+    .project-card {
+        padding: 12px !important;
+    }
+}

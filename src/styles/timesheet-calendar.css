@@ -1,0 +1,227 @@
+/**
+ * TIMESHEET CALENDAR - MOBILE FIRST
+ * Layout visual tipo planilha/calendário
+ * Fácil para os funcionários preencherem
+ */
+
+.timesheet-calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.day-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    transition: all 0.2s ease;
+}
+
+.day-card:hover {
+    border-color: #CE0201;
+    box-shadow: 0 4px 12px rgba(206, 2, 1, 0.1);
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.day-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.day-date {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 4px 12px;
+    border-radius: 6px;
+}
+
+.hours-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.hour-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hour-input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hour-input-group.normal label {
+    color: #166534;
+}
+
+.hour-input-group.extra label {
+    color: #92400e;
+}
+
+.hour-input-group.noturna label {
+    color: #3730a3;
+}
+
+.hour-input-group input {
+    width: 100%;
+    padding: 14px 12px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    border: 2px solid;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.hour-input-group.normal input {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.hour-input-group.normal input:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.hour-input-group.extra input {
+    border-color: #fef3c7;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.hour-input-group.extra input:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.hour-input-group.noturna input {
+    border-color: #e0e7ff;
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.hour-input-group.noturna input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.hour-input-group input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.hour-input-group input::placeholder {
+    color: #d1d5db;
+    opacity: 1;
+}
+
+.day-total {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.day-total strong {
+    color: #111827;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* RESPONSIVO MOBILE */
+@media (max-width: 768px) {
+    .timesheet-calendar {
+        gap: 16px;
+    }
+
+    .day-card {
+        padding: 20px !important;
+        border-width: 3px;
+    }
+
+    .day-header h3 {
+        font-size: 20px;
+    }
+
+    .day-date {
+        font-size: 16px;
+        padding: 6px 14px;
+    }
+
+    .hours-grid {
+        gap: 14px;
+    }
+
+    .hour-input-group label {
+        font-size: 13px;
+    }
+
+    .hour-input-group input {
+        padding: 18px 14px;
+        font-size: 24px;
+        border-width: 3px;
+    }
+
+    .day-total {
+        padding: 16px;
+        font-size: 16px;
+    }
+
+    .day-total strong {
+        font-size: 22px;
+    }
+}
+
+/* SUPER MOBILE (< 400px) */
+@media (max-width: 400px) {
+    .hours-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .hour-input-group {
+        width: 100%;
+    }
+
+    .hour-input-group label {
+        font-size: 14px;
+    }
+
+    .hour-input-group input {
+        padding: 20px;
+        font-size: 28px;
+    }
+}
+
+/* LANDSCAPE MODE - voltar para 3 colunas */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hours-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}

@@ -1,0 +1,40 @@
+════════════════════════════════════════════════════════════════
+  CREDENCIAIS DE TESTE (para Google Play Console)
+════════════════════════════════════════════════════════════════
+
+IMPORTANTE: Você precisa criar um usuário de teste no sistema.
+
+INSTRUÇÕES:
+1. Acesse: https://j2s.ad/login
+2. Login como Admin
+3. Vá em: "Empleados" (menu lateral)
+4. Clique: "Nuevo Usuario"
+5. Preencha:
+   - Nome: Usuario Teste
+   - Passaporte: TEST123
+   - Tipo: Admin (para Google testar todas funcionalidades)
+   - Email: teste@j2s.ad
+   - Senha: Teste@2026
+
+6. Salve o usuário
+
+────────────────────────────────────────────────────────────────
+
+CREDENCIAIS PARA INFORMAR NA PLAY CONSOLE:
+
+Email: teste@j2s.ad
+Contrasenya: Teste@2026
+
+────────────────────────────────────────────────────────────────
+
+TEXTO PARA CAMPO "INSTRUÇÕES DE ACESSO":
+
+Aquesta aplicació requereix credencials corporatives.
+
+Credencials de prova:
+Email: teste@j2s.ad
+Contrasenya: Teste@2026
+
+L'aplicació és d'ús exclusiu per a empleats de J2S Enginyeria.
+
+════════════════════════════════════════════════════════════════

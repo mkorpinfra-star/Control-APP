@@ -1,0 +1,35 @@
+{
+  "appId": "com.j2s.obras",
+  "appName": "J2S Hores",
+  "webDir": "dist",
+  "server": {
+    "url": "https://j2s.ad/login",
+    "cleartext": true,
+    "allowNavigation": [
+      "j2s.ad",
+      "*.j2s.ad"
+    ]
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#CE0201",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "androidSpinnerStyle": "large",
+      "iosSpinnerStyle": "small",
+      "spinnerColor": "#ffffff",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": false
+  }
+}

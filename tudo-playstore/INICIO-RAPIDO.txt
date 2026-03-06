@@ -1,0 +1,58 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║          ⚡ INÍCIO RÁPIDO - 4 COMANDOS (SMART!)              ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+COPIE ESTA PASTA PARA SEU PROJETO E EXECUTE:
+
+
+1️⃣  CONFIGURAR.bat (NOVO! 🎯)
+    ↓
+    Wizard inteligente (nome, ID, cores, senhas)
+    Executa UMA VEZ por projeto
+    Tempo: 1 minuto
+
+
+2️⃣  CORRIGIR-JAVA.bat
+    ↓
+    Corrige Java 21 → Java 17
+    Tempo: 5 segundos
+
+
+3️⃣  EXECUTAR-AGORA.bat
+    ↓
+    Lê config.txt e gera AAB automaticamente
+    Tempo: 5-10 minutos
+
+
+4️⃣  python gerar-graficos.py (NOVO! Multi-resolução 📱)
+    ↓
+    Gera 2 gráficos + 36 screenshots (phones, tablets, TV, wearables)
+    Tempo: 10 segundos
+
+
+═══════════════════════════════════════════════════════════════
+
+
+PRONTO! Você terá:
+
+✅ AAB assinado: playstore-assets/aab/seuapp-v1.0.aab
+✅ Ícone 512x512: playstore-assets/graficos/icone-512x512.png
+✅ Feature Graphic: playstore-assets/graficos/feature-graphic-1024x500.png
+✅ 36 Screenshots: playstore-assets/screenshots/
+   • phone/ (12 imagens)
+   • tablet_7/ (6 imagens)
+   • tablet_10/ (6 imagens)
+   • tv/ (6 imagens)
+   • wear/ (6 imagens)
+
+
+═══════════════════════════════════════════════════════════════
+
+
+📖 Guia completo: COMO-USAR.txt
+
+
+🎉

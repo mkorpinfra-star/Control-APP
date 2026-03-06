@@ -1,0 +1,258 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║          📖 COMO USAR - GUIA COMPLETO                        ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+🎯 CENÁRIO:
+
+Você tem um projeto React + Vite + Capacitor e quer gerar
+um AAB assinado para publicar na Google Play Store.
+
+
+═══════════════════════════════════════════════════════════════
+
+
+✅ PRÉ-REQUISITOS:
+
+1. Projeto React funcionando
+2. Capacitor instalado: npm install @capacitor/core @capacitor/cli
+3. Android adicionado: npx cap add android
+4. Pasta android/ existente no projeto
+
+
+═══════════════════════════════════════════════════════════════
+
+
+🚀 PASSO A PASSO:
+
+────────────────────────────────────────────────────────────────
+ETAPA 1: COPIAR A PASTA
+────────────────────────────────────────────────────────────────
+
+1. Copie a pasta INTEIRA "tudo-playstore" para a RAIZ
+   do seu projeto.
+
+   Exemplo:
+   C:\MeuProjeto\
+   ├── src/
+   ├── public/
+   ├── android/
+   └── tudo-playstore/  ← COLE AQUI
+
+
+────────────────────────────────────────────────────────────────
+ETAPA 2: CONFIGURAR PROJETO (NOVO! 🎯)
+────────────────────────────────────────────────────────────────
+
+2. Entre na pasta tudo-playstore:
+   cd tudo-playstore
+
+3. Execute:
+   CONFIGURAR.bat
+
+   O wizard vai perguntar:
+   ✅ Nome do app (ex: Meu Sistema)
+   ✅ ID do app (ex: meusistema)
+   ✅ Versão inicial (ex: 1.0)
+   ✅ Nome da empresa
+   ✅ País (ex: BR, ES, PT)
+   ✅ Senha do keystore (mínimo 6 caracteres)
+   ✅ Alias da chave (ex: meusistema)
+   ✅ Cor primária em HEX (ex: FF5722)
+   ✅ Cor secundária em HEX (ex: 03A9F4)
+
+   Tempo: 1 minuto
+
+   ⚠️  Tudo será salvo em config.txt para uso automático!
+
+
+────────────────────────────────────────────────────────────────
+ETAPA 3: CORRIGIR JAVA (OBRIGATÓRIO)
+────────────────────────────────────────────────────────────────
+
+4. Execute:
+   CORRIGIR-JAVA.bat
+
+   O que faz:
+   ✅ Corrige 6 arquivos Gradle
+   ✅ Muda Java 21 → Java 17
+   ✅ Automático em 5 segundos
+
+
+────────────────────────────────────────────────────────────────
+ETAPA 4: GERAR AAB (SMART! 🤖)
+────────────────────────────────────────────────────────────────
+
+5. Execute:
+   EXECUTAR-AGORA.bat
+
+   O que faz:
+   ✅ LÊ config.txt automaticamente
+   ✅ Configura Java 17 local
+   ✅ Cria keystore com SUAS senhas
+   ✅ Compila AAB com SEU nome/ID
+   ✅ Copia para playstore-assets/
+
+   Tempo: 5-10 minutos
+
+6. Quando terminar, você terá:
+   playstore-assets/aab/seuapp-v1.0.aab
+
+
+────────────────────────────────────────────────────────────────
+ETAPA 5: GERAR GRÁFICOS MULTI-RESOLUÇÃO (NOVO! 📱)
+────────────────────────────────────────────────────────────────
+
+7. Execute:
+   python gerar-graficos.py
+
+   O que faz:
+   ✅ Ícone 512x512 com SUAS cores e iniciais
+   ✅ Feature Graphic 1024x500 personalizado
+   ✅ 36 Screenshots para TODOS os dispositivos:
+      • Phone (2 resoluções): 12 screenshots
+      • Tablet 7" (1 resolução): 6 screenshots
+      • Tablet 10" (1 resolução): 6 screenshots
+      • Android TV (1 resolução): 6 screenshots
+      • Wear OS (1 resolução): 6 screenshots
+
+   Tempo: 10 segundos
+
+8. Arquivos gerados em:
+   playstore-assets/
+   ├── graficos/
+   │   ├── icone-512x512.png
+   │   └── feature-graphic-1024x500.png
+   └── screenshots/
+       ├── phone/
+       ├── tablet_7/
+       ├── tablet_10/
+       ├── tv/
+       └── wear/
+
+
+────────────────────────────────────────────────────────────────
+ETAPA 6: PERSONALIZAR TEXTOS
+────────────────────────────────────────────────────────────────
+
+9. Edite os arquivos em tudo-playstore/textos/:
+   - 01-NOME-DO-APP.txt
+   - 02-BREVE-DESCRICAO.txt
+   - 03-DESCRICAO-COMPLETA.txt
+   - Etc.
+
+   Coloque as informações do SEU app!
+
+
+═══════════════════════════════════════════════════════════════
+
+
+📦 RESULTADO FINAL:
+
+Você terá TUDO que precisa para Play Store:
+
+playstore-assets/
+├── aab/
+│   └── seuapp-v1.0.aab              ← ARQUIVO PRINCIPAL AAB
+├── graficos/
+│   ├── icone-512x512.png            ← Ícone do app
+│   └── feature-graphic-1024x500.png ← Banner destaque
+├── screenshots/
+│   ├── phone/ (12 imagens)          ← Screenshots celular
+│   ├── tablet_7/ (6 imagens)        ← Screenshots tablet 7"
+│   ├── tablet_10/ (6 imagens)       ← Screenshots tablet 10"
+│   ├── tv/ (6 imagens)              ← Screenshots Android TV
+│   └── wear/ (6 imagens)            ← Screenshots Wear OS
+└── textos/ (6 descrições)           ← Textos para a loja
+
+
+═══════════════════════════════════════════════════════════════
+
+
+⚠️ IMPORTANTE - BACKUP DO KEYSTORE:
+
+Depois de gerar, você terá um arquivo:
+
+   seu-projeto/seuapp.keystore
+
+⚠️  FAÇA BACKUP EM 3 LUGARES DIFERENTES:
+   • PC (pasta segura fora do projeto)
+   • Nuvem (Google Drive/Dropbox/OneDrive)
+   • Pendrive/HD externo
+
+🚨 SE PERDER ESTE ARQUIVO, NUNCA MAIS CONSEGUE ATUALIZAR O APP!
+   Terá que publicar como app NOVO e perder todos os usuários.
+
+
+═══════════════════════════════════════════════════════════════
+
+
+🔄 PRÓXIMAS ATUALIZAÇÕES:
+
+Para atualizar o app no futuro:
+
+1. Altere versionCode e versionName em:
+   android/app/build.gradle
+
+   Exemplo:
+   versionCode 1 → versionCode 2
+   versionName "1.0" → versionName "1.1"
+
+2. Execute novamente:
+   cd tudo-playstore
+   EXECUTAR-AGORA.bat
+
+3. Novo AAB será gerado automaticamente:
+   playstore-assets/aab/seuapp-v1.1.aab
+
+⚠️  NÃO execute CONFIGURAR.bat novamente!
+   Apenas EXECUTAR-AGORA.bat (ele já tem suas configurações)
+
+
+═══════════════════════════════════════════════════════════════
+
+
+🆘 PROBLEMAS COMUNS:
+
+❌ Erro "Java not found"
+   → Execute CORRIGIR-JAVA.bat primeiro
+
+❌ Erro "Keystore not found"
+   → Normal na primeira vez, será criado automaticamente
+
+❌ Erro "invalid source release: 21"
+   → Execute CORRIGIR-JAVA.bat novamente
+
+❌ Build demora muito
+   → Normal na primeira vez (5-10 min)
+
+
+═══════════════════════════════════════════════════════════════
+
+
+✅ CHECKLIST FINAL:
+
+Antes de submeter na Play Store:
+
+□ AAB gerado (seuapp-v1.0.aab)
+□ Ícone 512x512 gerado
+□ Feature Graphic 1024x500 gerado
+□ 36 Screenshots geradas (phone, tablet, TV, wear)
+□ Textos personalizados (6 arquivos .txt)
+□ Backup do keystore feito (3 lugares!)
+□ Política de privacidade publicada no site
+□ Conta Google Play Console criada
+□ Taxa única de $25 paga (Google)
+
+
+═══════════════════════════════════════════════════════════════
+
+
+📞 FICOU ALGUMA DÚVIDA?
+
+Releia este guia com calma. Está tudo explicado! 😊
+
+
+🎉 BOA SORTE COM SEU APP NA PLAY STORE!

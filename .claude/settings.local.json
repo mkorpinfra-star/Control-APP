@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(md5sum playstore-assets/graficos/j2s-hores-icon-512x512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)",
+      "Bash(git checkout -- package.json package-lock.json)",
+      "Bash(npm install @capacitor/cli@5.7.0 @capacitor/core@5.7.0 @capacitor/android@5.7.0)",
+      "Bash(npx cap add android)",
+      "Bash(if exist android rmdir /s /q android)",
+      "Bash(keytool -list -v -keystore j2s-horas.keystore -storepass j2shoras2024)",
+      "Bash(./keytool.exe -list -v -keystore \"../../j2s-horas.keystore\" -storepass j2shoras2024)",
+      "Bash(./tudo-playstore/jdk-17.0.2/bin/keytool.exe -list -v -keystore j2s-horas.keystore -storepass j2shoras2024)",
+      "Bash(for pwd in \"J2SInstaladora010203!\" \"j2shoras\" \"123456\" \"j2s2024\")",
+      "Bash(do echo \"Testando: $pwd\")",
+      "Bash(./tudo-playstore/jdk-17.0.2/bin/keytool.exe -list -keystore j2s-horas.keystore -storepass \"$pwd\")",
+      "Bash(done)",
+      "Bash(find dist/ -type f -size +500k -exec ls -lh {} ;)",
+      "Bash(npx cap copy)",
+      "Bash(npm uninstall @capacitor/cli @capacitor/core @capacitor/android)",
+      "Bash(npm install @capacitor/cli@5.7.0 @capacitor/core@5.7.0 @capacitor/android@5.7.0 --save-exact)",
+      "Bash(unzip -l \"j2s-hores-v1.20-playstore.aab\")",
+      "Bash(sort -k1 -n -r)"
+    ],
+    "deny": [],
+    "ask": []
+  }

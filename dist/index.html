@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" type="image/png" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./icon-512.png" />
+
+    <!-- Mobile Optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="J2S Obras" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#CE0201" />
+    <meta name="msapplication-TileColor" content="#CE0201" />
+
+    <!-- SEO -->
+    <meta name="description" content="Sistema de gestión de obras, apontamento de horas y facturación - J2S Enginyeria" />
+    <meta name="keywords" content="j2s, enginyeria, obras, construccion, horas, facturacion" />
+
+    <title>J2S Enginyeria - Gestión de Obras</title>
+    <script type="module" crossorigin src="./assets/index-DpvH8M50.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-NFDoS4l4.css">
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- PWA Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ Service Worker registrado'))
+            .catch(err => console.log('❌ Service Worker falhou:', err));
+        });
+      }
+    </script>
+  </body>
+</html>

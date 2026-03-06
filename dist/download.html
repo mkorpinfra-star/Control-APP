@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Descargar J2S Horas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #CE0201 0%, #8a0000 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 450px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      padding: 48px 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      background: #CE0201;
+      border-radius: 24px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 700;
+      color: white;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #111;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .platform {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #CE0201;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 20px;
+      background: #CE0201;
+      color: white;
+      text-decoration: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(206, 2, 1, 0.3);
+    }
+
+    .btn:hover {
+      background: #8a0000;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(206, 2, 1, 0.4);
+    }
+
+    .btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .steps {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+      text-align: left;
+    }
+
+    .steps h3 {
+      font-size: 16px;
+      color: #111;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .steps ol {
+      padding-left: 20px;
+      margin: 0;
+    }
+
+    .steps li {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 8px;
+    }
+
+    .steps strong {
+      color: #CE0201;
+      font-weight: 600;
+    }
+
+    .alert {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #856404;
+      text-align: left;
+    }
+
+    #android-only, #ios-only, #desktop-only {
+      display: none;
+    }
+
+    .emoji {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">J2S</div>
+    <h1>J2S Horas</h1>
+    <p class="subtitle">Control de horas y asistencia</p>
+
+    <div class="platform" id="platform-name">Detectando dispositivo...</div>
+
+    <!-- ANDROID -->
+    <div id="android-only">
+      <div class="emoji">📱</div>
+
+      <a href="j2s-obras.apk" class="btn" id="download-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        DESCARGAR APP
+      </a>
+
+      <div class="steps">
+        <h3>Instalación (2 pasos):</h3>
+        <ol>
+          <li>Toca <strong>"DESCARGAR APP"</strong></li>
+          <li>Abre el archivo y toca <strong>"Instalar"</strong></li>
+        </ol>
+        <div class="alert">
+          ⚠️ Si aparece "Fuente desconocida", toca <strong>Configuración</strong> y activa la opción.
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS -->
+    <div id="ios-only">
+      <div class="emoji">🍎</div>
+
+      <a href="/login" class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
+        PASO 1: ABRIR APP
+      </a>
+
+      <div class="steps">
+        <h3>📱 Cómo instalar el App (paso a paso):</h3>
+
+        <div style="background: white; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #CE0201;">
+          <strong style="color: #CE0201; font-size: 16px;">PASO 1:</strong>
+          <p style="margin: 8px 0 0 0; color: #333;">Toca el botón rojo <strong>"ABRIR APP"</strong> arriba ☝️</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">Se abrirá el sistema J2S en Safari</p>
+        </div>
+
+        <div style="background: white; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #CE0201;">
+          <strong style="color: #CE0201; font-size: 16px;">PASO 2:</strong>
+          <p style="margin: 8px 0 0 0; color: #333;">En la parte de <strong>abajo</strong> de la pantalla, busca este botón:</p>
+          <p style="margin: 8px 0; font-size: 32px; text-align: center;">⎋</p>
+          <p style="margin: 0; font-size: 13px; color: #666; text-align: center;">(Botón "Compartir" en el menú inferior)</p>
+        </div>
+
+        <div style="background: white; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #CE0201;">
+          <strong style="color: #CE0201; font-size: 16px;">PASO 3:</strong>
+          <p style="margin: 8px 0 0 0; color: #333;">En el menú que aparece, <strong>desliza hacia abajo</strong> hasta encontrar:</p>
+          <p style="margin: 8px 0; padding: 12px; background: #f0f0f0; border-radius: 6px; text-align: center;">
+            <strong>"Añadir a pantalla de inicio"</strong><br>
+            <span style="font-size: 13px; color: #666;">o</span><br>
+            <strong>"Add to Home Screen"</strong>
+          </p>
+        </div>
+
+        <div style="background: white; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #CE0201;">
+          <strong style="color: #CE0201; font-size: 16px;">PASO 4:</strong>
+          <p style="margin: 8px 0 0 0; color: #333;">Toca <strong>"Añadir"</strong> en la esquina superior derecha</p>
+        </div>
+
+        <div style="background: #d4edda; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #28a745;">
+          <strong style="color: #155724; font-size: 16px;">✅ ¡LISTO!</strong>
+          <p style="margin: 8px 0 0 0; color: #155724;">El icono de <strong>J2S Horas</strong> aparecerá en tu pantalla de inicio</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #155724;">Ábrelo como cualquier otra app</p>
+        </div>
+
+        <div class="alert" style="margin-top: 16px;">
+          ⚠️ <strong>IMPORTANTE:</strong> Debes usar <strong>Safari</strong> (no Chrome ni otros navegadores)
+        </div>
+      </div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div id="desktop-only">
+      <div class="emoji">💻</div>
+
+      <a href="/login" class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        ABRIR EN NAVEGADOR
+      </a>
+
+      <div class="steps">
+        <h3>💡 Recomendación:</h3>
+        <ol>
+          <li>Este sistema está optimizado para <strong>móviles</strong></li>
+          <li>Para instalar, accede desde tu <strong>smartphone</strong></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // REDIRECCIONAR SI YA ESTÁ INSTALADO COMO APP
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone === true ||
+                        document.referrer.includes('android-app://');
+
+    if (isStandalone) {
+      window.location.href = '/login';
+    }
+
+    // DETECTAR PLATAFORMA
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const platformName = document.getElementById('platform-name');
+
+    if (/android/i.test(userAgent)) {
+      // ANDROID
+      document.getElementById('android-only').style.display = 'block';
+      platformName.innerHTML = '✅ Android detectado';
+
+      // FIX: Adicionar evento de download forçado
+      document.getElementById('download-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Método 1: Criar elemento temporário para forçar download
+        const link = document.createElement('a');
+        link.href = 'j2s-obras.apk';
+        link.download = 'j2s-horas.apk';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Método 2: Abrir em nova aba como fallback
+        setTimeout(() => {
+          window.open('j2s-obras.apk', '_blank');
+        }, 500);
+      });
+    } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+      // iOS
+      document.getElementById('ios-only').style.display = 'block';
+      platformName.innerHTML = '✅ iPhone detectado';
+    } else {
+      // DESKTOP
+      document.getElementById('desktop-only').style.display = 'block';
+      platformName.innerHTML = '💻 Ordenador detectado';
+    }
+  </script>
+</body>
+</html>

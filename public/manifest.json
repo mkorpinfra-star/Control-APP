@@ -1,0 +1,25 @@
+{
+  "name": "J2S Obras",
+  "short_name": "J2S",
+  "description": "Sistema de gestão de obras, apontamento de horas e faturamento",
+  "start_url": "/login?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#CE0201",
+  "theme_color": "#CE0201",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

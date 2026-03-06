@@ -1,0 +1,202 @@
+════════════════════════════════════════════════════════════════
+  ✅ CHECKLIST FINAL - PUBLICAR NA PLAY STORE
+════════════════════════════════════════════════════════════════
+
+📦 TUDO ESTÁ PRONTO NA PASTA: playstore-assets/
+
+════════════════════════════════════════════════════════════════
+  FASE 1: PREPARAÇÃO (ANTES DA PLAY CONSOLE)
+════════════════════════════════════════════════════════════════
+
+□ 1.1 - Gerar Keystore
+      Execute: gerar-keystore.bat
+      Anote as senhas!
+      Arquivo: j2s-horas.keystore
+
+□ 1.2 - Configurar Assinatura
+      Execute: configurar-signing.bat
+      Arquivo criado: android/key.properties
+
+□ 1.3 - Gerar AAB Assinado
+      Execute: gerar-aab.bat
+      Arquivo: android/app/build/outputs/bundle/release/app-release.aab
+      Tamanho esperado: 8-12 MB
+
+□ 1.4 - Upload Privacy no FTP
+      Arquivo: dist/privacy.html
+      Upload para: public_html/privacy.html
+      Testar: https://j2s.ad/privacy.html
+
+□ 1.5 - Criar Usuário de Teste
+      Login: https://j2s.ad/login
+      Menu: Empleados > Nuevo Usuario
+      Nome: Usuario Teste
+      Email: teste@j2s.ad
+      Senha: Teste@2026
+      Tipo: Admin
+
+════════════════════════════════════════════════════════════════
+  FASE 2: PLAY CONSOLE - UPLOAD DE ARQUIVOS
+════════════════════════════════════════════════════════════════
+
+□ 2.1 - Upload AAB
+      Arquivo: android/app/build/outputs/bundle/release/app-release.aab
+      Arrastar para: "Solte os pacotes de apps aqui"
+
+□ 2.2 - Upload Ícone 512x512
+      Arquivo: playstore-assets/graficos/icone-512x512.png
+      Campo: "Ícone do aplicativo"
+
+□ 2.3 - Upload Feature Graphic 1024x500
+      Arquivo: playstore-assets/graficos/feature-graphic-1024x500.png
+      Campo: "Recurso gráfico"
+
+□ 2.4 - Upload Screenshots (6 arquivos)
+      playstore-assets/screenshots/screenshot-1-login.png
+      playstore-assets/screenshots/screenshot-2-les-meves-hores.png
+      playstore-assets/screenshots/screenshot-3-dashboard.png
+      playstore-assets/screenshots/screenshot-4-aprovacions.png
+      playstore-assets/screenshots/screenshot-5-el-meu-perfil.png
+      playstore-assets/screenshots/screenshot-6-j2s-app.png
+      Campo: "Capturas de tela do telefone"
+
+════════════════════════════════════════════════════════════════
+  FASE 3: PLAY CONSOLE - TEXTOS
+════════════════════════════════════════════════════════════════
+
+□ 3.1 - Nome do App
+      Copiar de: playstore-assets/textos/01-NOME-DO-APP.txt
+      Texto: J2S Hores
+
+□ 3.2 - Breve Descrição
+      Copiar de: playstore-assets/textos/02-BREVE-DESCRICAO.txt
+      Texto: Control d'hores i assistència per a empleats de J2S Enginyeria
+
+□ 3.3 - Descrição Completa
+      Copiar de: playstore-assets/textos/03-DESCRICAO-COMPLETA.txt
+      (3.189 caracteres - texto completo em catalão)
+
+□ 3.4 - Notas da Versão
+      Copiar de: playstore-assets/textos/04-NOTAS-DA-VERSAO.txt
+      Nome da versão: 1.0
+      Texto entre tags <ca> e </ca>
+
+□ 3.5 - Categoria e Tags
+      Ver: playstore-assets/textos/05-CATEGORIA-E-TAGS.txt
+      Categoria: Empresa
+      Tags: Empresa, Produtividade, Bloco de notas, Busca de emprego/Empresa, Ferramentas
+
+════════════════════════════════════════════════════════════════
+  FASE 4: PLAY CONSOLE - CONFIGURAÇÕES
+════════════════════════════════════════════════════════════════
+
+□ 4.1 - Detalhes de Contato
+      Email: admin@j2s.ad
+      Site: https://j2s.ad
+
+□ 4.2 - Política de Privacidade
+      URL: https://j2s.ad/privacy.html
+
+□ 4.3 - Acesso do App
+      Selecionar: "Todas ou algumas funcionalidades são restritas"
+      Instruções: Ver playstore-assets/textos/06-CREDENCIAIS-TESTE.txt
+      Email teste: teste@j2s.ad
+      Senha teste: Teste@2026
+
+□ 4.4 - Segurança de Dados
+      Coleta dados: SIM
+      Dados: Nome, Email, Fotos, Informações de emprego
+      Compartilha: NÃO
+      Encriptado: SIM
+      Usuário pode excluir: SIM
+
+□ 4.5 - Classificação de Conteúdo
+      Responder questionário
+      Categoria: Ferramentas de produtividade / Negócios
+      Resultado esperado: PEGI 3 / Everyone
+
+□ 4.6 - Público-alvo
+      Adultos (18+)
+
+════════════════════════════════════════════════════════════════
+  FASE 5: REVISÃO E SUBMISSÃO
+════════════════════════════════════════════════════════════════
+
+□ 5.1 - Revisar Todos os Campos
+      Verificar se todos os campos obrigatórios foram preenchidos
+      Verificar se não há avisos vermelhos
+
+□ 5.2 - Revisar Versão
+      Clicar: "Revisar versão"
+      Verificar resumo de tudo
+
+□ 5.3 - Iniciar Lançamento
+      Clicar: "Iniciar lançamento para produção" (ou "teste interno")
+      Confirmar
+
+□ 5.4 - Aguardar Aprovação
+      Tempo: 1-7 dias (média 2-3 dias)
+      Você receberá email
+
+════════════════════════════════════════════════════════════════
+  ✅ RESULTADO ESPERADO
+════════════════════════════════════════════════════════════════
+
+Se aprovado:
+- App publicado automaticamente
+- URL: https://play.google.com/store/apps/details?id=com.j2s.obras
+- Visível para busca no Google Play
+- Usuários podem instalar
+
+Se rejeitado:
+- Google enviará email explicando motivo
+- Corrija e reenvie
+
+════════════════════════════════════════════════════════════════
+  📊 RESUMO DOS ARQUIVOS
+════════════════════════════════════════════════════════════════
+
+GRÁFICOS (2 arquivos):
+  ✓ graficos/icone-512x512.png
+  ✓ graficos/feature-graphic-1024x500.png
+
+SCREENSHOTS (6 arquivos):
+  ✓ screenshots/screenshot-1-login.png
+  ✓ screenshots/screenshot-2-les-meves-hores.png
+  ✓ screenshots/screenshot-3-dashboard.png
+  ✓ screenshots/screenshot-4-aprovacions.png
+  ✓ screenshots/screenshot-5-el-meu-perfil.png
+  ✓ screenshots/screenshot-6-j2s-app.png
+
+TEXTOS (6 arquivos):
+  ✓ textos/01-NOME-DO-APP.txt
+  ✓ textos/02-BREVE-DESCRICAO.txt
+  ✓ textos/03-DESCRICAO-COMPLETA.txt
+  ✓ textos/04-NOTAS-DA-VERSAO.txt
+  ✓ textos/05-CATEGORIA-E-TAGS.txt
+  ✓ textos/06-CREDENCIAIS-TESTE.txt
+
+════════════════════════════════════════════════════════════════
+  🎯 TEMPO ESTIMADO
+════════════════════════════════════════════════════════════════
+
+Fase 1 (Preparação): 15-20 minutos
+Fase 2 (Upload arquivos): 5-10 minutos
+Fase 3 (Textos): 5 minutos
+Fase 4 (Configurações): 10-15 minutos
+Fase 5 (Revisão/Submissão): 5 minutos
+
+TOTAL: 40-55 minutos
+APROVAÇÃO GOOGLE: 1-7 dias
+
+════════════════════════════════════════════════════════════════
+  🚀 VOCÊ ESTÁ PRONTO!
+════════════════════════════════════════════════════════════════
+
+Todos os arquivos estão organizados e prontos.
+Siga este checklist passo a passo.
+Marque cada item conforme concluir.
+
+BOA SORTE! 🍀
+
+════════════════════════════════════════════════════════════════
