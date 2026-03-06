@@ -364,7 +364,7 @@ export default function Analytics() {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b-2 border-gray-200">
+                                        <tr className="bg-gray-50">
                                             <th className="px-3 py-2 text-left font-semibold">Empleado</th>
                                             <th className="px-3 py-2 text-center font-semibold">Normal</th>
                                             <th className="px-3 py-2 text-center font-semibold">Extra</th>
@@ -376,7 +376,7 @@ export default function Analytics() {
                                     </thead>
                                     <tbody>
                                         {data.top_employees.map((emp) => (
-                                            <tr key={emp.id} className="border-b border-gray-200">
+                                            <tr key={emp.id}>
                                                 <td className="px-3 py-2 font-medium">{emp.nome}</td>
                                                 <td className="px-3 py-2 text-center text-success">{emp.horas_normal}h</td>
                                                 <td className="px-3 py-2 text-center text-warning">{emp.horas_extra}h</td>

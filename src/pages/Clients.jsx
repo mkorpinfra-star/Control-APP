@@ -144,7 +144,7 @@ export default function Clients() {
                                         </div>
                                     )}
                                     {client.email_financeiro && (
-                                        <div className="flex items-center gap-2 p-2 bg-green-50 border-2 border-green-200 rounded-lg">
+                                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
                                             <Mail size={14} className="text-success shrink-0" />
                                             <span className="text-xs text-success font-semibold truncate">
                                                 {client.email_financeiro}
@@ -159,17 +159,17 @@ export default function Clients() {
                                     )}
                                 </div>
 
-                                <div className="flex gap-2 pt-3 border-t-2 border-gray-200">
+                                <div className="flex gap-2 pt-3">
                                     <button
                                         onClick={() => handleEdit(client)}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border-2 border-gray-300 text-gray-700 hover:border-j2s-red hover:text-j2s-red rounded-lg transition-all font-semibold text-sm"
+                                        className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-gray-300 text-gray-700 hover:border-j2s-red hover:text-j2s-red rounded-lg transition-all font-semibold text-sm"
                                     >
                                         <Edit size={16} />
                                         Editar
                                     </button>
                                     <button
                                         onClick={() => handleDelete(client)}
-                                        className="flex items-center justify-center py-2 px-3 border-2 border-red-300 text-j2s-red hover:bg-red-50 rounded-lg transition-all"
+                                        className="flex items-center justify-center py-2 px-3 border border-red-300 text-j2s-red hover:bg-red-50 rounded-lg transition-all"
                                     >
                                         <Trash2 size={16} />
                                     </button>

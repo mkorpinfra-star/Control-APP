@@ -56,9 +56,9 @@ function ObraCalendar({ dataInicio, dataFim, diasDesativados, onChange }) {
     const totalThisMonth    = cur.cells.filter(Boolean).length;
 
     return (
-        <div className="mt-3 border border-gray-200 rounded-xl overflow-hidden">
+        <div className="mt-3 rounded-xl overflow-hidden shadow-sm bg-white">
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
                 <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Días de trabajo</span>
@@ -100,7 +100,7 @@ function ObraCalendar({ dataInicio, dataFim, diasDesativados, onChange }) {
             </div>
 
             {/* Footer */}
-            <div className="px-3 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
+            <div className="px-3 py-2 bg-gray-50 flex items-center justify-between text-xs text-gray-500">
                 <span>{meses.length} {meses.length === 1 ? 'mes' : 'meses'} • {meses.indexOf(cur)+1}/{meses.length}</span>
                 {diasDesativados.length > 0
                     ? <span className="text-orange-600 font-medium">{diasDesativados.length} día(s) desactivado(s) en total</span>
@@ -526,8 +526,8 @@ export default function Projects() {
                                 />
 
                                 {/* Funcionários */}
-                                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
+                                <div className="rounded-xl overflow-hidden shadow-sm bg-white">
+                                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50">
                                         <Users className="w-3.5 h-3.5 text-gray-500" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Funcionarios</span>
                                         {selectedEmployees.length > 0 && (

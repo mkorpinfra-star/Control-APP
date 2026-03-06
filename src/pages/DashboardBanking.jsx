@@ -80,7 +80,7 @@ export default function DashboardBanking() {
 
         <div className="space-y-3">
           {/* Activity Item */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
                 <Clock size={18} className="text-[#CE0201]" />
@@ -98,7 +98,7 @@ export default function DashboardBanking() {
           </div>
 
           {/* Activity Item */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
                 <CheckCircle size={18} className="text-green-600" />
@@ -116,7 +116,7 @@ export default function DashboardBanking() {
           </div>
 
           {/* Activity Item */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
                 <TrendingUp size={18} className="text-blue-600" />
