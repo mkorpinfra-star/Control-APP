@@ -61,11 +61,7 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Reset removido - Tailwind v4 já inclui reset completo em @layer base */
 
 body {
   font-family: var(--font-family);
