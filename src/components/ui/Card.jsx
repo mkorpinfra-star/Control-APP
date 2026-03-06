@@ -1,11 +1,18 @@
 import { cn } from '../../lib/utils'
 
-// Cards limpos e modernos
-export function Card({ children, className, ...props }) {
+// Cards limpos e modernos - estilo Nubank (sem bordas)
+export function Card({ children, className, variant = 'default', ...props }) {
+  const getVariantClasses = () => {
+    if (variant === 'nubank') return 'bg-[#F5F5F5] shadow-sm';
+    if (variant === 'nubank-no-shadow') return 'bg-[#F5F5F5]';
+    return 'bg-white shadow-sm';
+  };
+
   return (
     <div
       className={cn(
-        'bg-white text-gray-900 rounded-lg shadow-sm border border-gray-200',
+        'text-gray-900 rounded-xl',
+        getVariantClasses(),
         className
       )}
       {...props}

@@ -1,0 +1,79 @@
+═══════════════════════════════════════════════════════════════
+  ARQUIVOS QUE VOCÊ PRECISA UPAR PARA O SERVIDOR
+═══════════════════════════════════════════════════════════════
+
+⚠️ ATENÇÃO: Você está vendo a versão ANTIGA no servidor!
+Os arquivos foram atualizados mas você não upou os novos!
+
+📁 ARQUIVOS DA BUILD (dentro da pasta dist/):
+
+1. dist/index.html
+   └─ Novo tamanho: 2.05 kB
+
+2. dist/assets/index-BSh13vzJ.css
+   └─ Novo tamanho: 73.67 kB
+   └─ ⚠️ ESTE É O ARQUIVO CSS NOVO - NÃO CONFUNDIR COM OS ANTIGOS!
+
+3. dist/assets/index-B0I6VmVT.js
+   └─ Novo tamanho: 1,195.54 kB
+   └─ ⚠️ ESTE É O ARQUIVO JS NOVO - NÃO CONFUNDIR COM OS ANTIGOS!
+
+═══════════════════════════════════════════════════════════════
+  COMO UPAR CORRETAMENTE
+═══════════════════════════════════════════════════════════════
+
+PASSO 1: DELETAR arquivos CSS e JS antigos do servidor
+   - Apagar TODOS os arquivos que começam com "index-" da pasta assets/
+   - Exemplo: index-DqZ1aRdd.css, index-C9Wqx4Z4.js (VERSÕES ANTIGAS)
+
+PASSO 2: UPAR os 3 arquivos listados acima
+   - dist/index.html → RAIZ do /login/
+   - dist/assets/index-BSh13vzJ.css → /login/assets/
+   - dist/assets/index-B0I6VmVT.js → /login/assets/
+
+PASSO 3: LIMPAR CACHE do navegador
+   - Ctrl + F5 (Windows/Linux)
+   - Cmd + Shift + R (Mac)
+   - OU abrir em aba anônima
+
+═══════════════════════════════════════════════════════════════
+  O QUE FOI CORRIGIDO NESTA BUILD
+═══════════════════════════════════════════════════════════════
+
+✅ Dashboard - Cards de "Actividad reciente":
+   - Padding aumentado: p-4 → p-5 (1.25rem)
+   - Gap aumentado: gap-3 → gap-4 (1rem)
+   - Ícones maiores: 18px → 20px
+   - Ícones com fundos coloridos (vermelho, verde, azul)
+   - Melhor espaçamento entre linhas (mb-2, leading-relaxed)
+
+✅ Settings/Perfil:
+   - Header vermelho com gradiente adicionado
+   - "J2S Hores by PuntoClicks" exibido
+   - Botões "Guardar" mudados de laranja para VERMELHO SÓLIDO
+   - Inputs com melhor alinhamento
+
+✅ Obras:
+   - Convertido de tabela para CARDS (igual Clientes)
+   - Datas de início/fim exibidas
+   - Melhor espaçamento em todos os elementos
+
+✅ Bottom Navigation:
+   - Flutuante com rounded-3xl e espaçamento lateral
+
+═══════════════════════════════════════════════════════════════
+  VERIFICAÇÃO APÓS UPAR
+═══════════════════════════════════════════════════════════════
+
+1. Abrir DevTools (F12)
+2. Ir na aba Network
+3. Verificar se está carregando:
+   ✓ index-BSh13vzJ.css (73.67 kB)
+   ✓ index-B0I6VmVT.js (1,195.54 kB)
+
+4. Se estiver carregando arquivos antigos:
+   - Limpar cache do navegador (Ctrl + Shift + Delete)
+   - Deletar arquivos antigos do servidor
+   - Fazer hard refresh (Ctrl + F5)
+
+═══════════════════════════════════════════════════════════════

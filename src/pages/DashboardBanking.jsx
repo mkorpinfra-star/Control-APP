@@ -52,7 +52,7 @@ export default function DashboardBanking() {
             return (
               <div
                 key={stat.id}
-                className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm"
+                className="bg-white rounded-2xl p-4 shadow-sm"
               >
                 <div className={`w-10 h-10 rounded-xl ${stat.bgColor} ${stat.color} flex items-center justify-center mb-3`}>
                   <Icon size={20} strokeWidth={2.5} />

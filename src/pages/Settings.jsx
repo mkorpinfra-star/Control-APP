@@ -192,7 +192,7 @@ export default function Settings() {
             </Card>
 
             {/* Multiplicadores */}
-            <Card className="mb-6 p-6">
+            <Card variant="nubank-no-shadow" className="mb-6 p-6">
                 <div className="flex items-center gap-2 mb-1">
                     <Moon className="w-5 h-5 text-purple-600" />
                     <h2 className="text-base font-semibold text-gray-900">Multiplicadores de Hora</h2>
@@ -229,7 +229,7 @@ export default function Settings() {
             </Card>
 
             {/* Impostos & Contribuições */}
-            <Card className="mb-6 p-6">
+            <Card variant="nubank-no-shadow" className="mb-6 p-6">
                 <div className="flex items-center gap-2 mb-1">
                     <Percent className="w-5 h-5 text-orange-600" />
                     <h2 className="text-base font-semibold text-gray-900">Impostos & Contribuições</h2>
