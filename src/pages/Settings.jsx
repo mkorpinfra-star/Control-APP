@@ -152,7 +152,7 @@ export default function Settings() {
     }
 
     return (
-        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen pb-24">
+        <div className="w-full p-4 sm:p-6 bg-white min-h-screen pb-24">
             <div className="mb-8 pb-4 border-b-2 border-gray-200 flex items-center gap-3">
                 <SettingsIcon className="w-8 h-8" style={{ color: '#CE0201' }} />
                 <div>

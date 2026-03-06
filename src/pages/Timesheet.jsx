@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { obrasService, apontamentosService } from '../services/api';
 import { ChevronLeft, ChevronRight, Save, Send, CheckCircle, AlertCircle } from 'lucide-react';
-import PhotoUpload from '../components/PhotoUpload';
 import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
 
@@ -66,19 +65,6 @@ export default function Timesheet() {
     const [saving, setSaving] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState(null);
-    const [showPhotoModal, setShowPhotoModal] = useState(false);
-    const [userPhoto, setUserPhoto] = useState(user?.foto_url || null);
-
-    useEffect(() => {
-        if (user && !userPhoto) {
-            setShowPhotoModal(true);
-        }
-    }, [user, userPhoto]);
-
-    const handlePhotoUpdated = (newPhotoUrl) => {
-        setUserPhoto(newPhotoUrl);
-        setShowPhotoModal(false);
-    };
 
     function getMonday(date) {
         const d = new Date(date);
@@ -569,15 +555,6 @@ export default function Timesheet() {
                         </Alert>
                     )}
                 </>
-            )}
-
-            {/* Photo Modal */}
-            {showPhotoModal && (
-                <PhotoUpload
-                    user={user}
-                    onPhotoUpdated={handlePhotoUpdated}
-                    required={true}
-                />
             )}
         </div>
     );

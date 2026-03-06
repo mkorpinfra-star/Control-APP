@@ -75,7 +75,7 @@ export default function Clients() {
     );
 
     return (
-        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen pb-24">
+        <div className="w-full p-4 sm:p-6 bg-white min-h-screen pb-24">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-gray-200">
                 <div>
@@ -91,13 +91,13 @@ export default function Clients() {
 
             {/* Search */}
             <div className="relative mb-6 max-w-2xl">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
                     type="text"
-                    placeholder="Buscar por nombre o email..."
+                    placeholder="Buscar cliente..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-700 text-black rounded-lg text-sm focus:outline-none focus:border-j2s-red transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
                 />
             </div>
 
@@ -119,7 +119,7 @@ export default function Clients() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredClients.map((client) => (
-                        <Card key={client.id} variant="nubank" className="hover:shadow-2xl transition-shadow">
+                        <Card key={client.id} variant="nubank" className="hover:shadow-md transition-shadow">
                             <CardBody>
                                 <div className="flex items-start gap-3 mb-4">
                                     <div className="w-12 h-12 bg-j2s-red rounded-full flex items-center justify-center text-white shrink-0">
@@ -181,14 +181,14 @@ export default function Clients() {
             )}
 
             {/* Modal */}
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} className="border-2 border-red-600">
-                <div className="bg-red-600 text-white px-6 py-4 flex items-center justify-between">
-                    <h2 className="text-xl font-bold uppercase">
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} className="border-0">
+                <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                    <h2 className="text-xl font-bold uppercase text-gray-900">
                         {editingClient ? 'Editar Cliente' : 'Nuevo Cliente'}
                     </h2>
                     <button
                         onClick={() => setShowModal(false)}
-                        className="text-white hover:text-j2s-red text-3xl leading-none transition-colors"
+                        className="text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center text-2xl leading-none transition-colors"
                     >
                         &times;
                     </button>

@@ -292,9 +292,9 @@ export default function BaterPonto() {
     const obraAtual = obras.find(o => o.id == obraId)
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-32">
+        <div className="min-h-screen bg-white pb-32">
             {/* Header Fixo com z-index menor que menu */}
-            <div className="bg-white shadow-lg relative z-10">
+            <div className="bg-white shadow-sm relative z-10">
                 <div className="px-4 py-3 border-b border-gray-200">
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -308,8 +308,8 @@ export default function BaterPonto() {
                         </div>
                         <div className="flex items-center gap-2">
                             {autoSaving && (
-                                <div className="flex items-center gap-2 text-green-600 text-sm">
-                                    <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
+                                <div className="flex items-center gap-2 text-gray-600 text-sm">
+                                    <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse"></div>
                                     Guardando...
                                 </div>
                             )}
@@ -364,10 +364,10 @@ export default function BaterPonto() {
                 {/* Status */}
                 {apontamento && (
                     <div className={`px-4 py-2 text-center text-sm font-semibold ${
-                        apontamento.status === 'aprovado' ? 'bg-green-100 text-green-800' :
-                        apontamento.status === 'enviado' ? 'bg-blue-100 text-blue-800' :
+                        apontamento.status === 'aprovado' ? 'bg-gray-200 text-gray-800' :
+                        apontamento.status === 'enviado' ? 'bg-gray-200 text-gray-800' :
                         apontamento.status === 'rejeitado' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
+                        'bg-gray-100 text-gray-700'
                     }`}>
                         {apontamento.status === 'aprovado' && '✅ APROBADO'}
                         {apontamento.status === 'enviado' && '⏳ ENVIADO - Esperando aprobación'}
@@ -414,20 +414,20 @@ export default function BaterPonto() {
                 {/* Inputs de Horas - GRANDE E FÁCIL */}
                 <div className="space-y-4">
                     {/* Normal */}
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 border-4 border-green-300 rounded-2xl p-6 shadow-lg">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-6 shadow-sm">
                         <label className="block text-center mb-3">
-                            <span className="text-green-800 font-bold text-lg">
+                            <span className="text-gray-800 font-bold text-lg">
                                 <ClockIcon className="w-5 h-5 inline-block mr-2" />
                                 NORMAL
                             </span>
-                            <span className="block text-green-600 text-xs mt-1">8:00 - 17:00</span>
+                            <span className="block text-gray-600 text-xs mt-1">8:00 - 17:00</span>
                         </label>
                         <div className="flex items-center justify-center gap-3">
                             <button
                                 type="button"
                                 onClick={() => updateHora('normal', Math.max(0, parseFloat(horasDia.normal || 0) - 0.5))}
                                 disabled={bloqueado || horasDia.normal <= 0}
-                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-green-700 hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 <Minus size={20} strokeWidth={3} />
                             </button>
@@ -441,13 +441,13 @@ export default function BaterPonto() {
                                 onChange={(e) => updateHora('normal', e.target.value)}
                                 disabled={bloqueado}
                                 placeholder="0"
-                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-200 disabled:text-gray-500"
+                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:bg-gray-200 disabled:text-gray-500"
                             />
                             <button
                                 type="button"
                                 onClick={() => updateHora('normal', Math.min(24, parseFloat(horasDia.normal || 0) + 0.5))}
                                 disabled={bloqueado || horasDia.normal >= 24}
-                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-green-700 hover:bg-green-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 <Plus size={20} strokeWidth={3} />
                             </button>
@@ -455,20 +455,20 @@ export default function BaterPonto() {
                     </div>
 
                     {/* Extra */}
-                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-4 border-yellow-300 rounded-2xl p-6 shadow-lg">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-6 shadow-sm">
                         <label className="block text-center mb-3">
-                            <span className="text-yellow-800 font-bold text-lg">
+                            <span className="text-gray-800 font-bold text-lg">
                                 <ClockIcon className="w-5 h-5 inline-block mr-2" />
                                 EXTRA
                             </span>
-                            <span className="block text-yellow-600 text-xs mt-1">17:00 - 22:00</span>
+                            <span className="block text-gray-600 text-xs mt-1">17:00 - 22:00</span>
                         </label>
                         <div className="flex items-center justify-center gap-3">
                             <button
                                 type="button"
                                 onClick={() => updateHora('extra', Math.max(0, parseFloat(horasDia.extra || 0) - 0.5))}
                                 disabled={bloqueado || horasDia.extra <= 0}
-                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-yellow-700 hover:bg-yellow-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 <Minus size={20} strokeWidth={3} />
                             </button>
@@ -482,13 +482,13 @@ export default function BaterPonto() {
                                 onChange={(e) => updateHora('extra', e.target.value)}
                                 disabled={bloqueado}
                                 placeholder="0"
-                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:bg-gray-200 disabled:text-gray-500"
+                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:bg-gray-200 disabled:text-gray-500"
                             />
                             <button
                                 type="button"
                                 onClick={() => updateHora('extra', Math.min(24, parseFloat(horasDia.extra || 0) + 0.5))}
                                 disabled={bloqueado || horasDia.extra >= 24}
-                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-yellow-700 hover:bg-yellow-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 <Plus size={20} strokeWidth={3} />
                             </button>
@@ -496,20 +496,20 @@ export default function BaterPonto() {
                     </div>
 
                     {/* Noturna */}
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-4 border-blue-300 rounded-2xl p-6 shadow-lg">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-6 shadow-sm">
                         <label className="block text-center mb-3">
-                            <span className="text-blue-800 font-bold text-lg">
+                            <span className="text-gray-800 font-bold text-lg">
                                 <ClockIcon className="w-5 h-5 inline-block mr-2" />
                                 NOCTURNA
                             </span>
-                            <span className="block text-blue-600 text-xs mt-1">22:00 - 6:00</span>
+                            <span className="block text-gray-600 text-xs mt-1">22:00 - 6:00</span>
                         </label>
                         <div className="flex items-center justify-center gap-3">
                             <button
                                 type="button"
                                 onClick={() => updateHora('noturna', Math.max(0, parseFloat(horasDia.noturna || 0) - 0.5))}
                                 disabled={bloqueado || horasDia.noturna <= 0}
-                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-blue-700 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 <Minus size={20} strokeWidth={3} />
                             </button>
@@ -523,13 +523,13 @@ export default function BaterPonto() {
                                 onChange={(e) => updateHora('noturna', e.target.value)}
                                 disabled={bloqueado}
                                 placeholder="0"
-                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200 disabled:text-gray-500"
+                                className="w-32 text-center text-3xl font-black py-3 px-2 rounded-xl bg-gray-100 border-0 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:bg-gray-200 disabled:text-gray-500"
                             />
                             <button
                                 type="button"
                                 onClick={() => updateHora('noturna', Math.min(24, parseFloat(horasDia.noturna || 0) + 0.5))}
                                 disabled={bloqueado || horasDia.noturna >= 24}
-                                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-blue-700 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 <Plus size={20} strokeWidth={3} />
                             </button>

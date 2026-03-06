@@ -289,7 +289,7 @@ export default function Projects() {
     );
 
     return (
-        <div className="w-full p-4 sm:p-6 bg-gray-50 min-h-screen pb-24">
+        <div className="w-full p-4 sm:p-6 bg-white min-h-screen pb-24">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-gray-200">
                 <div>
@@ -305,13 +305,13 @@ export default function Projects() {
 
             {/* Filter */}
             <div className="relative mb-6 max-w-2xl">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
                     type="text"
-                    placeholder="BUSCAR OBRA..."
+                    placeholder="Buscar obra..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-700 text-black rounded-lg uppercase font-semibold text-sm focus:outline-none focus:border-j2s-red transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
                 />
             </div>
 
@@ -329,7 +329,7 @@ export default function Projects() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredProjects.map((project) => (
-                        <Card key={project.id} variant="nubank" className="hover:shadow-2xl transition-shadow">
+                        <Card key={project.id} variant="nubank" className="hover:shadow-md transition-shadow">
                             <CardBody>
                                 {/* Header com ID e Nome */}
                                 <div className="flex items-start gap-3 mb-4">
@@ -416,15 +416,15 @@ export default function Projects() {
             {/* Modal Crear/Editar */}
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} className="border-0 !max-w-3xl">
                 {/* Header fixo */}
-                <div className="bg-red-600 text-white px-5 py-3 flex items-center justify-between flex-shrink-0 rounded-t-xl">
+                <div className="bg-white px-5 py-3 flex items-center justify-between flex-shrink-0 rounded-t-xl border-b border-gray-200">
                     <div className="flex items-center gap-2">
-                        <Briefcase className="w-5 h-5 opacity-80" />
-                        <h2 className="text-base font-bold uppercase tracking-wide">
+                        <Briefcase className="w-5 h-5 text-[#CE0201]" />
+                        <h2 className="text-base font-bold uppercase tracking-wide text-gray-900">
                             {editingProject ? 'Editar Obra' : 'Nueva Obra'}
                         </h2>
                     </div>
                     <button onClick={() => setShowModal(false)}
-                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-xl leading-none">
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-xl leading-none text-gray-600">
                         &times;
                     </button>
                 </div>
@@ -571,14 +571,14 @@ export default function Projects() {
             </Modal>
 
             {/* Modal Asignar Personal */}
-            <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} className="border-2 border-red-600">
-                <div className="bg-red-600 text-white px-6 py-4 flex items-center justify-between">
-                    <h2 className="text-xl font-bold uppercase">
+            <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} className="border-0">
+                <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                    <h2 className="text-xl font-bold uppercase text-gray-900">
                         Asignar Personal - {selectedProject?.numero}
                     </h2>
                     <button
                         onClick={() => setShowAssignModal(false)}
-                        className="text-white hover:text-j2s-red text-3xl leading-none transition-colors"
+                        className="text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center text-2xl leading-none transition-colors"
                     >
                         &times;
                     </button>
