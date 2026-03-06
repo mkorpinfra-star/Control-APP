@@ -135,8 +135,9 @@ export default function Settings() {
                     value={values[field]}
                     onChange={e => handleChange(field, e.target.value)}
                     className={`w-full pl-7 pr-3 py-2 border-2 rounded-lg text-right font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-0
-                        ${color === 'blue'   ? 'border-blue-300 focus:border-blue-500 focus:ring-blue-200 bg-blue-50' : ''}
-                        ${color === 'purple' ? 'border-purple-300 focus:border-purple-500 focus:ring-purple-200 bg-purple-50' : ''}
+                        ${color === 'blue'   ? 'border-gray-300 focus:border-gray-500 focus:ring-gray-200 bg-gray-50' : ''}
+                        ${color === 'purple' ? 'border-gray-300 focus:border-gray-500 focus:ring-gray-200 bg-gray-50' : ''}
+                        ${color === 'gray'   ? 'border-gray-300 focus:border-gray-500 focus:ring-gray-200 bg-gray-50' : ''}
                     `}
                 />
             </div>
@@ -180,46 +181,46 @@ export default function Settings() {
             {/* Faturamento ao cliente */}
             <Card variant="nubank-no-shadow" className="mb-5 p-6">
                 <div className="flex items-center gap-2 mb-1">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
+                    <TrendingUp className="w-5 h-5 text-gray-600" />
                     <h2 className="text-base font-semibold text-gray-900">Faturamento — Cobrado ao Cliente</h2>
                 </div>
                 <p className="text-xs text-gray-500 mb-4">
                     Valor base cobrado do cliente por hora. Pode ser sobrescrito individualmente por funcionário.
                 </p>
-                <Field label="Hora Normal (08h–17h)" field="fatura_hora_normal" color="blue" />
-                <Field label="Hora Extra (17h–22h)" field="fatura_hora_extra" color="blue" />
-                <Field label="Hora Noturna (22h–06h)" field="fatura_hora_noturna" color="blue" />
+                <Field label="Hora Normal (08h–17h)" field="fatura_hora_normal" color="gray" />
+                <Field label="Hora Extra (17h–22h)" field="fatura_hora_extra" color="gray" />
+                <Field label="Hora Noturna (22h–06h)" field="fatura_hora_noturna" color="gray" />
             </Card>
 
             {/* Multiplicadores */}
             <Card variant="nubank-no-shadow" className="mb-6 p-6">
                 <div className="flex items-center gap-2 mb-1">
-                    <Moon className="w-5 h-5 text-purple-600" />
+                    <Moon className="w-5 h-5 text-gray-600" />
                     <h2 className="text-base font-semibold text-gray-900">Multiplicadores de Hora</h2>
                 </div>
                 <p className="text-xs text-gray-500 mb-4">
                     Aplicado sobre a hora normal para calcular extra e noturna automaticamente.
                     Ex: Normal €{values.fatura_hora_normal.toFixed(2)} × {values.multiplicador_extra} = Extra €{(values.fatura_hora_normal * values.multiplicador_extra).toFixed(2)}
                 </p>
-                <Field label="Multiplicador Hora Extra" field="multiplicador_extra" color="purple" prefix="×" step="0.01" min="1" />
-                <Field label="Multiplicador Hora Noturna" field="multiplicador_noturna" color="purple" prefix="×" step="0.01" min="1" />
+                <Field label="Multiplicador Hora Extra" field="multiplicador_extra" color="gray" prefix="×" step="0.01" min="1" />
+                <Field label="Multiplicador Hora Noturna" field="multiplicador_noturna" color="gray" prefix="×" step="0.01" min="1" />
 
                 {/* Preview */}
-                <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                    <p className="text-xs font-medium text-purple-700 mb-2">Preview (faturamento ao cliente):</p>
+                <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+                    <p className="text-xs font-medium text-gray-700 mb-2">Preview (faturamento ao cliente):</p>
                     <div className="grid grid-cols-3 gap-3 text-center">
                         <div>
-                            <div className="text-lg font-bold text-blue-700">€{values.fatura_hora_normal.toFixed(2)}</div>
+                            <div className="text-lg font-bold text-gray-900">€{values.fatura_hora_normal.toFixed(2)}</div>
                             <div className="text-xs text-gray-500">Normal (1×)</div>
                         </div>
                         <div>
-                            <div className="text-lg font-bold text-blue-600">
+                            <div className="text-lg font-bold text-gray-900">
                                 €{(values.fatura_hora_normal * values.multiplicador_extra).toFixed(2)}
                             </div>
                             <div className="text-xs text-gray-500">Extra ({values.multiplicador_extra}×)</div>
                         </div>
                         <div>
-                            <div className="text-lg font-bold text-purple-700">
+                            <div className="text-lg font-bold text-gray-900">
                                 €{(values.fatura_hora_normal * values.multiplicador_noturna).toFixed(2)}
                             </div>
                             <div className="text-xs text-gray-500">Noturna ({values.multiplicador_noturna}×)</div>

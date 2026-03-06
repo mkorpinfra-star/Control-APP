@@ -9,32 +9,32 @@ export default function DashboardBanking() {
       label: 'Obras Activas',
       value: '12',
       icon: TrendingUp,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-100'
     },
     {
       id: 'pending',
       label: 'Pendentes',
       value: '5',
       icon: Clock,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50'
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-100'
     },
     {
       id: 'completed',
       label: 'Finalizadas',
       value: '28',
       icon: CheckCircle,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-100'
     },
     {
       id: 'alerts',
       label: 'Alertas',
       value: '3',
       icon: AlertCircle,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50'
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-100'
     }
   ];
 
@@ -52,7 +52,7 @@ export default function DashboardBanking() {
             return (
               <div
                 key={stat.id}
-                className="bg-white rounded-2xl p-4 shadow-sm"
+                className="bg-[#F5F5F5] rounded-2xl p-4"
               >
                 <div className={`w-10 h-10 rounded-xl ${stat.bgColor} ${stat.color} flex items-center justify-center mb-3`}>
                   <Icon size={20} strokeWidth={2.5} />
@@ -80,10 +80,10 @@ export default function DashboardBanking() {
 
         <div className="space-y-3">
           {/* Activity Item */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="bg-[#F5F5F5] rounded-2xl p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-                <Clock size={18} className="text-[#CE0201]" />
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <Clock size={18} className="text-gray-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900">
@@ -98,10 +98,10 @@ export default function DashboardBanking() {
           </div>
 
           {/* Activity Item */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="bg-[#F5F5F5] rounded-2xl p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
-                <CheckCircle size={18} className="text-green-600" />
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <CheckCircle size={18} className="text-gray-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900">
@@ -116,10 +116,10 @@ export default function DashboardBanking() {
           </div>
 
           {/* Activity Item */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="bg-[#F5F5F5] rounded-2xl p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <TrendingUp size={18} className="text-blue-600" />
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <TrendingUp size={18} className="text-gray-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900">

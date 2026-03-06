@@ -122,7 +122,7 @@ export default function Clients() {
                         <Card key={client.id} variant="nubank" className="hover:shadow-md transition-shadow">
                             <CardBody>
                                 <div className="flex items-start gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-j2s-red rounded-full flex items-center justify-center text-white shrink-0">
+                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 shrink-0">
                                         <Building2 size={24} />
                                     </div>
                                     <div className="flex-1 min-w-0">
