@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api, clientesService } from '../services/api';
 import { Plus, Search, Edit, Trash2, Users, MapPin, Mail, Briefcase, Building2, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { Card, CardBody } from '../components/ui/Card';
 import { Modal, ModalBody, ModalFooter } from '../components/ui/Modal';
 import { Input, Select } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
@@ -315,109 +315,103 @@ export default function Projects() {
                 />
             </div>
 
-            {/* Table Container */}
-            <Card variant="nubank" className="overflow-x-auto">
-                {loading ? (
-                    <div className="p-10 text-center">
-                        <Loading size="lg" text="CARGANDO DATOS..." />
-                    </div>
-                ) : filteredProjects.length === 0 ? (
-                    <div className="py-16 px-4 text-center">
-                        <Briefcase size={48} className="mx-auto mb-4 text-gray-400 opacity-50" />
-                        <h3 className="text-xl font-bold text-black uppercase mb-2">NO SE ENCONTRARON OBRAS</h3>
-                        <p className="text-gray-500">Verifica tu búsqueda o registra una nueva.</p>
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse min-w-[800px]">
-                            <thead>
-                                <tr className="bg-gray-800 text-white">
-                                    <th className="px-4 py-4 text-left uppercase text-sm font-bold tracking-wide">ID / OBRA</th>
-                                    <th className="px-4 py-4 text-left uppercase text-sm font-bold tracking-wide">CLIENTE</th>
-                                    <th className="px-4 py-4 text-left uppercase text-sm font-bold tracking-wide">ENCARGADO</th>
-                                    <th className="px-4 py-4 text-left uppercase text-sm font-bold tracking-wide">PERSONAL</th>
-                                    <th className="px-4 py-4 text-left uppercase text-sm font-bold tracking-wide">INFO</th>
-                                    <th className="px-4 py-4 text-right uppercase text-sm font-bold tracking-wide">ACCIONES</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredProjects.map((project, index) => (
-                                    <tr key={project.id} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}>
-                                        <td className="px-4 py-4">
-                                            <Badge variant="danger" className="mb-1 text-xs">{project.numero}</Badge>
-                                            <div className="font-bold text-black text-sm">{project.nome}</div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            {project.cliente_nome ? (
-                                                <div className="flex items-center gap-2 text-sm text-gray-700">
-                                                    <Building2 size={14} className="text-gray-500" />
-                                                    {project.cliente_nome}
-                                                </div>
-                                            ) : <span className="text-gray-400">-</span>}
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            {project.encarregado_nome ? (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                                                        {project.encarregado_nome.charAt(0)}
-                                                    </div>
-                                                    <span className="text-sm text-gray-700">{project.encarregado_nome}</span>
-                                                </div>
-                                            ) : <span className="text-gray-400">-</span>}
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <span className="text-sm text-gray-600">
-                                                {project.funcionarios_count || 0} Asignados
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="space-y-1">
-                                                {project.endereco && (
-                                                    <div className="flex items-start gap-1 text-xs text-gray-600">
-                                                        <MapPin size={12} className="mt-0.5 shrink-0" />
-                                                        <span className="line-clamp-1">{project.endereco}</span>
-                                                    </div>
-                                                )}
-                                                {project.email_financeiro && (
-                                                    <div className="flex items-center gap-1 text-xs text-gray-600">
-                                                        <Mail size={12} className="shrink-0" />
-                                                        <span className="truncate">{project.email_financeiro}</span>
-                                                    </div>
-                                                )}
+            {/* Grid de Cards - Mobile Friendly */}
+            {loading ? (
+                <div className="p-10 text-center">
+                    <Loading size="lg" text="CARGANDO DATOS..." />
+                </div>
+            ) : filteredProjects.length === 0 ? (
+                <div className="py-16 px-4 text-center">
+                    <Briefcase size={48} className="mx-auto mb-4 text-gray-400 opacity-50" />
+                    <h3 className="text-xl font-bold text-black uppercase mb-2">NO SE ENCONTRARON OBRAS</h3>
+                    <p className="text-gray-500">Verifica tu búsqueda o registra una nueva.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredProjects.map((project) => (
+                        <Card key={project.id} variant="nubank" className="hover:shadow-2xl transition-shadow">
+                            <CardBody>
+                                {/* Header com ID e Nome */}
+                                <div className="flex items-start gap-3 mb-4">
+                                    <div className="w-12 h-12 bg-j2s-red rounded-full flex items-center justify-center text-white shrink-0">
+                                        <Briefcase size={24} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <Badge variant="danger" className="mb-1 text-xs">{project.numero}</Badge>
+                                        <h3 className="text-lg font-bold text-black line-clamp-2">{project.nome}</h3>
+                                    </div>
+                                </div>
+
+                                {/* Informações */}
+                                <div className="space-y-2 mb-4">
+                                    {/* Cliente */}
+                                    {project.cliente_nome && (
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <Building2 size={14} className="shrink-0" />
+                                            <span className="truncate">{project.cliente_nome}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Encarregado */}
+                                    {project.encarregado_nome && (
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <div className="w-5 h-5 bg-gray-800 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">
+                                                {project.encarregado_nome.charAt(0)}
                                             </div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex justify-end gap-2">
-                                                <button
-                                                    onClick={() => openAssignModal(project)}
-                                                    className="w-9 h-9 flex items-center justify-center border-2 border-gray-300 text-gray-600 hover:border-j2s-red hover:text-j2s-red rounded transition-all"
-                                                    title="PERSONAL"
-                                                >
-                                                    <Users size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleEdit(project)}
-                                                    className="w-9 h-9 flex items-center justify-center border-2 border-gray-300 text-gray-600 hover:border-j2s-red hover:text-j2s-red rounded transition-all"
-                                                    title="EDITAR"
-                                                >
-                                                    <Edit size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(project)}
-                                                    className="w-9 h-9 flex items-center justify-center border-2 border-red-300 text-j2s-red hover:bg-red-50 rounded transition-all"
-                                                    title="ELIMINAR"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </Card>
+                                            <span className="truncate">{project.encarregado_nome}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Funcionários */}
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Users size={14} className="shrink-0" />
+                                        <span>{project.funcionarios_count || 0} Asignados</span>
+                                    </div>
+
+                                    {/* Endereço */}
+                                    {project.endereco && (
+                                        <div className="flex items-start gap-2 text-sm text-gray-600">
+                                            <MapPin size={14} className="mt-0.5 shrink-0" />
+                                            <span className="line-clamp-2">{project.endereco}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Email Financeiro */}
+                                    {project.email_financeiro && (
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <Mail size={14} className="shrink-0" />
+                                            <span className="truncate">{project.email_financeiro}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Botões de Ação */}
+                                <div className="flex gap-2 pt-3">
+                                    <button
+                                        onClick={() => openAssignModal(project)}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-gray-300 text-gray-700 hover:border-j2s-red hover:text-j2s-red rounded-lg transition-all font-semibold text-sm"
+                                    >
+                                        <Users size={16} />
+                                        Personal
+                                    </button>
+                                    <button
+                                        onClick={() => handleEdit(project)}
+                                        className="flex items-center justify-center py-2 px-3 border border-gray-300 text-gray-700 hover:border-j2s-red hover:text-j2s-red rounded-lg transition-all"
+                                    >
+                                        <Edit size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(project)}
+                                        className="flex items-center justify-center py-2 px-3 border border-red-300 text-j2s-red hover:bg-red-50 rounded-lg transition-all"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             {/* Modal Crear/Editar */}
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} className="border-0 !max-w-3xl">
