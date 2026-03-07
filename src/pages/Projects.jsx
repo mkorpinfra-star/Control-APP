@@ -8,6 +8,7 @@ import { Modal, ModalBody, ModalFooter } from '../components/ui/Modal';
 import { Input, Select } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { Loading } from '../components/ui/Loading';
+import CustomSelect from '../components/CustomSelect';
 
 // ── Mini calendário de dias úteis (1 mês por vez, navegável) ───────────────
 function ObraCalendar({ dataInicio, dataFim, diasDesativados, onChange }) {
@@ -461,20 +462,26 @@ export default function Projects() {
                                         onChange={(e) => setFormData({ ...formData, endereco: e.target.value })} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Cliente</label>
-                                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
-                                        value={formData.cliente_id} onChange={(e) => handleClientChange(e.target.value)}>
-                                        <option value="">Seleccionar...</option>
-                                        {clients.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
-                                    </select>
+                                    <CustomSelect
+                                        label="Cliente"
+                                        value={formData.cliente_id}
+                                        onChange={(value) => handleClientChange(value)}
+                                        options={[
+                                            { value: '', label: 'Seleccionar...' },
+                                            ...clients.map(c => ({ value: c.id, label: c.nome }))
+                                        ]}
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Encargado</label>
-                                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
-                                        value={formData.encarregado_id} onChange={(e) => setFormData({ ...formData, encarregado_id: e.target.value })}>
-                                        <option value="">Seleccionar...</option>
-                                        {encarregados.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
-                                    </select>
+                                    <CustomSelect
+                                        label="Encargado"
+                                        value={formData.encarregado_id}
+                                        onChange={(value) => setFormData({ ...formData, encarregado_id: value })}
+                                        options={[
+                                            { value: '', label: 'Seleccionar...' },
+                                            ...encarregados.map(e => ({ value: e.id, label: e.nome }))
+                                        ]}
+                                    />
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>

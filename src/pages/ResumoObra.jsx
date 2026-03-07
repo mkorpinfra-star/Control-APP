@@ -4,6 +4,7 @@ import {
     Building2, ChevronDown, RefreshCw, Save, AlertCircle,
     FileText, TrendingUp, DollarSign, Calculator
 } from 'lucide-react';
+import CustomSelect from '../components/CustomSelect';
 
 const API_URL = import.meta.env.VITE_API_URL || '/backend/api';
 
@@ -170,53 +171,41 @@ export default function ResumoObra() {
             <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap gap-4">
                 {/* Obra */}
                 <div className="flex-1 min-w-[200px]">
-                    <label className="block text-xs font-semibold text-gray-500 mb-1">Obra</label>
-                    <div className="relative">
-                        <select
-                            value={obraId}
-                            onChange={e => setObraId(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-red-500"
-                        >
-                            {obras.map(o => (
-                                <option key={o.id} value={o.id}>
-                                    {o.numero} — {o.nome}
-                                </option>
-                            ))}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-2 top-3 text-gray-400 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                        label="Obra"
+                        value={obraId}
+                        onChange={(value) => setObraId(value)}
+                        options={obras.map(o => ({
+                            value: o.id,
+                            label: `${o.numero} — ${o.nome}`
+                        }))}
+                    />
                 </div>
 
                 {/* Mês */}
                 <div>
-                    <label className="block text-xs font-semibold text-gray-500 mb-1">Mês</label>
-                    <div className="relative">
-                        <select
-                            value={mes}
-                            onChange={e => setMes(e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-red-500"
-                        >
-                            {MESES.map(m => (
-                                <option key={m} value={m}>{MESES_NOME[m]}</option>
-                            ))}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-2 top-3 text-gray-400 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                        label="Mês"
+                        value={mes}
+                        onChange={(value) => setMes(value)}
+                        options={MESES.map(m => ({
+                            value: m,
+                            label: MESES_NOME[m]
+                        }))}
+                    />
                 </div>
 
                 {/* Ano */}
                 <div>
-                    <label className="block text-xs font-semibold text-gray-500 mb-1">Ano</label>
-                    <div className="relative">
-                        <select
-                            value={ano}
-                            onChange={e => setAno(e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-red-500"
-                        >
-                            {anos.map(y => <option key={y} value={y}>{y}</option>)}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-2 top-3 text-gray-400 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                        label="Ano"
+                        value={ano}
+                        onChange={(value) => setAno(value)}
+                        options={anos.map(y => ({
+                            value: y,
+                            label: y
+                        }))}
+                    />
                 </div>
             </div>
 

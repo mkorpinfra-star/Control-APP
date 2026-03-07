@@ -5,6 +5,7 @@ import { obrasService, apontamentosService } from '../services/api';
 import { ChevronLeft, ChevronRight, Save, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
+import CustomSelect from '../components/CustomSelect';
 
 const createEmptyHours = (weekStart) => {
     const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -337,19 +338,16 @@ export default function Timesheet() {
                 {/* Obra Selector */}
                 {obras.length > 1 && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('timesheet.selectProject')}</label>
-                        <select
+                        <CustomSelect
+                            label={t('timesheet.selectProject')}
                             value={selectedObra}
-                            onChange={(e) => setSelectedObra(e.target.value)}
-                            className="w-full px-4 py-3 border-0 bg-[#F5F5F5] text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
-                            disabled={isReadOnly}
-                        >
-                            {obras.map((obra) => (
-                                <option key={obra.id} value={obra.id}>
-                                    {obra.numero} - {obra.nome}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setSelectedObra(value)}
+                            options={obras.map(obra => ({
+                                value: obra.id,
+                                label: `${obra.numero} - ${obra.nome}`,
+                                disabled: isReadOnly
+                            }))}
+                        />
                     </div>
                 )}
 

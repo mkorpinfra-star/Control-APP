@@ -89,8 +89,10 @@ export const clientesService = {
 
 // ==================== OBRAS ====================
 export const obrasService = {
-    getAll: () =>
-        apiCall('/obras/list.php'),
+    getAll: async () => {
+        const response = await apiCall('/obras/list.php');
+        return response.obras || response; // Suporta ambos formatos: {success, obras} ou array direto
+    },
 
     getById: (id) =>
         apiCall(`/obras/get.php?id=${id}`),

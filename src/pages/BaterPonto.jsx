@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { ChevronLeft, ChevronRight, Send, Clock as ClockIcon, Minus, Plus } from 'lucide-react'
+import CustomSelect from '../components/CustomSelect'
 
 const DIAS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 const DIAS_NOME = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -292,19 +293,18 @@ export default function BaterPonto() {
                     </div>
 
                     {/* Seleção Obra */}
-                    <select
+                    <CustomSelect
                         value={obraId}
-                        onChange={(e) => {
-                            setObraId(e.target.value)
-                            setSemanaInicio(getMonday(new Date()))
-                            setDiaAtual(0)
+                        onChange={(value) => {
+                            setObraId(value);
+                            setSemanaInicio(getMonday(new Date()));
+                            setDiaAtual(0);
                         }}
-                        className="w-full px-4 py-3 border-0 bg-[#F5F5F5] rounded-xl font-semibold text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                    >
-                        {obras.map(o => (
-                            <option key={o.id} value={o.id}>{o.numero} - {o.nome}</option>
-                        ))}
-                    </select>
+                        options={obras.map(o => ({
+                            value: o.id,
+                            label: `${o.numero} — ${o.nome}`
+                        }))}
+                    />
 
                 </div>
 

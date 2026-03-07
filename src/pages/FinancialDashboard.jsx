@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import CustomDatePicker from '../components/CustomDatePicker';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
@@ -9,6 +10,7 @@ export default function FinancialDashboard() {
         const today = new Date();
         return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     });
+    const [selectedDate, setSelectedDate] = useState(() => new Date());
     const [obras, setObras] = useState([]);
     const [totais, setTotais] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -73,14 +75,18 @@ export default function FinancialDashboard() {
             {/* Month Filter */}
             <Card className="mb-6 p-5">
                 <div className="max-w-xs">
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
-                        Mes de Referencia
-                    </label>
-                    <input
-                        type="month"
-                        value={mesReferencia}
-                        onChange={(e) => setMesReferencia(e.target.value)}
-                        className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                    <CustomDatePicker
+                        label="Mes de Referencia"
+                        selected={selectedDate}
+                        onChange={(date) => {
+                            setSelectedDate(date);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            setMesReferencia(`${year}-${month}`);
+                        }}
+                        dateFormat="MMMM yyyy"
+                        showMonthYearPicker
+                        showFullMonthYearPicker
                     />
                 </div>
             </Card>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Toast from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
+import CustomSelect from '../components/CustomSelect';
+import CustomDatePicker from '../components/CustomDatePicker';
 import { Plus, Download, Mail, Printer, Trash2, Trash } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
@@ -10,6 +12,8 @@ export default function Payroll() {
         const today = new Date();
         return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     });
+
+    const [selectedDate, setSelectedDate] = useState(() => new Date());
     const [obraId, setObraId] = useState('all');
     const [obras, setObras] = useState([]);
     const [folhas, setFolhas] = useState([]);
@@ -373,45 +377,35 @@ export default function Payroll() {
             {/* Filters */}
             <div className="px-4 mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                            Mes de Referencia
-                        </label>
-                        <input
-                            type="month"
-                            value={mesReferencia}
-                            onChange={(e) => setMesReferencia(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                            Obra {obras.length > 0 && <span className="text-xs text-gray-500">({obras.length} obras)</span>}
-                        </label>
-                        <select
-                            value={obraId}
-                            onChange={(e) => setObraId(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CE0201] font-medium text-base appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
-                            style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23CE0201' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                                backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'right 12px center',
-                                backgroundSize: '20px',
-                                paddingRight: '40px'
-                            }}
-                        >
-                            <option value="all" className="font-semibold">📋 Todas las obras</option>
-                            {obras.length === 0 ? (
-                                <option disabled>Nenhuma obra cadastrada</option>
-                            ) : (
-                                obras.map(obra => (
-                                    <option key={obra.id} value={obra.id} className="font-medium">
-                                        {obra.numero} — {obra.nome}
-                                    </option>
-                                ))
-                            )}
-                        </select>
-                    </div>
+                    <CustomDatePicker
+                        label="Mes de Referencia"
+                        selected={selectedDate}
+                        onChange={(date) => {
+                            setSelectedDate(date);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            setMesReferencia(`${year}-${month}`);
+                        }}
+                        dateFormat="MMMM yyyy"
+                        showMonthYearPicker
+                        showFullMonthYearPicker
+                    />
+                    <CustomSelect
+                        label="Obra"
+                        count={obras.length}
+                        value={obraId}
+                        onChange={setObraId}
+                        options={[
+                            { value: 'all', label: 'Todas las obras' },
+                            ...(obras.length === 0
+                                ? [{ value: '', label: 'Nenhuma obra cadastrada', disabled: true }]
+                                : obras.map(obra => ({
+                                    value: obra.id,
+                                    label: `${obra.numero} — ${obra.nome}`
+                                }))
+                            )
+                        ]}
+                    />
                 </div>
             </div>
 

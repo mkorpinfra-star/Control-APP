@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Fingerprint, Search, Plus, Trash2, Edit, X, User } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import CustomSelect from '../components/CustomSelect';
 
 const inputCls = "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white";
 
@@ -157,16 +158,16 @@ export default function Employees() {
                         className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     />
                 </div>
-                <select
+                <CustomSelect
                     value={filterType}
-                    onChange={e => setFilterType(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
-                >
-                    <option value="all">Todos</option>
-                    <option value="funcionario">Empleados</option>
-                    <option value="encarregado">Encargados</option>
-                    <option value="admin">Admins</option>
-                </select>
+                    onChange={setFilterType}
+                    options={[
+                        { value: 'all', label: 'Todos' },
+                        { value: 'funcionario', label: 'Empleados' },
+                        { value: 'encarregado', label: 'Encargados' },
+                        { value: 'admin', label: 'Admins' }
+                    ]}
+                />
             </div>
 
             {/* List */}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, DollarSign } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import CustomSelect from '../components/CustomSelect';
+import CustomDatePicker from '../components/CustomDatePicker';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
@@ -9,6 +11,7 @@ export default function ApprovedFinancial() {
         const today = new Date();
         return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     });
+    const [selectedDate, setSelectedDate] = useState(() => new Date());
     const [obraId, setObraId] = useState('all');
     const [obras, setObras] = useState([]);
     const [apontamentos, setApontamentos] = useState([]);
@@ -147,32 +150,34 @@ export default function ApprovedFinancial() {
             <Card className="mb-6 p-5">
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
-                        <label className="block text-sm font-medium mb-2 text-gray-700">
-                            Mes de Referencia
-                        </label>
-                        <input
-                            type="month"
-                            value={mesReferencia}
-                            onChange={(e) => setMesReferencia(e.target.value)}
-                            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                        <CustomDatePicker
+                            label="Mes de Referencia"
+                            selected={selectedDate}
+                            onChange={(date) => {
+                                setSelectedDate(date);
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                setMesReferencia(`${year}-${month}`);
+                            }}
+                            dateFormat="MMMM yyyy"
+                            showMonthYearPicker
+                            showFullMonthYearPicker
                         />
                     </div>
                     <div className="flex-1">
-                        <label className="block text-sm font-medium mb-2 text-gray-700">
-                            Obra
-                        </label>
-                        <select
+                        <CustomSelect
+                            label="Obra"
+                            count={obras.length}
                             value={obraId}
-                            onChange={(e) => setObraId(e.target.value)}
-                            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                        >
-                            <option value="all">Todas las obras</option>
-                            {obras.map(obra => (
-                                <option key={obra.id} value={obra.id}>
-                                    {obra.numero} - {obra.nome}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={setObraId}
+                            options={[
+                                { value: 'all', label: 'Todas las obras' },
+                                ...obras.map(obra => ({
+                                    value: obra.id,
+                                    label: `${obra.numero} — ${obra.nome}`
+                                }))
+                            ]}
+                        />
                     </div>
                 </div>
             </Card>

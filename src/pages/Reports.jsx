@@ -7,6 +7,8 @@ import InsightsPanel from '../components/reports/InsightsPanel';
 import EmployeeLog from '../components/reports/EmployeeLog';
 import { ChartIcon, BrainIcon, FileIcon, CloseIcon } from '../components/Icons';
 import { User, ClipboardList, BookOpen, Plus, FileText, BarChart, Brain } from 'lucide-react';
+import CustomSelect from '../components/CustomSelect';
+import CustomDatePicker from '../components/CustomDatePicker';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -27,6 +29,7 @@ export default function Reports() {
     const [obras, setObras] = useState([]);
     const [selectedObra, setSelectedObra] = useState('');
     const [selectedMes, setSelectedMes] = useState(new Date().toISOString().slice(0, 7));
+    const [selectedDate, setSelectedDate] = useState(() => new Date());
     const [relatorio, setRelatorio] = useState(null);
     const [loadingRelatorio, setLoadingRelatorio] = useState(false);
 
@@ -137,51 +140,67 @@ export default function Reports() {
                     </button>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex gap-2 overflow-x-auto">
+                {/* Tabs - Grid Responsivo igual QuickActions */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <button
                         onClick={() => setActiveTab('financial')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
+                        className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl font-medium text-sm transition-all ${
                             activeTab === 'financial'
                                 ? 'bg-gray-900 text-white'
                                 : 'bg-[#F5F5F5] text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        <FileText size={16} />
-                        Financiero
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                            activeTab === 'financial' ? 'bg-white/20' : 'bg-gray-100'
+                        }`}>
+                            <FileText size={20} strokeWidth={2} className={activeTab === 'financial' ? 'text-white' : 'text-black'} />
+                        </div>
+                        <span className="font-semibold text-xs">Financiero</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('analytics')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
+                        className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl font-medium text-sm transition-all ${
                             activeTab === 'analytics'
                                 ? 'bg-gray-900 text-white'
                                 : 'bg-[#F5F5F5] text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        <BarChart size={16} />
-                        Performance
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                            activeTab === 'analytics' ? 'bg-white/20' : 'bg-gray-100'
+                        }`}>
+                            <BarChart size={20} strokeWidth={2} className={activeTab === 'analytics' ? 'text-white' : 'text-black'} />
+                        </div>
+                        <span className="font-semibold text-xs">Performance</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('insights')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
+                        className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl font-medium text-sm transition-all ${
                             activeTab === 'insights'
                                 ? 'bg-gray-900 text-white'
                                 : 'bg-[#F5F5F5] text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        <Brain size={16} />
-                        IA Insights
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                            activeTab === 'insights' ? 'bg-white/20' : 'bg-gray-100'
+                        }`}>
+                            <Brain size={20} strokeWidth={2} className={activeTab === 'insights' ? 'text-white' : 'text-black'} />
+                        </div>
+                        <span className="font-semibold text-xs">IA Insights</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('log')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
+                        className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl font-medium text-sm transition-all ${
                             activeTab === 'log'
                                 ? 'bg-gray-900 text-white'
                                 : 'bg-[#F5F5F5] text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        <User size={16} />
-                        Historial
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                            activeTab === 'log' ? 'bg-white/20' : 'bg-gray-100'
+                        }`}>
+                            <User size={20} strokeWidth={2} className={activeTab === 'log' ? 'text-white' : 'text-black'} />
+                        </div>
+                        <span className="font-semibold text-xs">Historial</span>
                     </button>
                 </div>
             </div>
@@ -196,23 +215,29 @@ export default function Reports() {
                         <div className="bg-[#F5F5F5] rounded-2xl p-4 mb-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium mb-1.5 text-gray-700">Obra</label>
-                                    <select
+                                    <CustomSelect
+                                        label="Obra"
                                         value={selectedObra}
-                                        onChange={e => setSelectedObra(e.target.value)}
-                                        className="w-full px-4 py-3 bg-white border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
-                                    >
-                                        <option value="">Seleccionar obra...</option>
-                                        {obras.map(o => <option key={o.id} value={o.id}>{o.numero} - {o.nome}</option>)}
-                                    </select>
+                                        onChange={(value) => setSelectedObra(value)}
+                                        options={[
+                                            { value: '', label: 'Seleccionar obra...' },
+                                            ...obras.map(o => ({ value: o.id, label: `${o.numero} - ${o.nome}` }))
+                                        ]}
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1.5 text-gray-700">Mes</label>
-                                    <input
-                                        type="month"
-                                        value={selectedMes}
-                                        onChange={e => setSelectedMes(e.target.value)}
-                                        className="w-full px-4 py-3 bg-white border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                    <CustomDatePicker
+                                        label="Mes"
+                                        selected={selectedDate}
+                                        onChange={(date) => {
+                                            setSelectedDate(date);
+                                            const year = date.getFullYear();
+                                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                                            setSelectedMes(`${year}-${month}`);
+                                        }}
+                                        dateFormat="MMMM yyyy"
+                                        showMonthYearPicker
+                                        showFullMonthYearPicker
                                     />
                                 </div>
                             </div>
