@@ -1,8 +1,12 @@
-import { LogOut } from 'lucide-react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { LogOut } from 'lucide-react';
+import ProfileMenu from './ProfileMenu';
 
 export default function BankingHeader() {
   const { user, logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -27,45 +31,72 @@ export default function BankingHeader() {
   };
 
   return (
-    <header className="bg-gradient-to-br from-[#CE0201] to-[#A00101] text-white safe-area-top">
-      <div className="px-4 pt-6 pb-8">
-        {/* Top Row - Avatar + Logout */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
-              <span className="text-lg font-bold">
-                {getUserInitials()}
-              </span>
+    <>
+      <header className="bg-gradient-to-br from-[#CE0201] to-[#A00101] text-white safe-area-top">
+        <div className="px-4 pt-6 pb-8">
+          {/* Top Row - Avatar Clicável + Logout */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              {/* Avatar com Notificação - Clicável */}
+              <button
+                onClick={() => setShowProfileMenu(true)}
+                className="relative group"
+              >
+                {user?.foto_url && user.foto_url.trim() !== '' && !imageError ? (
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all">
+                    <img
+                      src={`https://j2s.ad/login/backend/${user.foto_url}`}
+                      alt={user?.nome}
+                      className="w-full h-full object-cover"
+                      onError={() => setImageError(true)}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 group-hover:border-white/50 transition-all">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                )}
+                {/* Bolinha de notificação branca */}
+                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-white rounded-full border-2 border-[#CE0201]"></div>
+              </button>
+
+              {/* Greeting */}
+              <div>
+                <p className="text-sm opacity-90">{getGreeting()},</p>
+                <p className="text-lg font-semibold">
+                  {user?.nome?.split(' ')[0] || 'Usuário'}
+                </p>
+              </div>
             </div>
 
-            {/* Greeting */}
-            <div>
-              <p className="text-sm opacity-90">{getGreeting()},</p>
-              <p className="text-lg font-semibold">
-                {user?.nome?.split(' ')[0] || 'Usuário'}
-              </p>
-            </div>
+            {/* Botão de Logout */}
+            <button
+              onClick={logout}
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="Cerrar sesión"
+            >
+              <LogOut size={20} />
+            </button>
           </div>
 
-          {/* Logout Button */}
-          <button
-            onClick={logout}
-            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
-            aria-label="Cerrar sesión"
-          >
-            <LogOut size={20} />
-          </button>
+          {/* Account Info */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+            <p className="text-xs opacity-80 mb-1">J2S Hores by PuntoClicks.com</p>
+            <p className="text-lg font-bold tracking-tight">
+              {getSystemTitle()}
+            </p>
+          </div>
         </div>
+      </header>
 
-        {/* Account Info */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-          <p className="text-xs opacity-80 mb-1">J2S Hores by PuntoClicks.com</p>
-          <p className="text-lg font-bold tracking-tight">
-            {getSystemTitle()}
-          </p>
-        </div>
-      </div>
-    </header>
+      {/* Profile Menu Lateral */}
+      <ProfileMenu
+        isOpen={showProfileMenu}
+        onClose={() => setShowProfileMenu(false)}
+      />
+    </>
   );
 }

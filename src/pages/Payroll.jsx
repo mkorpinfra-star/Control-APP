@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from '../components/Toast';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { Plus, Download, Mail, Printer, Trash2, Trash } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
@@ -18,6 +19,17 @@ export default function Payroll() {
     const [editValues, setEditValues] = useState({});
     const [toast, setToast] = useState(null);
 
+    // Estados para modais de confirmação
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        type: 'warning',
+        confirmText: 'Confirmar',
+        loading: false
+    });
+
     useEffect(() => {
         fetchObras();
     }, []);
@@ -33,11 +45,15 @@ export default function Payroll() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
+            console.log('📊 Payroll - Obras recebidas:', data);
             if (data.success) {
                 setObras(data.obras || []);
+                console.log('📊 Payroll - Total de obras:', data.obras?.length || 0);
+            } else {
+                console.error('❌ Payroll - Erro ao buscar obras:', data.message);
             }
         } catch (error) {
-            console.error('Error fetching obras:', error);
+            console.error('❌ Payroll - Error fetching obras:', error);
         }
     };
 
@@ -61,9 +77,20 @@ export default function Payroll() {
         }
     };
 
-    const handleGenerate = async () => {
-        if (!confirm('¿Generar/actualizar folha de pagamento para este mes?')) return;
+    const handleGenerate = () => {
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Generar Folha de Pagamento',
+            message: '¿Generar/actualizar folha de pagamento para este mes?',
+            type: 'info',
+            confirmText: 'Generar',
+            onConfirm: executeGenerate,
+            loading: false
+        });
+    };
 
+    const executeGenerate = async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -83,6 +110,7 @@ export default function Payroll() {
             setToast({ message: 'Error al generar folha', type: 'error' });
         } finally {
             setLoading(false);
+            setConfirmDialog(prev => ({ ...prev, isOpen: false, loading: false }));
         }
     };
 
@@ -187,8 +215,20 @@ export default function Payroll() {
         }
     };
 
-    const handleDeleteRow = async (id, nome) => {
-        if (!confirm(`Deletar registro de ${nome}?`)) return;
+    const handleDeleteRow = (id, nome) => {
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Eliminar Registro',
+            message: `¿Deletar registro de ${nome}?`,
+            type: 'danger',
+            confirmText: 'Eliminar',
+            onConfirm: () => executeDeleteRow(id),
+            loading: false
+        });
+    };
+
+    const executeDeleteRow = async (id) => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
         const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${API_URL}/payroll/delete.php`, {
@@ -205,11 +245,25 @@ export default function Payroll() {
             }
         } catch {
             setToast({ message: 'Erro ao deletar', type: 'error' });
+        } finally {
+            setConfirmDialog(prev => ({ ...prev, isOpen: false, loading: false }));
         }
     };
 
-    const handleDeleteMes = async () => {
-        if (!confirm(`⚠️ Apagar TODA a folha do mês ${mesReferencia}? Esta ação não pode ser desfeita.`)) return;
+    const handleDeleteMes = () => {
+        setConfirmDialog({
+            isOpen: true,
+            title: '⚠️ Eliminar Folha Completa',
+            message: `¿Apagar TODA a folha do mês ${mesReferencia}? Esta ação não pode ser desfeita.`,
+            type: 'danger',
+            confirmText: 'Eliminar Todo',
+            onConfirm: executeDeleteMes,
+            loading: false
+        });
+    };
+
+    const executeDeleteMes = async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
         const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${API_URL}/payroll/delete.php`, {
@@ -226,6 +280,8 @@ export default function Payroll() {
             }
         } catch {
             setToast({ message: 'Erro ao deletar', type: 'error' });
+        } finally {
+            setConfirmDialog(prev => ({ ...prev, isOpen: false, loading: false }));
         }
     };
 
@@ -238,6 +294,31 @@ export default function Payroll() {
 
     const formatHours = (value) => {
         return parseFloat(value || 0).toFixed(1) + 'h';
+    };
+
+    // Agrupar folhas por obra para tabela resumo
+    const getObrasSummary = () => {
+        if (obraId !== 'all' || folhas.length === 0) return [];
+
+        const obraMap = {};
+        folhas.forEach(folha => {
+            const obraKey = folha.obra_id || 'sem_obra';
+            if (!obraMap[obraKey]) {
+                obraMap[obraKey] = {
+                    obra_id: folha.obra_id,
+                    obra_numero: folha.obra_numero,
+                    obra_nome: folha.obra_nome,
+                    total_custo: 0,
+                    total_liquido: 0,
+                    funcionarios: 0
+                };
+            }
+            obraMap[obraKey].total_custo += parseFloat(folha.custo_total_empresa || 0);
+            obraMap[obraKey].total_liquido += parseFloat(folha.total_liquido || folha.liquido_a_pagar || 0);
+            obraMap[obraKey].funcionarios += 1;
+        });
+
+        return Object.values(obraMap).sort((a, b) => b.total_custo - a.total_custo);
     };
 
     return (
@@ -350,6 +431,53 @@ export default function Payroll() {
                             <div className="text-2xl font-bold text-gray-900">
                                 {formatCurrency(totais.total_custo_empresa)}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Tabela Resumo por Obra (quando "Todas las obras" está selecionado) */}
+            {obraId === 'all' && !loading && folhas.length > 0 && (
+                <div className="px-4 mb-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3">Resumo por Obra</h3>
+                    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-[#F5F5F5]">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-900">Obra</th>
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-900">Funcionários</th>
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-900">Total Líquido</th>
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-900">Custo Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {getObrasSummary().map((obra, idx) => (
+                                        <tr key={obra.obra_id || idx} className="border-t border-gray-200 hover:bg-[#F5F5F5] transition-colors">
+                                            <td className="px-4 py-3">
+                                                <div className="font-semibold text-gray-900 text-sm">{obra.obra_nome}</div>
+                                                <div className="text-xs text-gray-600">{obra.obra_numero}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-sm text-gray-700 font-medium">{obra.funcionarios}</td>
+                                            <td className="px-4 py-3 text-right text-sm text-gray-700 font-bold">{formatCurrency(obra.total_liquido)}</td>
+                                            <td className="px-4 py-3 text-right text-sm text-red-700 font-black">{formatCurrency(obra.total_custo)}</td>
+                                        </tr>
+                                    ))}
+                                    {/* Total Geral */}
+                                    <tr className="border-t-2 border-gray-900 bg-gray-900">
+                                        <td className="px-4 py-3 font-black text-white text-sm">TOTAL GERAL</td>
+                                        <td className="px-4 py-3 text-right font-bold text-white text-sm">
+                                            {getObrasSummary().reduce((sum, o) => sum + o.funcionarios, 0)}
+                                        </td>
+                                        <td className="px-4 py-3 text-right font-black text-white text-sm">
+                                            {formatCurrency(getObrasSummary().reduce((sum, o) => sum + o.total_liquido, 0))}
+                                        </td>
+                                        <td className="px-4 py-3 text-right font-black text-white text-base">
+                                            {formatCurrency(getObrasSummary().reduce((sum, o) => sum + o.total_custo, 0))}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -557,6 +685,17 @@ export default function Payroll() {
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmDialog.onConfirm}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                type={confirmDialog.type}
+                confirmText={confirmDialog.confirmText}
+                loading={confirmDialog.loading}
+            />
 
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
         </div>
