@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import SignatureCanvas from 'react-signature-canvas';
 import { apontamentosService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import PhotoUpload from '../components/PhotoUpload';
 import {
     User, Calendar, Check, X, Trash2, Inbox, FileText, Trash,
     AlertTriangle, ChevronLeft, Building2, CheckCircle2,
@@ -160,10 +159,7 @@ export default function Approvals() {
     const [processing,       setProcessing]       = useState(false);
     const [message,          setMessage]          = useState(null);
 
-    // ── foto obrigatória ─────────────────────────────────────────────────────
-    const [showPhotoModal, setShowPhotoModal] = useState(false);
-    const [userPhoto,      setUserPhoto]      = useState(user?.foto_url || null);
-    useEffect(() => { if (user && !userPhoto) setShowPhotoModal(true); }, [user, userPhoto]);
+    // ── foto obrigatória removida ─────────────────────────────────────────────────────
 
     // admin extras
     const [generatingReport, setGeneratingReport] = useState(false);
@@ -361,13 +357,66 @@ export default function Approvals() {
                 obraSelecionada === null ? (
                     /* ── TELA 1: escolher obra ── */
                     <>
-                        <div className="mb-6 pb-4 border-b-2 border-gray-200">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 uppercase tracking-wide">
-                                Obras para Aprovar
-                            </h1>
-                            <p className="text-sm text-gray-500 mt-1">
+                        {/* Header com Badge de função */}
+                        <div className="mb-6">
+                            <div className="flex items-center gap-3 mb-3">
+                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                                    Obras para Aprovar
+                                </h1>
+                                <span className="px-3 py-1 bg-gradient-to-r from-[#CE0201] to-[#A00101] text-white text-xs font-bold rounded-full">
+                                    ENCARGADO
+                                </span>
+                            </div>
+                            <p className="text-sm text-gray-600">
                                 Selecione uma obra para ver e aprovar as horas dos funcionários
                             </p>
+                        </div>
+
+                        {/* Cards Panorâmicos */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                            <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                        <Building2 size={18} strokeWidth={2} className="text-black" />
+                                    </div>
+                                </div>
+                                <div className="text-3xl font-black text-black mb-1">{obras.length}</div>
+                                <div className="text-xs text-gray-700 font-semibold">Obra{obras.length !== 1 ? 's' : ''}</div>
+                            </div>
+
+                            <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                        <Clock3 size={18} strokeWidth={2} className="text-black" />
+                                    </div>
+                                </div>
+                                <div className="text-3xl font-black text-black mb-1">{pending.length}</div>
+                                <div className="text-xs text-gray-700 font-semibold">Pendente{pending.length !== 1 ? 's' : ''}</div>
+                            </div>
+
+                            <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                        <Users size={18} strokeWidth={2} className="text-black" />
+                                    </div>
+                                </div>
+                                <div className="text-3xl font-black text-black mb-1">
+                                    {obras.reduce((sum, o) => sum + (o.funcionarios_count || 0), 0)}
+                                </div>
+                                <div className="text-xs text-gray-700 font-semibold">Funcionários</div>
+                            </div>
+
+                            <div className="bg-[#F5F5F5] rounded-2xl p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                        <CheckCircle2 size={18} strokeWidth={2} className="text-black" />
+                                    </div>
+                                </div>
+                                <div className="text-3xl font-black text-black mb-1">
+                                    {Math.round((obras.reduce((sum, o) => sum + (obraResumo(o.id).pendentes === 0 ? 1 : 0), 0) / Math.max(obras.length, 1)) * 100)}%
+                                </div>
+                                <div className="text-xs text-gray-700 font-semibold">Concluído</div>
+                            </div>
                         </div>
 
                         {obras.length === 0 ? (
@@ -376,7 +425,7 @@ export default function Approvals() {
                                 <p className="text-gray-400 font-semibold">Nenhuma obra ativa atribuída a você.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {obras.map(obra => {
                                     const res  = obraResumo(obra.id);
                                     return (
@@ -387,44 +436,44 @@ export default function Approvals() {
                                                 setSituacao(null);
                                                 loadSituacao(obra.id);
                                             }}
-                                            className={`text-left bg-white rounded-xl border-2 p-5 hover:shadow-lg transition-all group ${
-                                                res.pendentes > 0 ? 'border-blue-300 hover:border-blue-400' : 'border-gray-200 hover:border-j2s-red'
+                                            className={`text-left bg-white rounded-xl border p-4 hover:shadow-lg transition-all group ${
+                                                res.pendentes > 0 ? 'border-blue-200' : 'border-gray-200'
                                             }`}
                                         >
                                             {/* Cabeçalho do card */}
                                             <div className="flex items-start justify-between gap-3 mb-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                                                        res.pendentes > 0 ? 'bg-blue-100' : 'bg-gray-100'
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                        res.pendentes > 0 ? 'bg-blue-50' : 'bg-[#F5F5F5]'
                                                     }`}>
-                                                        <Building2 size={20} className={res.pendentes > 0 ? 'text-blue-600' : 'text-gray-500'}/>
+                                                        <Building2 size={18} className={res.pendentes > 0 ? 'text-blue-600' : 'text-gray-700'}/>
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold text-gray-800 text-sm leading-tight">{obra.nome}</div>
+                                                        <div className="font-bold text-gray-900 text-sm leading-tight">{obra.nome}</div>
                                                         <div className="text-xs text-gray-500 font-mono mt-0.5">{obra.numero}</div>
                                                     </div>
                                                 </div>
                                                 {res.pendentes > 0 && (
                                                     <span className="flex-shrink-0 bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                                        {res.pendentes} aguardando
+                                                        {res.pendentes}
                                                     </span>
                                                 )}
                                             </div>
 
                                             {/* Cliente */}
                                             {obra.cliente_nome && (
-                                                <div className="text-xs text-gray-500 mb-3 flex items-center gap-1">
-                                                    <Users size={11}/>
+                                                <div className="text-xs text-gray-600 mb-3 flex items-center gap-1">
+                                                    <Users size={12}/>
                                                     {obra.cliente_nome}
                                                 </div>
                                             )}
 
                                             {/* Footer */}
-                                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                                <span className="text-xs text-gray-400">
+                                            <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                                                <span className="text-xs text-gray-600 font-semibold">
                                                     {obra.funcionarios_count || 0} funcionário{obra.funcionarios_count !== 1 ? 's' : ''}
                                                 </span>
-                                                <span className={`text-xs font-bold ${res.pendentes > 0 ? 'text-blue-600' : 'text-gray-400 group-hover:text-j2s-red'} transition-colors`}>
+                                                <span className={`text-xs font-bold ${res.pendentes > 0 ? 'text-blue-600' : 'text-gray-400 group-hover:text-red-600'} transition-colors`}>
                                                     Ver obra →
                                                 </span>
                                             </div>
@@ -466,15 +515,15 @@ export default function Approvals() {
                         </div>
 
                         {/* Info da obra */}
-                        <div className="bg-white rounded-xl border-2 border-gray-200 p-4 mb-5 flex flex-wrap items-center gap-4">
+                        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-5 flex flex-wrap items-center gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-j2s-red rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Building2 size={20} className="text-white"/>
+                                <div className="w-10 h-10 bg-gradient-to-br from-[#CE0201] to-[#A00101] rounded-full flex items-center justify-center flex-shrink-0">
+                                    <Building2 size={18} className="text-white"/>
                                 </div>
                                 <div>
-                                    <div className="font-bold text-gray-900">{obraSelecionada.nome}</div>
+                                    <div className="font-bold text-gray-900 text-sm">{obraSelecionada.nome}</div>
                                     {obraSelecionada.cliente_nome && (
-                                        <div className="text-xs text-gray-500">{obraSelecionada.cliente_nome}</div>
+                                        <div className="text-xs text-gray-600">{obraSelecionada.cliente_nome}</div>
                                     )}
                                 </div>
                             </div>
@@ -542,7 +591,7 @@ export default function Approvals() {
                                         return (
                                             <div
                                                 key={f.funcionario_id}
-                                                className={`bg-white rounded-xl border-2 overflow-hidden ${cfg.border}`}
+                                                className={`bg-white rounded-xl border overflow-hidden ${cfg.border}`}
                                             >
                                                 {/* Cabeçalho do funcionário */}
                                                 <div className={`flex items-center justify-between px-4 py-3 ${cfg.bg}`}>
@@ -551,11 +600,11 @@ export default function Approvals() {
                                                             <img
                                                                 src={`https://j2s.ad/login/backend/${f.foto_url}`}
                                                                 alt={f.funcionario_nome}
-                                                                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
+                                                                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                                                             />
                                                         ) : (
-                                                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center border-2 border-white shadow">
-                                                                <User size={18} className="text-gray-400"/>
+                                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border-2 border-white shadow-sm">
+                                                                <User size={18} className="text-gray-500"/>
                                                             </div>
                                                         )}
                                                         <div>
@@ -572,20 +621,20 @@ export default function Approvals() {
                                                         <div className="flex gap-2">
                                                             <button
                                                                 onClick={() => openApproveModal(pendEntry)}
-                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors active:scale-95"
                                                             >
                                                                 <Check size={13}/> Aprovar
                                                             </button>
                                                             <button
                                                                 onClick={() => openRejectModal(pendEntry)}
-                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-colors"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors active:scale-95"
                                                             >
                                                                 <X size={13}/> Rejeitar
                                                             </button>
                                                         </div>
                                                     ) : (
                                                         /* badge de status */
-                                                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                                                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
                                                             {cfg.label}
                                                         </span>
                                                     )}
@@ -824,14 +873,6 @@ export default function Approvals() {
                 </ModalFooter>
             </Modal>
 
-            {/* Modal Foto obrigatória */}
-            {showPhotoModal && (
-                <PhotoUpload
-                    user={user}
-                    onPhotoUpdated={url => { setUserPhoto(url); setShowPhotoModal(false); }}
-                    required={true}
-                />
-            )}
         </div>
     );
 }

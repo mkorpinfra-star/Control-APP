@@ -32,12 +32,6 @@ export default function BottomNav() {
           icon: ClipboardCheck,
           path: '/approvals',
           activePaths: ['/approvals']
-        },
-        {
-          id: 'ponto',
-          icon: Clock,
-          path: '/bater-ponto',
-          activePaths: ['/bater-ponto']
         }
       ];
     }

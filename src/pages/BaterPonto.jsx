@@ -1,22 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { ChevronLeft, ChevronRight, Send, Clock as ClockIcon, LogOut, Minus, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Send, Clock as ClockIcon, Minus, Plus } from 'lucide-react'
 
 const DIAS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 const DIAS_NOME = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const DIAS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
-const PRESETS_HORAS = [
-    { label: '4h', normal: 4, extra: 0, noturna: 0 },
-    { label: '6h', normal: 6, extra: 0, noturna: 0 },
-    { label: '8h', normal: 8, extra: 0, noturna: 0 },
-    { label: '8h+2', normal: 8, extra: 2, noturna: 0 },
-    { label: '8h+4', normal: 8, extra: 4, noturna: 0 },
-    { label: 'Noite', normal: 0, extra: 0, noturna: 8 }
-]
-
 export default function BaterPonto() {
-    const { user, logout } = useAuth()
+    const { user } = useAuth()
     const [diaAtual, setDiaAtual] = useState(0)
     const [semanaInicio, setSemanaInicio] = useState(getMonday(new Date()))
     const [obraId, setObraId] = useState('')
@@ -134,20 +125,6 @@ export default function BaterPonto() {
         autoSaveTimer.current = setTimeout(() => {
             handleAutoSave()
         }, 2000)
-    }
-
-    function aplicarPreset(preset) {
-        const dia = DIAS[diaAtual]
-        setHoras(prev => ({
-            ...prev,
-            [dia]: {
-                normal: preset.normal,
-                extra: preset.extra,
-                noturna: preset.noturna
-            }
-        }))
-
-        setTimeout(handleAutoSave, 500)
     }
 
     async function handleAutoSave() {
@@ -306,21 +283,12 @@ export default function BaterPonto() {
                                 <p className="text-sm text-gray-500">{user?.nome}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            {autoSaving && (
-                                <div className="flex items-center gap-2 text-gray-600 text-xs">
-                                    <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
-                                    Guardando...
-                                </div>
-                            )}
-                            <button
-                                onClick={logout}
-                                className="w-9 h-9 flex items-center justify-center bg-[#F5F5F5] hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
-                                title="Cerrar sesión"
-                            >
-                                <LogOut size={18} />
-                            </button>
-                        </div>
+                        {autoSaving && (
+                            <div className="flex items-center gap-2 text-gray-600 text-xs">
+                                <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
+                                Guardando...
+                            </div>
+                        )}
                     </div>
 
                     {/* Seleção Obra */}
@@ -382,28 +350,11 @@ export default function BaterPonto() {
                 onTouchEnd={handleTouchEnd}
                 className="px-4 py-6 pb-8"
             >
-                {/* Título do Dia - Compacto */}
-                <div className="text-center mb-4">
+                {/* Título do Dia */}
+                <div className="text-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">{DIAS_NOME[diaAtual]}</h2>
                     <p className="text-gray-600 text-xs mt-0.5">{formatDate(diaAtual)}</p>
                 </div>
-
-                {/* Presets Rápidos - Compactos */}
-                {!bloqueado && (
-                    <div className="mb-4">
-                        <div className="grid grid-cols-6 gap-1.5">
-                            {PRESETS_HORAS.map((preset, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => aplicarPreset(preset)}
-                                    className="bg-[#F5F5F5] hover:bg-red-600 hover:text-white py-2.5 px-1 rounded-lg font-bold text-xs text-gray-900 transition-all active:scale-95"
-                                >
-                                    {preset.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
                 {/* Inputs de Horas - COMPACTO */}
                 <div className="space-y-2">
