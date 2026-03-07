@@ -130,10 +130,9 @@ export default function Employees() {
         return matchName && matchType;
     });
 
-    const typeLabel = (t) => ({ admin: 'Admin', encarregado: 'Encargado' }[t] || 'Empleado');
+    const typeLabel = (t) => ({ admin: 'Admin' }[t] || 'Empleado');
     const typeColor = (t) => ({
         admin: 'bg-gray-100 text-gray-600',
-        encarregado: 'bg-gray-100 text-gray-600',
         funcionario: 'bg-gray-100 text-gray-600'
     }[t] || 'bg-gray-100 text-gray-600');
 
@@ -171,7 +170,6 @@ export default function Employees() {
                     options={[
                         { value: 'all', label: 'Todos' },
                         { value: 'funcionario', label: 'Empleados' },
-                        { value: 'encarregado', label: 'Encargados' },
                         { value: 'admin', label: 'Admins' }
                     ]}
                 />
@@ -274,7 +272,6 @@ export default function Employees() {
                                         <select className={inputCls} value={formData.tipo}
                                             onChange={e => setFormData({ ...formData, tipo: e.target.value })} required>
                                             <option value="funcionario">Empleado</option>
-                                            <option value="encarregado">Encargado</option>
                                             <option value="admin">Admin</option>
                                         </select>
                                     </Field>

@@ -45,15 +45,25 @@ try {
     $totaisStmt = $pdo->prepare("
         SELECT
             COUNT(*) as total_obras,
-            SUM(valor_total_servicos) as total_servicos,
-            SUM(igi_valor) as total_igi,
-            SUM(valor_total_fatura) as total_faturamento
+            COALESCE(SUM(valor_total_servicos), 0) as total_servicos,
+            COALESCE(SUM(igi_valor), 0) as total_igi,
+            COALESCE(SUM(valor_total_fatura), 0) as total_faturamento
         FROM faturamento
         WHERE mes_referencia = :mes_referencia
         $whereObra
     ");
     $totaisStmt->execute($params);
     $totais = $totaisStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Garantir que totais nunca sejam NULL
+    if (!$totais || $totais['total_obras'] == 0) {
+        $totais = [
+            'total_obras' => 0,
+            'total_servicos' => 0,
+            'total_igi' => 0,
+            'total_faturamento' => 0
+        ];
+    }
 
     echo json_encode([
         'success' => true,

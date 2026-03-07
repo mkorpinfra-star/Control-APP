@@ -87,6 +87,33 @@ export const clientesService = {
         }),
 };
 
+// ==================== ENCARREGADOS ====================
+export const encarregadosService = {
+    getAll: () =>
+        apiCall('/encarregados/list.php'),
+
+    getById: (id) =>
+        apiCall(`/encarregados/get.php?id=${id}`),
+
+    create: (data) =>
+        apiCall('/encarregados/create.php', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+
+    update: (id, data) =>
+        apiCall('/encarregados/update.php', {
+            method: 'PUT',
+            body: JSON.stringify({ id, ...data }),
+        }),
+
+    delete: (id) =>
+        apiCall('/encarregados/delete.php', {
+            method: 'DELETE',
+            body: JSON.stringify({ id }),
+        }),
+};
+
 // ==================== OBRAS ====================
 export const obrasService = {
     getAll: async () => {

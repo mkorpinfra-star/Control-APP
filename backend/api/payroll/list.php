@@ -59,14 +59,23 @@ try {
     $totaisStmt = $pdo->prepare("
         SELECT
             COUNT(*) as total_funcionarios,
-            SUM(COALESCE(total_liquido, liquido_a_pagar)) as total_liquido,
-            SUM(custo_total_empresa) as total_custo_empresa
+            COALESCE(SUM(COALESCE(total_liquido, liquido_a_pagar)), 0) as total_liquido,
+            COALESCE(SUM(custo_total_empresa), 0) as total_custo_empresa
         FROM folha_pagamento
         WHERE mes_referencia = :mes_referencia
         $whereObra
     ");
     $totaisStmt->execute($params);
     $totais = $totaisStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Garantir que totais nunca sejam NULL
+    if (!$totais || $totais['total_funcionarios'] == 0) {
+        $totais = [
+            'total_funcionarios' => 0,
+            'total_liquido' => 0,
+            'total_custo_empresa' => 0
+        ];
+    }
 
     echo json_encode([
         'success' => true,

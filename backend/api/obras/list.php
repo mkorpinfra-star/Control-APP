@@ -47,11 +47,11 @@ try {
                o.data_inicio, o.data_fim,
                o.cliente_id, o.encarregado_id,
                c.nome as cliente_nome,
-               u.nome as encarregado_nome,
+               e.nome as encarregado_nome,
                (SELECT COUNT(*) FROM funcionario_obra WHERE obra_id = o.id) as funcionarios_count
         FROM obras o
         LEFT JOIN clientes c ON o.cliente_id = c.id
-        LEFT JOIN usuarios u ON o.encarregado_id = u.id
+        LEFT JOIN encarregados e ON o.encarregado_id = e.id
         WHERE o.ativo = 1
         ORDER BY o.numero DESC
     ";

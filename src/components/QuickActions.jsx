@@ -1,4 +1,4 @@
-import { Briefcase, Users, UserCircle, BarChart3, FileText, Settings, DollarSign, Receipt } from 'lucide-react';
+import { Briefcase, Users, UserCircle, BarChart3, FileText, Settings, DollarSign, Receipt, UserCog } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function QuickActions() {
@@ -17,6 +17,13 @@ export default function QuickActions() {
       label: 'Clientes',
       icon: Users,
       path: '/clients',
+      color: 'bg-[#F5F5F5] text-black'
+    },
+    {
+      id: 'encarregados',
+      label: 'Encargados',
+      icon: UserCog,
+      path: '/encarregados',
       color: 'bg-[#F5F5F5] text-black'
     },
     {

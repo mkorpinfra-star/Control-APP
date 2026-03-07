@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { api, clientesService } from '../services/api';
+import { api, clientesService, encarregadosService } from '../services/api';
 import { Plus, Search, Edit, Trash2, Users, MapPin, Mail, Briefcase, Building2, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
@@ -145,9 +145,10 @@ export default function Projects() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const [projectsRes, employeesRes, clientsRes] = await Promise.allSettled([
+            const [projectsRes, employeesRes, encarregadosRes, clientsRes] = await Promise.allSettled([
                 api.getProjects(),
                 api.getEmployees(),
+                encarregadosService.getAll(),
                 clientesService.getAll()
             ]);
 
@@ -161,9 +162,14 @@ export default function Projects() {
             if (employeesRes.status === 'fulfilled' && Array.isArray(employeesRes.value)) {
                 const all = employeesRes.value;
                 setEmployees(all.filter(e => e.tipo === 'funcionario'));
-                setEncarregados(all.filter(e => e.tipo === 'encarregado'));
             } else {
                 console.warn('Failed to load employees for dropdowns');
+            }
+
+            if (encarregadosRes.status === 'fulfilled' && Array.isArray(encarregadosRes.value)) {
+                setEncarregados(encarregadosRes.value);
+            } else {
+                console.warn('Failed to load encarregados for dropdowns');
             }
 
             if (clientsRes.status === 'fulfilled' && Array.isArray(clientsRes.value)) {

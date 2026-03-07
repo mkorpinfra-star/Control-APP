@@ -12,6 +12,7 @@ import Timesheet from './pages/Timesheet';
 import BaterPonto from './pages/BaterPonto';
 import Approvals from './pages/Approvals';
 import Employees from './pages/Employees';
+import Encarregados from './pages/Encarregados';
 import Projects from './pages/Projects';
 import Clients from './pages/Clients';
 import Payroll from './pages/Payroll';
@@ -104,6 +105,7 @@ function AppRoutes() {
             <Route path="bater-ponto" element={<BaterPonto />} />
             <Route path="approvals" element={<Approvals />} />
             <Route path="employees" element={<Employees />} />
+            <Route path="encarregados" element={<Encarregados />} />
             <Route path="projects" element={<Projects />} />
             <Route path="clients" element={<Clients />} />
             <Route path="payroll" element={<Payroll />} />

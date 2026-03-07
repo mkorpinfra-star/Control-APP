@@ -11,16 +11,16 @@ try {
     $pdo = getConnection();
     $funcionarioId = $user['id'];
 
-    // Admin e encarregado vêem todas as obras
-    if ($user['tipo'] === 'admin' || $user['tipo'] === 'encarregado') {
+    // Admin vê todas as obras
+    if ($user['tipo'] === 'admin') {
         $stmt = $pdo->prepare("
             SELECT
                 o.*,
                 c.nome as cliente_nome,
-                e.nome as encarregado_nome
+                enc.nome as encarregado_nome
             FROM obras o
             LEFT JOIN clientes c ON c.id = o.cliente_id
-            LEFT JOIN usuarios e ON e.id = o.encarregado_id
+            LEFT JOIN encarregados enc ON enc.id = o.encarregado_id
             WHERE o.ativa = 1
             ORDER BY o.numero
         ");
@@ -31,11 +31,11 @@ try {
             SELECT DISTINCT
                 o.*,
                 c.nome as cliente_nome,
-                e.nome as encarregado_nome
+                enc.nome as encarregado_nome
             FROM obras o
             INNER JOIN funcionario_obra fo ON fo.obra_id = o.id
             LEFT JOIN clientes c ON c.id = o.cliente_id
-            LEFT JOIN usuarios e ON e.id = o.encarregado_id
+            LEFT JOIN encarregados enc ON enc.id = o.encarregado_id
             WHERE fo.funcionario_id = ?
             AND o.ativa = 1
             ORDER BY o.numero

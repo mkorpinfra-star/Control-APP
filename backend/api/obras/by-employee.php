@@ -34,11 +34,11 @@ try {
     $stmt = $pdo->prepare("
         SELECT o.id, o.numero, o.nome, o.endereco, o.ativa, o.data_inicio, o.data_fim,
                c.nome as cliente_nome,
-               u.nome as encarregado_nome
+               e.nome as encarregado_nome
         FROM obras o
         INNER JOIN funcionario_obra fo ON fo.obra_id = o.id
         LEFT JOIN clientes c ON c.id = o.cliente_id
-        LEFT JOIN usuarios u ON u.id = o.encarregado_id
+        LEFT JOIN encarregados e ON e.id = o.encarregado_id
         WHERE fo.funcionario_id = ? AND (o.ativa = 1 OR o.ativo = 1)
         ORDER BY o.numero
     ");
