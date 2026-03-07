@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/notificacao_helper.php';
 
 $headers = getallheaders();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
@@ -62,6 +63,24 @@ try {
     $stmt->execute([$nome, $documento, $nif, $email, $telefone, $email_financeiro, $endereco, $pessoa_contato]);
 
     $id = $pdo->lastInsertId();
+
+    // Criar notificação
+    $config = getNotificacaoConfig('cliente_criado');
+    criarNotificacao(
+        'cliente_criado',
+        'Nuevo cliente creado',
+        "Cliente {$nome} fue registrado en el sistema",
+        [
+            'icone' => $config['icone'],
+            'cor' => $config['cor'],
+            'url' => '/clients',
+            'entidade_tipo' => 'cliente',
+            'entidade_id' => $id,
+            'usuario_id' => $user['id'],
+            'usuario_nome' => $user['nome'] ?? 'Admin',
+            'usuario_tipo' => $user['tipo']
+        ]
+    );
 
     echo json_encode([
         'success' => true,

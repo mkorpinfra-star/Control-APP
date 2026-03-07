@@ -6,6 +6,7 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once '../../includes/auth.php';
 require_once '../../config/database.php';
+require_once '../../includes/notificacao_helper.php';
 
 $user = authMiddleware(['admin']);
 
@@ -50,10 +51,30 @@ try {
         'ativo' => $data['ativo'] ?? 1
     ]);
 
+    $id = $pdo->lastInsertId();
+
+    // Criar notificação
+    $config = getNotificacaoConfig('encarregado_criado');
+    criarNotificacao(
+        'encarregado_criado',
+        'Nuevo encargado creado',
+        "Encargado {$data['nome']} fue registrado",
+        [
+            'icone' => $config['icone'],
+            'cor' => $config['cor'],
+            'url' => '/staff',
+            'entidade_tipo' => 'encarregado',
+            'entidade_id' => $id,
+            'usuario_id' => $user['id'],
+            'usuario_nome' => $user['nome'] ?? 'Admin',
+            'usuario_tipo' => $user['tipo']
+        ]
+    );
+
     echo json_encode([
         'success' => true,
         'message' => 'Encarregado criado com sucesso',
-        'id' => $pdo->lastInsertId()
+        'id' => $id
     ]);
 
 } catch (Exception $e) {

@@ -148,6 +148,7 @@ export default function Projects() {
     const [diasDesativados, setDiasDesativados] = useState([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // {project, hasRecords, count}
 
     // Auto-refresh: refetch quando volta ao app ou reconecta
     useAutoRefresh(['projects', 'employees', 'clients'], {
@@ -287,19 +288,36 @@ export default function Projects() {
     };
 
     const handleDelete = async (project, force = false) => {
-        if (!confirm(`¿Eliminar obra ${project.numero}?`)) return;
-        try {
-            const result = await api.deleteProject(project.id, force);
-            if (result?.error === 'has_records') {
-                if (confirm(`⚠️ Esta obra tiene ${result.count} registros de horas en el sistema.\n\n¿Desea removerla de todas formas?`)) {
-                    await api.deleteProject(project.id, true);
-                    loadData();
+        // Primeira tentativa - verificar se tem registros
+        if (!force) {
+            try {
+                const result = await api.deleteProject(project.id, false);
+                if (result?.error === 'has_records') {
+                    // Tem registros - mostrar warning no modal
+                    setDeleteConfirm({ project, hasRecords: true, count: result.count });
+                } else {
+                    // Sem registros - pode deletar direto, mas pedir confirmação
+                    setDeleteConfirm({ project, hasRecords: false, count: 0 });
                 }
-            } else {
+            } catch (error) {
+                setError(error.message || 'Error al eliminar obra');
+            }
+        } else {
+            // Force delete confirmado
+            try {
+                await api.deleteProject(project.id, true);
+                setDeleteConfirm(null);
+                setError('');
                 loadData();
+            } catch (error) {
+                setError(error.message || 'Error al eliminar obra');
             }
         }
-        catch (error) { alert('Error: ' + error.message); }
+    };
+
+    const confirmDelete = async (force = false) => {
+        if (!deleteConfirm) return;
+        await handleDelete(deleteConfirm.project, force);
     };
 
     const openNewModal = () => {
@@ -328,8 +346,14 @@ export default function Projects() {
 
     const saveAssignments = async () => {
         setSaving(true);
-        try { await api.assignEmployees(selectedProject.id, selectedEmployees); setShowAssignModal(false); loadData(); }
-        catch (error) { alert('Error: ' + error.message); }
+        try {
+            await api.assignEmployees(selectedProject.id, selectedEmployees);
+            setShowAssignModal(false);
+            loadData();
+        }
+        catch (error) {
+            setError(error.message || 'Error al asignar empleados');
+        }
         finally { setSaving(false); }
     };
 
@@ -855,6 +879,70 @@ export default function Projects() {
                     </Button>
                 </ModalFooter>
             </Modal>
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${deleteConfirm.hasRecords ? 'bg-orange-100' : 'bg-red-100'}`}>
+                                <Trash2 size={24} className={deleteConfirm.hasRecords ? 'text-orange-600' : 'text-red-600'} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Eliminar Obra</h3>
+                                <p className="text-sm text-gray-500">
+                                    {deleteConfirm.hasRecords ? 'Esta obra tiene registros' : 'Esta acción no se puede deshacer'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                                {error}
+                            </div>
+                        )}
+
+                        {deleteConfirm.hasRecords ? (
+                            <div className="mb-6">
+                                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                                    <p className="text-sm text-orange-900 font-medium mb-2">
+                                        ⚠️ Advertencia: Esta obra tiene <strong>{deleteConfirm.count}</strong> registro(s) de horas en el sistema.
+                                    </p>
+                                    <p className="text-sm text-orange-800">
+                                        Al eliminarla, todos los apontamentos asociados también serán eliminados permanentemente.
+                                    </p>
+                                </div>
+                                <p className="text-gray-700">
+                                    ¿Estás seguro de que deseas eliminar la obra <strong>{deleteConfirm.project.numero} - {deleteConfirm.project.nome}</strong>?
+                                </p>
+                            </div>
+                        ) : (
+                            <p className="text-gray-700 mb-6">
+                                ¿Estás seguro de que deseas eliminar la obra <strong>{deleteConfirm.project.numero} - {deleteConfirm.project.nome}</strong>?
+                            </p>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => { setDeleteConfirm(null); setError(''); }}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => confirmDelete(deleteConfirm.hasRecords)}
+                                className={`flex-1 px-4 py-3 text-white font-medium rounded-xl transition-colors ${
+                                    deleteConfirm.hasRecords
+                                        ? 'bg-orange-600 hover:bg-orange-700'
+                                        : 'bg-red-600 hover:bg-red-700'
+                                }`}
+                            >
+                                {deleteConfirm.hasRecords ? 'Eliminar de todas formas' : 'Eliminar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

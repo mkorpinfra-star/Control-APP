@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/notificacao_helper.php';
 
 $headers = getallheaders();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
@@ -153,6 +154,30 @@ try {
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
+
+    // Buscar obra para notificação
+    $stmtObra = $pdo->prepare("SELECT numero, nome FROM obras WHERE id = ?");
+    $stmtObra->execute([$data['id']]);
+    $obra = $stmtObra->fetch(PDO::FETCH_ASSOC);
+
+    if ($obra) {
+        $config = getNotificacaoConfig('obra_editada');
+        criarNotificacao(
+            'obra_editada',
+            'Obra editada',
+            "Obra #{$obra['numero']} - {$obra['nome']} fue modificada",
+            [
+                'icone' => $config['icone'],
+                'cor' => $config['cor'],
+                'url' => '/projects',
+                'entidade_tipo' => 'obra',
+                'entidade_id' => $data['id'],
+                'usuario_id' => $payload['id'],
+                'usuario_nome' => $payload['nome'] ?? 'Admin',
+                'usuario_tipo' => $payload['tipo']
+            ]
+        );
+    }
 
     echo json_encode(['success' => true]);
 

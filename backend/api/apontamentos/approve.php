@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/jwt.php';
 require_once __DIR__ . '/../../includes/email.php';
+require_once __DIR__ . '/../../includes/notificacao_helper.php';
 
 // Autenticação
 $headers = getallheaders();
@@ -214,6 +215,24 @@ try {
         }
         $mensagem .= ' Pendiente de aprobación final por Admin/RH.';
     }
+
+    // Criar notificação
+    $config = getNotificacaoConfig('apontamento_aprovado');
+    criarNotificacao(
+        'apontamento_aprovado',
+        'Horas aprobadas',
+        "Horas de {$apontamento['funcionario_nome']} en obra #{$apontamento['obra_numero']} aprobadas",
+        [
+            'icone' => $config['icone'],
+            'cor' => $config['cor'],
+            'url' => '/approvals',
+            'entidade_tipo' => 'apontamento',
+            'entidade_id' => $apontamentoId,
+            'usuario_id' => $user['id'],
+            'usuario_nome' => $user['nome'] ?? 'Admin',
+            'usuario_tipo' => $user['tipo']
+        ]
+    );
 
     $responseData = [
         'success'     => true,

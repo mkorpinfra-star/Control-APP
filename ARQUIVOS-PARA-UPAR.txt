@@ -1,121 +1,189 @@
 ═══════════════════════════════════════════════════════════════════
-  ARQUIVOS PARA UPLOAD - SISTEMA ENCARREGADOS COMPLETO
+  ARQUIVOS PARA UPLOAD - NOTIFICAÇÕES + TRANSIÇÕES NUBANK
 ═══════════════════════════════════════════════════════════════════
 
-📁 BACKEND (14 arquivos PHP):
+📁 BACKEND:
 
-NOVOS - Sistema Encarregados:
-1. backend/api/encarregados/list.php          → CRUD lista (sem restrição admin)
-2. backend/api/encarregados/create.php        → CRUD criar
-3. backend/api/encarregados/update.php        → CRUD atualizar
-4. backend/api/encarregados/delete.php        → CRUD deletar
+NOVOS - Sistema de Notificações:
+1. backend/api/notificacoes/list.php          → Listar notificações (com paginação)
+2. backend/api/notificacoes/create.php        → Criar notificação
+3. backend/api/notificacoes/mark-read.php     → Marcar como lida
+4. backend/api/notificacoes/count-unread.php  → Contar não lidas
+5. backend/includes/notificacao_helper.php    → Helper com configs de ícones/cores
 
-ATUALIZADOS - Login e Auth:
-5. backend/api/auth/login.php                 → Login aceita encarregados (dupla busca)
+ATUALIZADOS - Triggers de Notificação:
+6. backend/api/obras/create.php               → Cria notificação ao criar obra
+7. backend/api/obras/update.php               → Cria notificação ao editar obra
+8. backend/api/clientes/create.php            → Cria notificação ao criar cliente
+9. backend/api/encarregados/create.php        → Cria notificação ao criar encarregado
+10. backend/api/apontamentos/approve.php      → Cria notificação ao aprovar horas
 
-ATUALIZADOS - Payroll/Billing:
-6. backend/api/payroll/generate-monthly.php   → GENERATED columns removidos
-7. backend/api/payroll/list.php               → NULL handling
-8. backend/api/billing/generate-monthly.php   → GENERATED columns removidos
-9. backend/api/billing/list.php               → NULL handling
+SQL - Notificações:
+11. backend/sql/create_notificacoes.sql              → Criar tabela notificacoes
+12. backend/sql/notificacoes_auto_cleanup_sem_super.sql → Auto-limpeza (USAR ESTE!)
 
-ATUALIZADOS - Obras (JOIN com encarregados):
-10. backend/api/obras/list.php                → LEFT JOIN encarregados
-11. backend/api/obras/by-employee.php         → LEFT JOIN encarregados
-12. backend/api/obras/my-obras.php            → LEFT JOIN encarregados
-
-ATUALIZADOS - Apontamentos (email encarregado):
-13. backend/api/apontamentos/submit.php       → LEFT JOIN encarregados (email notificação)
-
-SQL - Migration:
-14. backend/sql/migrate_encarregados.sql      → MIGRAR usuarios tipo='encarregado' → tabela encarregados
+CRON - Auto-limpeza:
+13. backend/cron/cleanup_notificacoes.php            → Script PHP para cron job
 
 ─────────────────────────────────────────────────────────────────────
 
-📁 FRONTEND (pasta dist/ completa):
+📁 FRONTEND:
 
-dist/index.html
-dist/assets/index-B8lelZYt.css      → 99 kB
-dist/assets/lottie-N0F4qLdD.js      → 307.85 kB
-dist/assets/index-OOuq9MvN.js       → 1,565.37 kB
+NOVOS - Sistema de Notificações:
+1. src/services/notificacoes.js               → Service com getAll, markAsRead, countUnread
+2. src/components/AnimatedRoutes.jsx          → Wrapper reutilizável (opcional)
 
-⚠️ DELETAR arquivos antigos da pasta assets/ antes de upar!
+ATUALIZADOS - Notificações e Transições:
+3. src/pages/DashboardBanking.jsx             → Notificações reais + navegação ao clicar
+4. src/components/BankingLayout.jsx           → Transições Nubank (slide horizontal)
 
-─────────────────────────────────────────────────────────────────────
+⚠️ EXECUTAR BUILD ANTES DE DEPLOY:
+```bash
+npm run build
+```
 
-✅ SQL JÁ EXECUTADO:
-   backend/sql/create_encarregados.sql ✓
+Depois fazer upload de dist/ completa
 
 ─────────────────────────────────────────────────────────────────────
 
 🔧 O QUE FOI FEITO NESTA ATUALIZAÇÃO:
 
-✅ Sistema Encarregados Completo:
-   - Tabela separada `encarregados` (não são employees)
-   - CRUD completo em /encarregados
-   - Login funciona com passaporte da tabela `encarregados`
-   - Encarregados aprovam apontamentos em /approvals
-   - Dropdown de obras carrega da nova tabela
-   - Modal centralizado (z-index 9999)
-   - Textos em espanhol ("Encargados", não português)
+✅ Sistema de Notificações Completo:
+   - Tabela `notificacoes` com todos os campos necessários
+   - API endpoints: list, create, mark-read, count-unread
+   - Helper function para criar notificações facilmente
+   - Notificações aparecem no Dashboard em tempo real
+   - Ícones coloridos por tipo (obra=azul, cliente=azul, aprovação=verde, etc)
+   - Timestamp relativo (Hace 5m, Hace 2h, Hace 3d)
+   - Navegação ao clicar (vai para /projects, /clients, /approvals, etc)
+   - Marca como lida automaticamente ao clicar
 
-✅ Fluxo de Autenticação:
-   - Login busca primeiro em `usuarios`, depois em `encarregados`
-   - JWT contém campo `tabela` ('usuario' ou 'encarregado')
-   - Encarregados veem apenas obras onde estão vinculados
-   - Aprovam apontamentos com tipo='encarregado'
+✅ Auto-Limpeza Inteligente (30+ dias):
+   - Stored Procedure: limpar_notificacoes_antigas()
+   - Event Scheduler: executa automaticamente às 3h da manhã
+   - Mantém BD leve e performático
+   - Pode ser executado manualmente quando necessário
+   - Sistema não vai "infestar" o banco de dados
 
-✅ Integração Obras:
-   - Todos JOINs atualizados: `LEFT JOIN encarregados`
-   - Email de notificação busca de `encarregados.email`
-   - `obras.encarregado_id` aponta para `encarregados.id`
+✅ Transições de Página Estilo Nubank:
+   - Efeito slide horizontal (direita → esquerda)
+   - Animação spring suave e natural
+   - Página anterior empurrada para esquerda
+   - Sensação de app nativo super rápido
+   - Implementado com Framer Motion (melhor lib 2025)
 
-✅ Fixes Payroll/Billing:
-   - Removido INSERT em colunas GENERATED
-   - NULL handling com COALESCE
-   - Encarregados NÃO aparecem na folha de pagamento
+✅ Triggers de Notificação em Todas Ações:
+   - Obra criada → notificação
+   - Obra editada → notificação
+   - Cliente criado → notificação
+   - Encarregado criado → notificação
+   - Horas aprovadas → notificação
+   - TUDO que for feito no sistema gera notificação
 
 ─────────────────────────────────────────────────────────────────────
 
 📋 PROCEDIMENTO DE DEPLOY:
 
-1️⃣ UPLOAD BACKEND (14 arquivos)
-2️⃣ UPLOAD FRONTEND (dist/)
-3️⃣ EXECUTAR SQL: backend/sql/migrate_encarregados.sql
-   ⚠️ Este SQL migra encarregados existentes de usuarios → encarregados
-4️⃣ TESTAR FLUXO COMPLETO (abaixo)
+1️⃣ UPLOAD BACKEND (12 arquivos PHP + 1 helper + 1 cron)
+2️⃣ EXECUTAR SQL 1: backend/sql/create_notificacoes.sql
+3️⃣ EXECUTAR SQL 2: backend/sql/notificacoes_auto_cleanup_sem_super.sql
+   ⚠️ Se der erro "Acesso negado SUPER", ignorar a parte do EVENT
+   ✅ A Stored Procedure vai ser criada normalmente
+4️⃣ CONFIGURAR CRON JOB (no cPanel ou servidor):
+   Adicionar no crontab:
+   ```
+   0 3 * * * /usr/bin/php /caminho/completo/backend/cron/cleanup_notificacoes.php
+   ```
+   Ou no cPanel: Adicionar CRON Job diário às 3h
+5️⃣ BUILD FRONTEND:
+   ```bash
+   npm run build
+   ```
+6️⃣ UPLOAD FRONTEND (dist/ completa)
+7️⃣ TESTAR FLUXO COMPLETO (abaixo)
 
 ─────────────────────────────────────────────────────────────────────
 
 📋 TESTES APÓS DEPLOY:
 
-✅ Teste 1 - CRUD Encarregados:
+✅ Teste 1 - Criar Notificações:
    1. Login como admin
-   2. Acessar /encarregados
-   3. Criar novo encargado (nome, email, telefone, passaporte, senha)
-   4. Verificar que aparece na lista
+   2. Criar uma nova obra em /projects
+   3. Ver notificação "Nueva obra creada" aparecer no Dashboard
+   4. Criar um cliente em /clients
+   5. Ver notificação "Nuevo cliente creado"
+   6. Criar um encarregado
+   7. Ver notificação "Nuevo encargado creado"
 
-✅ Teste 2 - Vincular Obra:
-   1. Ir em /projects (Obras)
-   2. Criar/editar obra
-   3. Selecionar encargado no dropdown
-   4. Salvar e verificar que nome aparece na lista
+✅ Teste 2 - Navegação por Notificação:
+   1. No Dashboard, clicar na notificação de obra criada
+   2. Deve navegar para /projects
+   3. Voltar ao Dashboard
+   4. Clicar em notificação de cliente
+   5. Deve navegar para /clients
 
-✅ Teste 3 - Login Encargado:
-   1. Logout do admin
-   2. Login com passaporte do encargado criado
-   3. Deve ir para /approvals
-   4. Ver apenas obras vinculadas a ele
+✅ Teste 3 - Transições de Página:
+   1. No Dashboard, clicar no botão "Obras Activas"
+   2. Observar transição slide (direita → esquerda)
+   3. Navegar entre diferentes páginas
+   4. Ver efeito Nubank em todas as transições
 
-✅ Teste 4 - Aprovação:
-   1. (Como funcionário) Criar apontamento e submeter
-   2. (Como encargado) Ver pending approval
-   3. Aprovar apontamento
-   4. (Como admin) Ver apontamento aprovado pelo encargado
+✅ Teste 4 - Auto-Limpeza Manual:
+   Via SQL:
+   ```sql
+   CALL limpar_notificacoes_antigas();
+   ```
 
-✅ Teste 5 - Verificações:
-   - Encargado NÃO aparece em /employees
-   - Encargado NÃO aparece em folha de pagamento
-   - Email de notificação chega quando apontamento é submetido
+   Ou via PHP (testar o cron):
+   ```bash
+   php /caminho/completo/backend/cron/cleanup_notificacoes.php
+   ```
+
+   Deve retornar: "X notificações antigas removidas"
+
+✅ Teste 5 - Verificar Cron Job:
+   No cPanel → Cron Jobs
+   Verificar se o job está ativo e rodando diariamente às 3h
+
+─────────────────────────────────────────────────────────────────────
+
+📋 CONFIGURAR CRON JOB NO CPANEL:
+
+1. Acessar cPanel → Cron Jobs
+2. Na seção "Add New Cron Job"
+3. Configurar:
+   - Minuto: 0
+   - Hora: 3
+   - Dia: *
+   - Mês: *
+   - Dia da Semana: *
+   - Comando:
+     /usr/bin/php /home/seuusuario/public_html/backend/cron/cleanup_notificacoes.php
+
+4. Salvar
+
+⚠️ IMPORTANTE: Substituir "/home/seuusuario/public_html/" pelo caminho real do servidor!
+
+Para descobrir o caminho real, criar arquivo PHP:
+```php
+<?php echo __DIR__; ?>
+```
+
+─────────────────────────────────────────────────────────────────────
+
+💡 DICA: EXECUTAR LIMPEZA AGORA (sem esperar cron):
+
+Via SSH:
+```bash
+php /caminho/completo/backend/cron/cleanup_notificacoes.php
+```
+
+Via browser (criar arquivo temporário):
+```php
+<?php
+require_once __DIR__ . '/backend/cron/cleanup_notificacoes.php';
+?>
+```
+Acessar: https://seusite.com/test_cleanup.php
 
 ═══════════════════════════════════════════════════════════════════

@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/notificacao_helper.php';
 
 $headers = getallheaders();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
@@ -124,6 +125,24 @@ try {
     $stmt->execute($filteredVals);
 
     $id = $pdo->lastInsertId();
+
+    // Criar notificação
+    $config = getNotificacaoConfig('obra_criada');
+    criarNotificacao(
+        'obra_criada',
+        'Nueva obra creada',
+        "Obra #{$data['numero']} - {$data['nome']} fue creada",
+        [
+            'icone' => $config['icone'],
+            'cor' => $config['cor'],
+            'url' => '/projects',
+            'entidade_tipo' => 'obra',
+            'entidade_id' => $id,
+            'usuario_id' => $payload['id'],
+            'usuario_nome' => $payload['nome'] ?? 'Admin',
+            'usuario_tipo' => $payload['tipo']
+        ]
+    );
 
     echo json_encode(['success' => true, 'id' => $id]);
 
