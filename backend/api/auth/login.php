@@ -38,10 +38,17 @@ if (empty($passport) || empty($password)) {
 try {
     $pdo = getConnection();
 
-    // Buscar usuário pelo passaporte
-    $stmt = $pdo->prepare("SELECT id, passaporte, senha_hash, nome, email, tipo, foto_url FROM usuarios WHERE passaporte = ? AND ativo = 1");
+    // Tentar buscar em usuarios primeiro
+    $stmt = $pdo->prepare("SELECT id, passaporte, senha_hash, nome, email, tipo, foto_url, 'usuario' as tabela FROM usuarios WHERE passaporte = ? AND ativo = 1");
     $stmt->execute([$passport]);
     $user = $stmt->fetch();
+
+    // Se não encontrou em usuarios, tentar em encarregados
+    if (!$user) {
+        $stmt = $pdo->prepare("SELECT id, passaporte, senha as senha_hash, nome, email, 'encarregado' as tipo, NULL as foto_url, 'encarregado' as tabela FROM encarregados WHERE passaporte = ? AND ativo = 1");
+        $stmt->execute([$passport]);
+        $user = $stmt->fetch();
+    }
 
     if (!$user || !password_verify($password, $user['senha_hash'])) {
         http_response_code(401);
@@ -56,6 +63,7 @@ try {
         'nome' => $user['nome'],
         'email' => $user['email'],
         'tipo' => $user['tipo'],
+        'tabela' => $user['tabela'], // 'usuario' ou 'encarregado'
     ];
 
     $token = generateJWT($payload);

@@ -100,6 +100,48 @@ try {
         $params[] = (!empty($diasArr) && is_array($diasArr)) ? json_encode($diasArr) : null;
     }
 
+    // === NOVOS CAMPOS: País, Faturamento, Impostos ===
+    if (array_key_exists('pais', $data)) {
+        $updates[] = "pais = ?";
+        $params[] = $data['pais'] ?: 'España';
+    }
+    if (array_key_exists('fatura_hora_normal', $data)) {
+        $updates[] = "fatura_hora_normal = ?";
+        $params[] = floatval($data['fatura_hora_normal']);
+    }
+    if (array_key_exists('fatura_hora_extra', $data)) {
+        $updates[] = "fatura_hora_extra = ?";
+        $params[] = floatval($data['fatura_hora_extra']);
+    }
+    if (array_key_exists('fatura_hora_noturna', $data)) {
+        $updates[] = "fatura_hora_noturna = ?";
+        $params[] = floatval($data['fatura_hora_noturna']);
+    }
+    if (array_key_exists('multiplicador_extra', $data)) {
+        $updates[] = "multiplicador_extra = ?";
+        $params[] = floatval($data['multiplicador_extra']);
+    }
+    if (array_key_exists('multiplicador_noturna', $data)) {
+        $updates[] = "multiplicador_noturna = ?";
+        $params[] = floatval($data['multiplicador_noturna']);
+    }
+    if (array_key_exists('imposto_igi', $data)) {
+        $updates[] = "imposto_igi = ?";
+        $params[] = floatval($data['imposto_igi']);
+    }
+    if (array_key_exists('imposto_cas_funcionario', $data)) {
+        $updates[] = "imposto_cas_funcionario = ?";
+        $params[] = floatval($data['imposto_cas_funcionario']);
+    }
+    if (array_key_exists('imposto_cas_empresa', $data)) {
+        $updates[] = "imposto_cas_empresa = ?";
+        $params[] = floatval($data['imposto_cas_empresa']);
+    }
+    if (array_key_exists('imposto_irpc', $data)) {
+        $updates[] = "imposto_irpc = ?";
+        $params[] = floatval($data['imposto_irpc']);
+    }
+
     if (empty($updates)) {
         http_response_code(400);
         echo json_encode(['error' => 'Nenhum campo para atualizar']);

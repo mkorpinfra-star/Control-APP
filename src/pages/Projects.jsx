@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, clientesService, encarregadosService } from '../services/api';
+import { PAISES_EUROPA, PAISES_FLAGS } from '../data/paises';
 import { Plus, Search, Edit, Trash2, Users, MapPin, Mail, Briefcase, Building2, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
@@ -125,9 +126,23 @@ export default function Projects() {
     const [editingProject, setEditingProject] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterPais, setFilterPais] = useState('all');
     const [formData, setFormData] = useState({
         numero: '', nome: '', endereco: '', email_financeiro: '', email_encarregado: '',
-        cliente_id: '', encarregado_id: '', data_inicio: '', data_fim: ''
+        cliente_id: '', encarregado_id: '', data_inicio: '', data_fim: '',
+        // País
+        pais: 'España',
+        // Faturamento (valores cobrados do cliente)
+        fatura_hora_normal: 25.00,
+        fatura_hora_extra: 37.50,
+        fatura_hora_noturna: 50.00,
+        multiplicador_extra: 1.50,
+        multiplicador_noturna: 2.00,
+        // Impostos/Tributações
+        imposto_igi: 0.00,
+        imposto_cas_funcionario: 4.70,
+        imposto_cas_empresa: 23.60,
+        imposto_irpc: 0.00
     });
     const [selectedEmployees, setSelectedEmployees] = useState([]);
     const [diasDesativados, setDiasDesativados] = useState([]);
@@ -228,7 +243,20 @@ export default function Projects() {
             cliente_id: project.cliente_id || '',
             encarregado_id: project.encarregado_id || '',
             data_inicio: project.data_inicio || '',
-            data_fim: project.data_fim || ''
+            data_fim: project.data_fim || '',
+            // País
+            pais: project.pais || 'España',
+            // Faturamento
+            fatura_hora_normal: parseFloat(project.fatura_hora_normal) || 25.00,
+            fatura_hora_extra: parseFloat(project.fatura_hora_extra) || 37.50,
+            fatura_hora_noturna: parseFloat(project.fatura_hora_noturna) || 50.00,
+            multiplicador_extra: parseFloat(project.multiplicador_extra) || 1.50,
+            multiplicador_noturna: parseFloat(project.multiplicador_noturna) || 2.00,
+            // Impostos
+            imposto_igi: parseFloat(project.imposto_igi) || 0.00,
+            imposto_cas_funcionario: parseFloat(project.imposto_cas_funcionario) || 4.70,
+            imposto_cas_empresa: parseFloat(project.imposto_cas_empresa) || 23.60,
+            imposto_irpc: parseFloat(project.imposto_irpc) || 0.00
         });
         // Carregar dias desativados salvos
         try {
@@ -267,7 +295,14 @@ export default function Projects() {
 
     const openNewModal = () => {
         setEditingProject(null);
-        setFormData({ numero: '', nome: '', endereco: '', email_financeiro: '', email_encarregado: '', cliente_id: '', encarregado_id: '', data_inicio: '', data_fim: '' });
+        setFormData({
+            numero: '', nome: '', endereco: '', email_financeiro: '', email_encarregado: '',
+            cliente_id: '', encarregado_id: '', data_inicio: '', data_fim: '',
+            pais: 'España',
+            fatura_hora_normal: 25.00, fatura_hora_extra: 37.50, fatura_hora_noturna: 50.00,
+            multiplicador_extra: 1.50, multiplicador_noturna: 2.00,
+            imposto_igi: 0.00, imposto_cas_funcionario: 4.70, imposto_cas_empresa: 23.60, imposto_irpc: 0.00
+        });
         setSelectedEmployees([]);
         setDiasDesativados([]);
         setShowModal(true); setError('');
@@ -297,10 +332,18 @@ export default function Projects() {
         }
     };
 
-    const filteredProjects = projects.filter(p =>
-        (p.numero?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (p.nome?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    );
+    const filteredProjects = projects.filter(p => {
+        const matchSearch = (p.numero?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                           (p.nome?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+        const matchPais = filterPais === 'all' || p.pais === filterPais;
+        return matchSearch && matchPais;
+    });
+
+    // Obter lista de países únicos das obras (para o filtro)
+    const paisesDisponiveis = useMemo(() => {
+        const paises = [...new Set(projects.map(p => p.pais).filter(Boolean))];
+        return paises.sort();
+    }, [projects]);
 
     return (
         <div className="min-h-screen bg-white pb-24">
@@ -319,16 +362,35 @@ export default function Projects() {
                     </button>
                 </div>
 
-                {/* Search */}
-                <div className="relative">
-                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Buscar por número o nombre..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                    />
+                {/* Search & Filtros */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="relative md:col-span-2">
+                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Buscar por número o nombre..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                        />
+                    </div>
+                    <div>
+                        <select
+                            value={filterPais}
+                            onChange={(e) => setFilterPais(e.target.value)}
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm"
+                        >
+                            <option value="all">🌍 Todos los países ({projects.length})</option>
+                            {paisesDisponiveis.map(pais => {
+                                const count = projects.filter(p => p.pais === pais).length;
+                                return (
+                                    <option key={pais} value={pais}>
+                                        {PAISES_FLAGS[pais] || '🏳️'} {pais} ({count})
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -570,6 +632,145 @@ export default function Projects() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* === NOVA SEÇÃO: Configurações de Faturamento e Impostos === */}
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                            <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                                Configuraciones de Facturación e Impuestos
+                            </h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                {/* País */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Ubicación</h4>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">País</label>
+                                        <select
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            value={formData.pais}
+                                            onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
+                                        >
+                                            {PAISES_EUROPA.map(pais => (
+                                                <option key={pais} value={pais}>
+                                                    {PAISES_FLAGS[pais] || ''} {pais}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Valores de Faturamento */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Facturación al Cliente (€/h)</h4>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Normal</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.fatura_hora_normal}
+                                                onChange={(e) => setFormData({ ...formData, fatura_hora_normal: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Extra</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.fatura_hora_extra}
+                                                onChange={(e) => setFormData({ ...formData, fatura_hora_extra: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Nocturna</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.fatura_hora_noturna}
+                                                onChange={(e) => setFormData({ ...formData, fatura_hora_noturna: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Mult. Extra</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.multiplicador_extra}
+                                                onChange={(e) => setFormData({ ...formData, multiplicador_extra: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Impostos */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Impuestos (%)</h4>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">IGI</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="100"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.imposto_igi}
+                                                onChange={(e) => setFormData({ ...formData, imposto_igi: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">CAS Func.</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="100"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.imposto_cas_funcionario}
+                                                onChange={(e) => setFormData({ ...formData, imposto_cas_funcionario: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">CAS Emp.</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="100"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.imposto_cas_empresa}
+                                                onChange={(e) => setFormData({ ...formData, imposto_cas_empresa: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">IRPC</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="100"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                value={formData.imposto_irpc}
+                                                onChange={(e) => setFormData({ ...formData, imposto_irpc: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-xs text-gray-500 mt-3 italic">
+                                ℹ️ Estas configuraciones son específicas para esta obra y se utilizarán en los cálculos de nómina y facturación.
+                            </p>
                         </div>
                     </div>
 

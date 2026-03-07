@@ -7,7 +7,8 @@ header('Content-Type: application/json; charset=utf-8');
 require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
-$user = authMiddleware(['admin']);
+// Admin pode ver todos, outros usuários também (para dropdown de obras)
+$user = authMiddleware();
 
 try {
     $pdo = getConnection();

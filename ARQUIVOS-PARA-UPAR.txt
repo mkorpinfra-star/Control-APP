@@ -1,23 +1,34 @@
 ═══════════════════════════════════════════════════════════════════
-  ARQUIVOS PARA UPLOAD - SISTEMA ENCARREGADOS
+  ARQUIVOS PARA UPLOAD - SISTEMA ENCARREGADOS COMPLETO
 ═══════════════════════════════════════════════════════════════════
 
-📁 BACKEND (11 arquivos PHP):
+📁 BACKEND (14 arquivos PHP):
 
-1. backend/api/encarregados/list.php          → NOVO
-2. backend/api/encarregados/create.php        → NOVO
-3. backend/api/encarregados/update.php        → NOVO
-4. backend/api/encarregados/delete.php        → NOVO
+NOVOS - Sistema Encarregados:
+1. backend/api/encarregados/list.php          → CRUD lista (sem restrição admin)
+2. backend/api/encarregados/create.php        → CRUD criar
+3. backend/api/encarregados/update.php        → CRUD atualizar
+4. backend/api/encarregados/delete.php        → CRUD deletar
 
-5. backend/api/payroll/generate-monthly.php   → CORRIGIDO (GENERATED columns)
-6. backend/api/payroll/list.php               → CORRIGIDO (NULL handling)
+ATUALIZADOS - Login e Auth:
+5. backend/api/auth/login.php                 → Login aceita encarregados (dupla busca)
 
-7. backend/api/billing/generate-monthly.php   → CORRIGIDO (GENERATED columns)
-8. backend/api/billing/list.php               → CORRIGIDO (NULL handling)
+ATUALIZADOS - Payroll/Billing:
+6. backend/api/payroll/generate-monthly.php   → GENERATED columns removidos
+7. backend/api/payroll/list.php               → NULL handling
+8. backend/api/billing/generate-monthly.php   → GENERATED columns removidos
+9. backend/api/billing/list.php               → NULL handling
 
-9. backend/api/obras/list.php                 → ATUALIZADO (JOIN encarregados)
-10. backend/api/obras/by-employee.php         → ATUALIZADO (JOIN encarregados)
-11. backend/api/obras/my-obras.php            → ATUALIZADO (JOIN encarregados)
+ATUALIZADOS - Obras (JOIN com encarregados):
+10. backend/api/obras/list.php                → LEFT JOIN encarregados
+11. backend/api/obras/by-employee.php         → LEFT JOIN encarregados
+12. backend/api/obras/my-obras.php            → LEFT JOIN encarregados
+
+ATUALIZADOS - Apontamentos (email encarregado):
+13. backend/api/apontamentos/submit.php       → LEFT JOIN encarregados (email notificação)
+
+SQL - Migration:
+14. backend/sql/migrate_encarregados.sql      → MIGRAR usuarios tipo='encarregado' → tabela encarregados
 
 ─────────────────────────────────────────────────────────────────────
 
@@ -37,33 +48,74 @@ dist/assets/index-OOuq9MvN.js       → 1,565.37 kB
 
 ─────────────────────────────────────────────────────────────────────
 
-🔧 O QUE FOI FEITO:
+🔧 O QUE FOI FEITO NESTA ATUALIZAÇÃO:
 
-✅ Modal de Encarregados:
-   - Centralizado com z-index: 9999 (acima do menu flutuante)
-   - Sempre no centro da tela (não mais embaixo)
-   - Shadow-2xl para destaque
+✅ Sistema Encarregados Completo:
+   - Tabela separada `encarregados` (não são employees)
+   - CRUD completo em /encarregados
+   - Login funciona com passaporte da tabela `encarregados`
+   - Encarregados aprovam apontamentos em /approvals
+   - Dropdown de obras carrega da nova tabela
+   - Modal centralizado (z-index 9999)
+   - Textos em espanhol ("Encargados", não português)
 
-✅ Integração completa Encarregados:
-   - Página /encarregados com CRUD completo
-   - Dropdown em Obras agora busca da tabela `encarregados`
-   - Removido tipo "encarregado" do formulário de Employees
-   - Todos os JOINs de obras atualizados para tabela separada
+✅ Fluxo de Autenticação:
+   - Login busca primeiro em `usuarios`, depois em `encarregados`
+   - JWT contém campo `tabela` ('usuario' ou 'encarregado')
+   - Encarregados veem apenas obras onde estão vinculados
+   - Aprovam apontamentos com tipo='encarregado'
 
-✅ Backend fixes:
-   - Payroll/Billing: removido INSERT em GENERATED columns
-   - Payroll/Billing: NULL handling com COALESCE
-   - Obras: JOIN com tabela `encarregados` (list, by-employee, my-obras)
+✅ Integração Obras:
+   - Todos JOINs atualizados: `LEFT JOIN encarregados`
+   - Email de notificação busca de `encarregados.email`
+   - `obras.encarregado_id` aponta para `encarregados.id`
+
+✅ Fixes Payroll/Billing:
+   - Removido INSERT em colunas GENERATED
+   - NULL handling com COALESCE
+   - Encarregados NÃO aparecem na folha de pagamento
 
 ─────────────────────────────────────────────────────────────────────
 
-📋 APÓS UPLOAD, TESTAR:
+📋 PROCEDIMENTO DE DEPLOY:
 
-1. Acessar /encarregados
-2. Criar novo encarregado
-3. Ir em Obras e selecionar encarregado no dropdown
-4. Verificar se nome do encarregado aparece na lista de obras
-5. Confirmar que encarregado NÃO aparece em Employees
-6. Confirmar que encarregado NÃO aparece na folha de pagamento
+1️⃣ UPLOAD BACKEND (14 arquivos)
+2️⃣ UPLOAD FRONTEND (dist/)
+3️⃣ EXECUTAR SQL: backend/sql/migrate_encarregados.sql
+   ⚠️ Este SQL migra encarregados existentes de usuarios → encarregados
+4️⃣ TESTAR FLUXO COMPLETO (abaixo)
+
+─────────────────────────────────────────────────────────────────────
+
+📋 TESTES APÓS DEPLOY:
+
+✅ Teste 1 - CRUD Encarregados:
+   1. Login como admin
+   2. Acessar /encarregados
+   3. Criar novo encargado (nome, email, telefone, passaporte, senha)
+   4. Verificar que aparece na lista
+
+✅ Teste 2 - Vincular Obra:
+   1. Ir em /projects (Obras)
+   2. Criar/editar obra
+   3. Selecionar encargado no dropdown
+   4. Salvar e verificar que nome aparece na lista
+
+✅ Teste 3 - Login Encargado:
+   1. Logout do admin
+   2. Login com passaporte do encargado criado
+   3. Deve ir para /approvals
+   4. Ver apenas obras vinculadas a ele
+
+✅ Teste 4 - Aprovação:
+   1. (Como funcionário) Criar apontamento e submeter
+   2. (Como encargado) Ver pending approval
+   3. Aprovar apontamento
+   4. (Como admin) Ver apontamento aprovado pelo encargado
+
+✅ Teste 5 - Verificações:
+   - Encargado NÃO aparece em /employees
+   - Encargado NÃO aparece em folha de pagamento
+   - Email de notificação chega quando apontamento é submetido
 
 ═══════════════════════════════════════════════════════════════════

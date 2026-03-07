@@ -54,11 +54,11 @@ try {
 
     // Verificar se o apontamento existe e pertence ao usuário
     $stmt = $pdo->prepare("
-        SELECT a.*, o.numero as obra_numero, o.nome as obra_nome, 
-               o.encarregado_id, u.email as encarregado_email, u.nome as encarregado_nome
+        SELECT a.*, o.numero as obra_numero, o.nome as obra_nome,
+               o.encarregado_id, e.email as encarregado_email, e.nome as encarregado_nome
         FROM apontamentos a
         INNER JOIN obras o ON o.id = a.obra_id
-        LEFT JOIN usuarios u ON u.id = o.encarregado_id
+        LEFT JOIN encarregados e ON e.id = o.encarregado_id
         WHERE a.id = ? AND a.funcionario_id = ?
     ");
     $stmt->execute([$apontamentoId, $user['id']]);
