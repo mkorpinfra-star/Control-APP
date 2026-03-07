@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from '../components/Toast';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { Plus, Download, Mail, Trash2, Trash } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
@@ -18,6 +19,17 @@ export default function Billing() {
     const [exporting, setExporting] = useState(false);
     const [sendingEmail, setSendingEmail] = useState(false);
 
+    // Estados para modais de confirmação
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        type: 'warning',
+        confirmText: 'Confirmar',
+        loading: false
+    });
+
     useEffect(() => {
         fetchObras();
     }, []);
@@ -33,11 +45,15 @@ export default function Billing() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
+            console.log('💰 Billing - Obras recebidas:', data);
             if (data.success) {
                 setObras(data.obras || []);
+                console.log('💰 Billing - Total de obras:', data.obras?.length || 0);
+            } else {
+                console.error('❌ Billing - Erro ao buscar obras:', data.message);
             }
         } catch (error) {
-            console.error('Error fetching obras:', error);
+            console.error('❌ Billing - Error fetching obras:', error);
         }
     };
 
@@ -61,9 +77,20 @@ export default function Billing() {
         }
     };
 
-    const handleGenerate = async () => {
-        if (!confirm('¿Generar/actualizar faturamento para este mes?')) return;
+    const handleGenerate = () => {
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Generar Faturamento',
+            message: '¿Generar/actualizar faturamento para este mes?',
+            type: 'info',
+            confirmText: 'Generar',
+            onConfirm: executeGenerate,
+            loading: false
+        });
+    };
 
+    const executeGenerate = async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -83,6 +110,7 @@ export default function Billing() {
             setToast({ message: 'Error al generar faturamento', type: 'error' });
         } finally {
             setLoading(false);
+            setConfirmDialog(prev => ({ ...prev, isOpen: false, loading: false }));
         }
     };
 
@@ -129,8 +157,20 @@ export default function Billing() {
         }
     };
 
-    const handleDeleteRow = async (id, obraNome) => {
-        if (!confirm(`Deletar fatura de ${obraNome}?`)) return;
+    const handleDeleteRow = (id, obraNome) => {
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Eliminar Fatura',
+            message: `¿Deletar fatura de ${obraNome}?`,
+            type: 'danger',
+            confirmText: 'Eliminar',
+            onConfirm: () => executeDeleteRow(id),
+            loading: false
+        });
+    };
+
+    const executeDeleteRow = async (id) => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
         const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${API_URL}/billing/delete.php`, {
@@ -141,11 +181,27 @@ export default function Billing() {
             const data = await res.json();
             if (data.success) { setToast({ message: data.message, type: 'success' }); fetchFaturas(); }
             else setToast({ message: 'Erro: ' + data.message, type: 'error' });
-        } catch { setToast({ message: 'Erro ao deletar', type: 'error' }); }
+        } catch {
+            setToast({ message: 'Erro ao deletar', type: 'error' });
+        } finally {
+            setConfirmDialog(prev => ({ ...prev, isOpen: false, loading: false }));
+        }
     };
 
-    const handleDeleteMes = async () => {
-        if (!confirm(`⚠️ Apagar TODO o faturamento do mês ${mesReferencia}?`)) return;
+    const handleDeleteMes = () => {
+        setConfirmDialog({
+            isOpen: true,
+            title: '⚠️ Eliminar Faturamento Completo',
+            message: `¿Apagar TODO o faturamento do mês ${mesReferencia}? Esta ação não pode ser desfeita.`,
+            type: 'danger',
+            confirmText: 'Eliminar Todo',
+            onConfirm: executeDeleteMes,
+            loading: false
+        });
+    };
+
+    const executeDeleteMes = async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
         const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${API_URL}/billing/delete.php`, {
@@ -156,7 +212,11 @@ export default function Billing() {
             const data = await res.json();
             if (data.success) { setToast({ message: data.message, type: 'success' }); fetchFaturas(); }
             else setToast({ message: 'Erro: ' + data.message, type: 'error' });
-        } catch { setToast({ message: 'Erro ao deletar', type: 'error' }); }
+        } catch {
+            setToast({ message: 'Erro ao deletar', type: 'error' });
+        } finally {
+            setConfirmDialog(prev => ({ ...prev, isOpen: false, loading: false }));
+        }
     };
 
     const handleSendEmail = async () => {
@@ -244,19 +304,30 @@ export default function Billing() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                            Obra
+                            Obra {obras.length > 0 && <span className="text-xs text-gray-500">({obras.length} obras)</span>}
                         </label>
                         <select
                             value={obraId}
                             onChange={(e) => setObraId(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CE0201] font-medium text-base appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
+                            style={{
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23CE0201' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'right 12px center',
+                                backgroundSize: '20px',
+                                paddingRight: '40px'
+                            }}
                         >
-                            <option value="all">Todas las obras</option>
-                            {obras.map(obra => (
-                                <option key={obra.id} value={obra.id}>
-                                    {obra.numero} - {obra.nome}
-                                </option>
-                            ))}
+                            <option value="all" className="font-semibold">📋 Todas las obras</option>
+                            {obras.length === 0 ? (
+                                <option disabled>Nenhuma obra cadastrada</option>
+                            ) : (
+                                obras.map(obra => (
+                                    <option key={obra.id} value={obra.id} className="font-medium">
+                                        {obra.numero} — {obra.nome}
+                                    </option>
+                                ))
+                            )}
                         </select>
                     </div>
                 </div>
@@ -379,6 +450,17 @@ export default function Billing() {
                     </ul>
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmDialog.onConfirm}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                type={confirmDialog.type}
+                confirmText={confirmDialog.confirmText}
+                loading={confirmDialog.loading}
+            />
 
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
         </div>

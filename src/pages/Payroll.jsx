@@ -386,19 +386,30 @@ export default function Payroll() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                            Obra
+                            Obra {obras.length > 0 && <span className="text-xs text-gray-500">({obras.length} obras)</span>}
                         </label>
                         <select
                             value={obraId}
                             onChange={(e) => setObraId(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300"
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CE0201] font-medium text-base appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
+                            style={{
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23CE0201' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'right 12px center',
+                                backgroundSize: '20px',
+                                paddingRight: '40px'
+                            }}
                         >
-                            <option value="all">Todas las obras</option>
-                            {obras.map(obra => (
-                                <option key={obra.id} value={obra.id}>
-                                    {obra.numero} - {obra.nome}
-                                </option>
-                            ))}
+                            <option value="all" className="font-semibold">📋 Todas las obras</option>
+                            {obras.length === 0 ? (
+                                <option disabled>Nenhuma obra cadastrada</option>
+                            ) : (
+                                obras.map(obra => (
+                                    <option key={obra.id} value={obra.id} className="font-medium">
+                                        {obra.numero} — {obra.nome}
+                                    </option>
+                                ))
+                            )}
                         </select>
                     </div>
                 </div>

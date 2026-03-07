@@ -1,27 +1,9 @@
 import { useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { X, Camera, Upload } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
-// Ícone de câmera
-const CameraIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-        <circle cx="12" cy="13" r="4" />
-    </svg>
-);
-
-// Ícone de alerta
-const AlertIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-        <line x1="12" y1="9" x2="12" y2="13" />
-        <line x1="12" y1="17" x2="12.01" y2="17" />
-    </svg>
-);
-
 export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = false }) {
-    const { t } = useTranslation();
     const [preview, setPreview] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
@@ -35,7 +17,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            setError(t('profile.selectImage'));
+            setError('Por favor selecciona una imagen');
             return;
         }
 
@@ -60,7 +42,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                 }
             }, 100);
         } catch (err) {
-            setError(t('profile.cameraError'));
+            setError('No se pudo acceder a la cámara');
         }
     };
 
@@ -72,7 +54,6 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
         canvas.height = 480;
         const ctx = canvas.getContext('2d');
 
-        // Pegar o centro do vídeo (quadrado)
         const video = videoRef.current;
         const size = Math.min(video.videoWidth, video.videoHeight);
         const x = (video.videoWidth - size) / 2;
@@ -113,7 +94,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || t('profile.uploadError'));
+                throw new Error(data.message || 'Error al subir foto');
             }
 
             // Atualizar user no localStorage
@@ -135,125 +116,125 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
         }
     };
 
-    // Se for obrigatório, não permitir fechar clicando fora
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget && !uploading && !required && onClose) {
+            stopCamera();
             onClose();
         }
     };
 
     return (
-        <div className="modal-overlay" onClick={handleOverlayClick}>
-            <div className="modal" style={{ maxWidth: '400px' }}>
-                <div className="modal-header">
-                    <h2 className="modal-title">
-                        {required ? '📸 Foto Obligatoria' : t('profile.addPhoto')}
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={handleOverlayClick}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900">
+                        {required ? '📸 Foto Obligatoria' : 'Adicionar Foto'}
                     </h2>
+                    {!required && onClose && (
+                        <button
+                            onClick={() => {
+                                stopCamera();
+                                onClose();
+                            }}
+                            className="w-10 h-10 rounded-full bg-[#F5F5F5] hover:bg-gray-200 flex items-center justify-center transition-colors"
+                        >
+                            <X size={20} className="text-gray-700" />
+                        </button>
+                    )}
                 </div>
 
-                <div className="modal-body" style={{ textAlign: 'center' }}>
+                {/* Body */}
+                <div className="p-6 text-center">
                     {required && (
-                        <div style={{
-                            background: '#fef3c7',
-                            border: '1px solid #f59e0b',
-                            borderRadius: '8px',
-                            padding: '12px',
-                            marginBottom: '16px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            fontSize: '13px',
-                            color: '#92400e'
-                        }}>
-                            <AlertIcon />
-                            <span>Debes añadir tu foto para continuar usando el sistema</span>
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-2 text-left">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                <span className="text-amber-600 font-bold">!</span>
+                            </div>
+                            <p className="text-xs text-amber-800 font-semibold">
+                                Debes añadir tu foto para continuar usando el sistema
+                            </p>
                         </div>
                     )}
 
-                    <p style={{ color: '#666', marginBottom: '20px', fontSize: '14px' }}>
-                        {t('profile.photoExplanation')}
+                    <p className="text-sm text-gray-600 mb-6">
+                        Tu foto aparecerá en los informes y ayudará a identificarte
                     </p>
 
-                    {/* Preview ou Placeholder */}
-                    <div style={{
-                        width: '150px',
-                        height: '150px',
-                        borderRadius: '50%',
-                        margin: '0 auto 20px',
-                        overflow: 'hidden',
-                        background: preview ? 'transparent' : '#f0f0f0',
-                        border: '3px solid #CE0201',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
+                    {/* Preview ou Camera */}
+                    <div className="w-48 h-48 rounded-full mx-auto mb-6 overflow-hidden border-4 border-[#CE0201] flex items-center justify-center bg-[#F5F5F5]">
                         {showCamera ? (
                             <video
                                 ref={videoRef}
                                 autoPlay
                                 playsInline
                                 muted
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                className="w-full h-full object-cover"
                             />
                         ) : preview ? (
-                            <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                         ) : (
-                            <div style={{ color: '#aaa' }}>
-                                <CameraIcon />
-                            </div>
+                            <Camera size={48} className="text-gray-400" />
                         )}
                     </div>
 
                     {error && (
-                        <p style={{ color: '#CE0201', fontSize: '13px', marginBottom: '15px' }}>{error}</p>
+                        <p className="text-sm text-red-600 font-semibold mb-4">{error}</p>
                     )}
 
-                    {/* Botões de ação */}
+                    {/* Buttons */}
                     {!showCamera && !preview && (
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <div className="flex gap-3">
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="btn btn-secondary"
-                                style={{ flex: 1 }}
+                                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#F5F5F5] hover:bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm transition-colors"
                             >
-                                📁 {t('profile.gallery')}
+                                <Upload size={18} />
+                                Galeria
                             </button>
                             <button
                                 onClick={startCamera}
-                                className="btn btn-primary"
-                                style={{ flex: 1 }}
+                                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#CE0201] hover:bg-[#A00101] text-white rounded-xl font-semibold text-sm transition-colors"
                             >
-                                📷 {t('profile.camera')}
+                                <Camera size={18} />
+                                Cámara
                             </button>
                         </div>
                     )}
 
                     {showCamera && (
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                            <button onClick={stopCamera} className="btn btn-secondary">
-                                {t('profile.cancel')}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={stopCamera}
+                                className="flex-1 py-3 px-4 bg-[#F5F5F5] hover:bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm transition-colors"
+                            >
+                                Cancelar
                             </button>
-                            <button onClick={capturePhoto} className="btn btn-primary">
-                                📸 {t('profile.capture')}
+                            <button
+                                onClick={capturePhoto}
+                                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#CE0201] hover:bg-[#A00101] text-white rounded-xl font-semibold text-sm transition-colors"
+                            >
+                                <Camera size={18} />
+                                Capturar
                             </button>
                         </div>
                     )}
 
                     {preview && !showCamera && (
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <div className="flex gap-3">
                             <button
                                 onClick={() => setPreview(null)}
-                                className="btn btn-secondary"
+                                className="flex-1 py-3 px-4 bg-[#F5F5F5] hover:bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm transition-colors"
                                 disabled={uploading}
                             >
-                                {t('profile.anotherPhoto')}
+                                Otra foto
                             </button>
                             <button
                                 onClick={uploadPhoto}
-                                className="btn btn-primary"
+                                className="flex-1 py-3 px-4 bg-[#CE0201] hover:bg-[#A00101] text-white rounded-xl font-semibold text-sm transition-colors disabled:opacity-50"
                                 disabled={uploading}
                             >
-                                {uploading ? t('profile.uploading') : `✅ ${t('profile.save')}`}
+                                {uploading ? 'Subiendo...' : '✓ Guardar'}
                             </button>
                         </div>
                     )}
@@ -263,7 +244,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                         type="file"
                         accept="image/*"
                         onChange={handleFileSelect}
-                        style={{ display: 'none' }}
+                        className="hidden"
                     />
                 </div>
             </div>

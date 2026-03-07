@@ -25,7 +25,7 @@ $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (is
 
 if (empty($authHeader)) {
     http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
@@ -34,7 +34,7 @@ $payload = validateJWT($token);
 
 if (!$payload) {
     http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
+    echo json_encode(['success' => false, 'message' => 'Invalid token']);
     exit;
 }
 
@@ -59,9 +59,16 @@ try {
     $stmt = $pdo->query($sql);
     $obras = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode($obras);
+    echo json_encode([
+        'success' => true,
+        'obras' => $obras,
+        'total' => count($obras)
+    ]);
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Server error', 'message' => $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server error: ' . $e->getMessage()
+    ]);
 }
