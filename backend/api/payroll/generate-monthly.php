@@ -155,6 +155,11 @@ try {
         // ── Bonificação: valor fixo manual cadastrado no funcionário ────────────
         $bonificacao = floatval($apt['bonificacao_manual'] ?? 0);
 
+        // ── PROVISÃO DE FÉRIAS MENSAL ────────────────────────────────────────
+        // Fórmula: (valor_hora × 176 horas) ÷ 12 meses
+        // Valor que deve ser reservado mensalmente para pagar férias futuras
+        $feriasProvisaoMensal = ($salarioHora * 176) / 12;
+
         // ── Total Bruto (provimentos): horas + moradia + prima + bonificação ──
         $totalBruto = $subtotalHoras + $valeMoradia + $ibf + $bonificacao;
 
@@ -163,8 +168,8 @@ try {
         $totalLiquido = $subtotalHoras + $valeMoradia + $ibf + $bonificacao - $casFuncionarioValor;
 
         // ── Custo total para a empresa ────────────────────────────────────────
-        // O que a empresa paga + CASS da empresa (encargo patronal)
-        $custoTotalEmpresa = $totalLiquido + $casEmpresaValor;
+        // O que a empresa paga + CASS da empresa (encargo patronal) + provisão férias
+        $custoTotalEmpresa = $totalLiquido + $casEmpresaValor + $feriasProvisaoMensal;
 
         if ($existing) {
             // Atualizar apenas colunas não-GENERATED
@@ -179,6 +184,7 @@ try {
                     multiplicador_extra = :multiplicador_extra,
                     multiplicador_noturna = :multiplicador_noturna,
                     bonificacao = :bonificacao,
+                    ferias_provisao = :ferias_provisao,
                     total_bruto = :total_bruto,
                     cas_funcionario_percentual = :cas_func_perc,
                     cas_funcionario_valor = :cas_func_valor,
@@ -201,6 +207,7 @@ try {
                 'multiplicador_extra' => $multiplicadorExtra,
                 'multiplicador_noturna' => $multiplicadorNoturna,
                 'bonificacao'         => $bonificacao,
+                'ferias_provisao'     => $feriasProvisaoMensal,
                 'total_bruto'         => $totalBruto,
                 'cas_func_perc'       => $casDescFuncionario,
                 'cas_func_valor'      => $casFuncionarioValor,
@@ -222,7 +229,7 @@ try {
                     horas_normais, horas_extra, horas_noturna,
                     salario_base, salario_hora, salario_base_hora,
                     multiplicador_extra, multiplicador_noturna,
-                    bonificacao, total_bruto,
+                    bonificacao, ferias_provisao, total_bruto,
                     cas_funcionario_percentual, cas_funcionario_valor,
                     vale_moradia, ibf, total_liquido,
                     cas_empresa_percentual, cas_empresa_valor,
@@ -232,7 +239,7 @@ try {
                     :horas_normais, :horas_extra, :horas_noturna,
                     :salario_base, :salario_hora, :salario_base_hora,
                     :multiplicador_extra, :multiplicador_noturna,
-                    :bonificacao, :total_bruto,
+                    :bonificacao, :ferias_provisao, :total_bruto,
                     :cas_func_perc, :cas_func_valor,
                     :vale_moradia, :ibf, :total_liquido,
                     :cas_emp_perc, :cas_emp_valor,
@@ -252,6 +259,7 @@ try {
                 'multiplicador_extra' => $multiplicadorExtra,
                 'multiplicador_noturna' => $multiplicadorNoturna,
                 'bonificacao'         => $bonificacao,
+                'ferias_provisao'     => $feriasProvisaoMensal,
                 'total_bruto'         => $totalBruto,
                 'cas_func_perc'       => $casDescFuncionario,
                 'cas_func_valor'      => $casFuncionarioValor,

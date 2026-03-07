@@ -181,10 +181,19 @@ export default function Projects() {
                 console.warn('Failed to load employees for dropdowns');
             }
 
-            if (encarregadosRes.status === 'fulfilled' && Array.isArray(encarregadosRes.value)) {
-                setEncarregados(encarregadosRes.value);
+            if (encarregadosRes.status === 'fulfilled') {
+                const encData = encarregadosRes.value;
+                // Backend retorna {success, encarregados: [...]}
+                const encArray = encData.encarregados || encData;
+                if (Array.isArray(encArray)) {
+                    setEncarregados(encArray);
+                } else {
+                    console.warn('Encarregados response is not an array:', encData);
+                    setEncarregados([]);
+                }
             } else {
-                console.warn('Failed to load encarregados for dropdowns');
+                console.warn('Failed to load encarregados for dropdowns:', encarregadosRes.reason);
+                setEncarregados([]);
             }
 
             if (clientsRes.status === 'fulfilled' && Array.isArray(clientsRes.value)) {

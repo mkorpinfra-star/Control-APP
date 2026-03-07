@@ -26,6 +26,7 @@ export default function Encarregados() {
     });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // {id, nome}
 
     // Auto-refresh
     useAutoRefresh(['encarregados'], {
@@ -95,14 +96,20 @@ export default function Encarregados() {
         }
     };
 
-    const handleDelete = async (id, nome) => {
-        if (!confirm(`¿Eliminar encargado "${nome}"?`)) return;
+    const handleDelete = (id, nome) => {
+        setDeleteConfirm({ id, nome });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirm) return;
 
         try {
-            await encarregadosService.delete(id);
+            await encarregadosService.delete(deleteConfirm.id);
+            setDeleteConfirm(null);
             loadEncarregados();
         } catch (err) {
-            alert(err.message || 'Erro ao deletar');
+            setError(err.message || 'Erro ao deletar');
+            setDeleteConfirm(null);
         }
     };
 
@@ -306,6 +313,48 @@ export default function Encarregados() {
                                 disabled={saving}
                             >
                                 {saving ? 'Guardando...' : 'Guardar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <Trash2 size={24} className="text-red-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Eliminar Encargado</h3>
+                                <p className="text-sm text-gray-500">Esta acción no se puede deshacer</p>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                                {error}
+                            </div>
+                        )}
+
+                        <p className="text-gray-700 mb-6">
+                            ¿Estás seguro de que deseas eliminar al encargado <strong>{deleteConfirm.nome}</strong>?
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => { setDeleteConfirm(null); setError(''); }}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="flex-1 px-4 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors"
+                            >
+                                Eliminar
                             </button>
                         </div>
                     </div>
