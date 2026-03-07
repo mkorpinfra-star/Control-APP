@@ -114,6 +114,11 @@ try {
         $valorTotalServicos = $apt['valor_total'];
         $totalHoras = $apt['total_horas_normais'] + $apt['total_horas_extra'] + $apt['total_horas_noturna'];
 
+        // Calcular valores médios por hora (fallback se não houver horas)
+        $valorHoraNormal = 30.00;   // valor padrão
+        $valorHoraExtra = 42.00;    // valor padrão
+        $valorHoraNoturna = 48.00;  // valor padrão
+
         // FASE 4: Cálculo automático de IGI
         $totalBruto = $valorTotalServicos;
         $igiValor = $totalBruto * ($igiPercentual / 100);
@@ -124,24 +129,34 @@ try {
         $hasTotalHorasColumn = $checkColumn->rowCount() > 0;
 
         if ($existing) {
-            // Atualizar - condicional baseado em existência da coluna
+            // Atualizar - REMOVER colunas GENERATED (igi_valor)
             if ($hasTotalHorasColumn) {
                 $updateStmt = $pdo->prepare("
                     UPDATE faturamento SET
+                        horas_normais = :horas_normais,
+                        horas_extra = :horas_extra,
+                        horas_noturna = :horas_noturna,
+                        valor_hora_normal = :valor_hora_normal,
+                        valor_hora_extra = :valor_hora_extra,
+                        valor_hora_noturna = :valor_hora_noturna,
                         total_horas = :total_horas,
                         valor_total_servicos = :valor_total_servicos,
                         total_bruto = :total_bruto,
                         igi_percentual = :igi_percentual,
-                        igi_valor = :igi_valor,
                         total_liquido = :total_liquido
                     WHERE id = :id
                 ");
                 $updateStmt->execute([
+                    'horas_normais' => $apt['total_horas_normais'],
+                    'horas_extra' => $apt['total_horas_extra'],
+                    'horas_noturna' => $apt['total_horas_noturna'],
+                    'valor_hora_normal' => $valorHoraNormal,
+                    'valor_hora_extra' => $valorHoraExtra,
+                    'valor_hora_noturna' => $valorHoraNoturna,
                     'total_horas' => $totalHoras,
                     'valor_total_servicos' => $valorTotalServicos,
                     'total_bruto' => $totalBruto,
                     'igi_percentual' => $igiPercentual,
-                    'igi_valor' => $igiValor,
                     'total_liquido' => $totalLiquido,
                     'id' => $existing['id']
                 ]);
@@ -149,43 +164,64 @@ try {
                 // Sem coluna total_horas
                 $updateStmt = $pdo->prepare("
                     UPDATE faturamento SET
+                        horas_normais = :horas_normais,
+                        horas_extra = :horas_extra,
+                        horas_noturna = :horas_noturna,
+                        valor_hora_normal = :valor_hora_normal,
+                        valor_hora_extra = :valor_hora_extra,
+                        valor_hora_noturna = :valor_hora_noturna,
                         valor_total_servicos = :valor_total_servicos,
                         total_bruto = :total_bruto,
                         igi_percentual = :igi_percentual,
-                        igi_valor = :igi_valor,
                         total_liquido = :total_liquido
                     WHERE id = :id
                 ");
                 $updateStmt->execute([
+                    'horas_normais' => $apt['total_horas_normais'],
+                    'horas_extra' => $apt['total_horas_extra'],
+                    'horas_noturna' => $apt['total_horas_noturna'],
+                    'valor_hora_normal' => $valorHoraNormal,
+                    'valor_hora_extra' => $valorHoraExtra,
+                    'valor_hora_noturna' => $valorHoraNoturna,
                     'valor_total_servicos' => $valorTotalServicos,
                     'total_bruto' => $totalBruto,
                     'igi_percentual' => $igiPercentual,
-                    'igi_valor' => $igiValor,
                     'total_liquido' => $totalLiquido,
                     'id' => $existing['id']
                 ]);
             }
             $atualizados++;
         } else {
-            // Criar novo - condicional baseado em existência da coluna
+            // Criar novo - REMOVER colunas GENERATED (igi_valor)
             if ($hasTotalHorasColumn) {
                 $insertStmt = $pdo->prepare("
                     INSERT INTO faturamento (
-                        obra_id, mes_referencia, total_horas,
-                        valor_total_servicos, total_bruto, igi_percentual, igi_valor, total_liquido
+                        obra_id, mes_referencia,
+                        horas_normais, horas_extra, horas_noturna,
+                        valor_hora_normal, valor_hora_extra, valor_hora_noturna,
+                        total_horas, valor_total_servicos, total_bruto,
+                        igi_percentual, total_liquido
                     ) VALUES (
-                        :obra_id, :mes_referencia, :total_horas,
-                        :valor_total_servicos, :total_bruto, :igi_percentual, :igi_valor, :total_liquido
+                        :obra_id, :mes_referencia,
+                        :horas_normais, :horas_extra, :horas_noturna,
+                        :valor_hora_normal, :valor_hora_extra, :valor_hora_noturna,
+                        :total_horas, :valor_total_servicos, :total_bruto,
+                        :igi_percentual, :total_liquido
                     )
                 ");
                 $insertStmt->execute([
                     'obra_id' => $apt['obra_id'],
                     'mes_referencia' => $mesReferencia,
+                    'horas_normais' => $apt['total_horas_normais'],
+                    'horas_extra' => $apt['total_horas_extra'],
+                    'horas_noturna' => $apt['total_horas_noturna'],
+                    'valor_hora_normal' => $valorHoraNormal,
+                    'valor_hora_extra' => $valorHoraExtra,
+                    'valor_hora_noturna' => $valorHoraNoturna,
                     'total_horas' => $totalHoras,
                     'valor_total_servicos' => $valorTotalServicos,
                     'total_bruto' => $totalBruto,
                     'igi_percentual' => $igiPercentual,
-                    'igi_valor' => $igiValor,
                     'total_liquido' => $totalLiquido
                 ]);
             } else {
@@ -193,19 +229,30 @@ try {
                 $insertStmt = $pdo->prepare("
                     INSERT INTO faturamento (
                         obra_id, mes_referencia,
-                        valor_total_servicos, total_bruto, igi_percentual, igi_valor, total_liquido
+                        horas_normais, horas_extra, horas_noturna,
+                        valor_hora_normal, valor_hora_extra, valor_hora_noturna,
+                        valor_total_servicos, total_bruto,
+                        igi_percentual, total_liquido
                     ) VALUES (
                         :obra_id, :mes_referencia,
-                        :valor_total_servicos, :total_bruto, :igi_percentual, :igi_valor, :total_liquido
+                        :horas_normais, :horas_extra, :horas_noturna,
+                        :valor_hora_normal, :valor_hora_extra, :valor_hora_noturna,
+                        :valor_total_servicos, :total_bruto,
+                        :igi_percentual, :total_liquido
                     )
                 ");
                 $insertStmt->execute([
                     'obra_id' => $apt['obra_id'],
                     'mes_referencia' => $mesReferencia,
+                    'horas_normais' => $apt['total_horas_normais'],
+                    'horas_extra' => $apt['total_horas_extra'],
+                    'horas_noturna' => $apt['total_horas_noturna'],
+                    'valor_hora_normal' => $valorHoraNormal,
+                    'valor_hora_extra' => $valorHoraExtra,
+                    'valor_hora_noturna' => $valorHoraNoturna,
                     'valor_total_servicos' => $valorTotalServicos,
                     'total_bruto' => $totalBruto,
                     'igi_percentual' => $igiPercentual,
-                    'igi_valor' => $igiValor,
                     'total_liquido' => $totalLiquido
                 ]);
             }

@@ -9,6 +9,7 @@ import { Input, Select } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { Loading } from '../components/ui/Loading';
 import CustomSelect from '../components/CustomSelect';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 // ── Mini calendário de dias úteis (1 mês por vez, navegável) ───────────────
 function ObraCalendar({ dataInicio, dataFim, diasDesativados, onChange }) {
@@ -132,6 +133,12 @@ export default function Projects() {
     const [diasDesativados, setDiasDesativados] = useState([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+
+    // Auto-refresh: refetch quando volta ao app ou reconecta
+    useAutoRefresh(['projects', 'employees', 'clients'], {
+        refetchOnFocus: true,
+        refetchOnReconnect: true,
+    });
 
     useEffect(() => { loadData(); }, []);
 

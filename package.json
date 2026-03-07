@@ -17,6 +17,8 @@
     "@capacitor/core": "5.7.0",
     "@headlessui/react": "^2.2.9",
     "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.35.0",

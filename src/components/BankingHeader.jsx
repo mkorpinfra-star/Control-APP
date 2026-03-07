@@ -45,7 +45,7 @@ export default function BankingHeader() {
                 {user?.foto_url && user.foto_url.trim() !== '' && !imageError ? (
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all">
                     <img
-                      src={`https://j2s.ad/login/backend/${user.foto_url}`}
+                      src={`https://j2s.ad${user.foto_url}`}
                       alt={user?.nome}
                       className="w-full h-full object-cover"
                       onError={() => setImageError(true)}

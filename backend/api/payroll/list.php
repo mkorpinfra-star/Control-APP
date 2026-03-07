@@ -34,7 +34,7 @@ try {
             COALESCE(fp.total_bruto, fp.subtotal_horas) as subtotal_horas,
             COALESCE(fp.cas_funcionario_valor, fp.cas_desconto_funcionario_valor) as cas_desconto_funcionario_valor,
             COALESCE(fp.total_liquido, fp.liquido_a_pagar) as liquido_a_pagar,
-            COALESCE(fp.custo_total_empresa, fp.custo_total_empresa) as custo_total_empresa,
+            fp.custo_total_empresa as custo_total_empresa,
 
             -- Provimentos e descontos (ainda usam GENERATED)
             fp.total_provimentos,
@@ -60,7 +60,7 @@ try {
         SELECT
             COUNT(*) as total_funcionarios,
             SUM(COALESCE(total_liquido, liquido_a_pagar)) as total_liquido,
-            SUM(COALESCE(custo_total_empresa, custo_total_empresa)) as total_custo_empresa
+            SUM(custo_total_empresa) as total_custo_empresa
         FROM folha_pagamento
         WHERE mes_referencia = :mes_referencia
         $whereObra

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth, AuthProvider } from './contexts/AuthContext';
+import QueryProvider from './providers/QueryProvider';
 import './i18n';
 import './index.css';
 
@@ -140,15 +141,17 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename="/login">
-      <AuthProvider>
-        {showSplash ? (
-          <AnimatedSplash onComplete={() => setShowSplash(false)} />
-        ) : (
-          <AppRoutes />
-        )}
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryProvider>
+      <BrowserRouter basename="/login">
+        <AuthProvider>
+          {showSplash ? (
+            <AnimatedSplash onComplete={() => setShowSplash(false)} />
+          ) : (
+            <AppRoutes />
+          )}
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryProvider>
   );
 }
 

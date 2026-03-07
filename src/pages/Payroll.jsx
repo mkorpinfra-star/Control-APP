@@ -4,6 +4,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
 import { Plus, Download, Mail, Printer, Trash2, Trash } from 'lucide-react';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
@@ -32,6 +33,12 @@ export default function Payroll() {
         type: 'warning',
         confirmText: 'Confirmar',
         loading: false
+    });
+
+    // Auto-refresh: refetch quando volta ao app ou reconecta
+    useAutoRefresh(['payroll', 'obras'], {
+        refetchOnFocus: true,
+        refetchOnReconnect: true,
     });
 
     useEffect(() => {

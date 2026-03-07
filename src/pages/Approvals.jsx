@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { Modal, ModalBody, ModalFooter } from '../components/ui/Modal';
 import { Badge } from '../components/ui/Badge';
 import { Loading } from '../components/ui/Loading';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const getMondayOfWeek = (date = new Date()) => {
@@ -163,6 +164,12 @@ export default function Approvals() {
 
     // admin extras
     const [generatingReport, setGeneratingReport] = useState(false);
+
+    // Auto-refresh: refetch quando volta ao app ou reconecta
+    useAutoRefresh(['approvals', 'obras'], {
+        refetchOnFocus: true,
+        refetchOnReconnect: true,
+    });
 
     // ── load inicial ─────────────────────────────────────────────────────────
     useEffect(() => { loadAll(); }, []);
@@ -598,7 +605,7 @@ export default function Approvals() {
                                                     <div className="flex items-center gap-3">
                                                         {f.foto_url ? (
                                                             <img
-                                                                src={`https://j2s.ad/login/backend/${f.foto_url}`}
+                                                                src={`https://j2s.ad${f.foto_url}`}
                                                                 alt={f.funcionario_nome}
                                                                 className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                                                             />

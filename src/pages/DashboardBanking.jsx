@@ -1,7 +1,13 @@
 import QuickActions from '../components/QuickActions';
 import { TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 export default function DashboardBanking() {
+  // Auto-refresh: refetch quando volta ao app ou reconecta
+  useAutoRefresh(['dashboard'], {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
   // Mock data - você vai substituir com dados reais da API
   const stats = [
     {

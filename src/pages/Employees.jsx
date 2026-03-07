@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import { Fingerprint, Search, Plus, Trash2, Edit, X, User } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import CustomSelect from '../components/CustomSelect';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const inputCls = "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white";
 
@@ -33,6 +34,12 @@ export default function Employees() {
     const [error, setError] = useState('');
 
     const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
+
+    // Auto-refresh: refetch quando volta ao app ou reconecta
+    useAutoRefresh(['employees', 'funcoes'], {
+        refetchOnFocus: true,
+        refetchOnReconnect: true,
+    });
 
     useEffect(() => {
         loadEmployees();

@@ -167,16 +167,17 @@ try {
         $custoTotalEmpresa = $totalLiquido + $casEmpresaValor;
 
         if ($existing) {
-            // Atualizar
+            // Atualizar apenas colunas não-GENERATED
             $updateStmt = $pdo->prepare("
                 UPDATE folha_pagamento SET
                     horas_normais = :horas_normais,
                     horas_extra = :horas_extra,
                     horas_noturna = :horas_noturna,
+                    salario_base = :salario_base,
+                    salario_hora = :salario_hora,
                     salario_base_hora = :salario_base_hora,
                     multiplicador_extra = :multiplicador_extra,
                     multiplicador_noturna = :multiplicador_noturna,
-                    subtotal_horas = :subtotal_horas,
                     bonificacao = :bonificacao,
                     total_bruto = :total_bruto,
                     cas_funcionario_percentual = :cas_func_perc,
@@ -186,17 +187,19 @@ try {
                     total_liquido = :total_liquido,
                     cas_empresa_percentual = :cas_emp_perc,
                     cas_empresa_valor = :cas_emp_valor,
-                    custo_total_empresa = :custo_total
+                    cas_desconto_funcionario_percentual = :cas_desc_func_perc,
+                    cas_custo_empresa_percentual = :cas_custo_emp_perc
                 WHERE id = :id
             ");
             $updateStmt->execute([
                 'horas_normais'       => $apt['total_horas_normais'],
                 'horas_extra'         => $apt['total_horas_extra'],
                 'horas_noturna'       => $apt['total_horas_noturna'],
+                'salario_base'        => $salarioBase,
+                'salario_hora'        => $salarioHora,
                 'salario_base_hora'   => $salarioHora,
                 'multiplicador_extra' => $multiplicadorExtra,
                 'multiplicador_noturna' => $multiplicadorNoturna,
-                'subtotal_horas'      => $subtotalHoras,
                 'bonificacao'         => $bonificacao,
                 'total_bruto'         => $totalBruto,
                 'cas_func_perc'       => $casDescFuncionario,
@@ -206,29 +209,34 @@ try {
                 'total_liquido'       => $totalLiquido,
                 'cas_emp_perc'        => $casCustoEmpresa,
                 'cas_emp_valor'       => $casEmpresaValor,
-                'custo_total'         => $custoTotalEmpresa,
+                'cas_desc_func_perc'  => $casDescFuncionario,
+                'cas_custo_emp_perc'  => $casCustoEmpresa,
                 'id'                  => $existing['id']
             ]);
             $atualizados++;
         } else {
-            // Criar novo
+            // Criar novo - apenas colunas não-GENERATED
             $insertStmt = $pdo->prepare("
                 INSERT INTO folha_pagamento (
                     funcionario_id, obra_id, mes_referencia,
                     horas_normais, horas_extra, horas_noturna,
-                    salario_base_hora, multiplicador_extra, multiplicador_noturna,
-                    subtotal_horas, bonificacao, total_bruto,
+                    salario_base, salario_hora, salario_base_hora,
+                    multiplicador_extra, multiplicador_noturna,
+                    bonificacao, total_bruto,
                     cas_funcionario_percentual, cas_funcionario_valor,
                     vale_moradia, ibf, total_liquido,
-                    cas_empresa_percentual, cas_empresa_valor, custo_total_empresa
+                    cas_empresa_percentual, cas_empresa_valor,
+                    cas_desconto_funcionario_percentual, cas_custo_empresa_percentual
                 ) VALUES (
                     :funcionario_id, :obra_id, :mes_referencia,
                     :horas_normais, :horas_extra, :horas_noturna,
-                    :salario_base_hora, :multiplicador_extra, :multiplicador_noturna,
-                    :subtotal_horas, :bonificacao, :total_bruto,
+                    :salario_base, :salario_hora, :salario_base_hora,
+                    :multiplicador_extra, :multiplicador_noturna,
+                    :bonificacao, :total_bruto,
                     :cas_func_perc, :cas_func_valor,
                     :vale_moradia, :ibf, :total_liquido,
-                    :cas_emp_perc, :cas_emp_valor, :custo_total
+                    :cas_emp_perc, :cas_emp_valor,
+                    :cas_desc_func_perc, :cas_custo_emp_perc
                 )
             ");
             $insertStmt->execute([
@@ -238,10 +246,11 @@ try {
                 'horas_normais'       => $apt['total_horas_normais'],
                 'horas_extra'         => $apt['total_horas_extra'],
                 'horas_noturna'       => $apt['total_horas_noturna'],
+                'salario_base'        => $salarioBase,
+                'salario_hora'        => $salarioHora,
                 'salario_base_hora'   => $salarioHora,
                 'multiplicador_extra' => $multiplicadorExtra,
                 'multiplicador_noturna' => $multiplicadorNoturna,
-                'subtotal_horas'      => $subtotalHoras,
                 'bonificacao'         => $bonificacao,
                 'total_bruto'         => $totalBruto,
                 'cas_func_perc'       => $casDescFuncionario,
@@ -251,7 +260,8 @@ try {
                 'total_liquido'       => $totalLiquido,
                 'cas_emp_perc'        => $casCustoEmpresa,
                 'cas_emp_valor'       => $casEmpresaValor,
-                'custo_total'         => $custoTotalEmpresa
+                'cas_desc_func_perc'  => $casDescFuncionario,
+                'cas_custo_emp_perc'  => $casCustoEmpresa
             ]);
             $gerados++;
         }
