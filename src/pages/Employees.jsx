@@ -137,7 +137,7 @@ export default function Employees() {
     }[t] || 'bg-gray-100 text-gray-600');
 
     return (
-        <div className="min-h-screen bg-white pb-24">
+        <div className="min-h-screen bg-white pb-32">
             {/* Header */}
             <div className="px-4 pt-6 pb-4 flex items-center justify-between">
                 <div>

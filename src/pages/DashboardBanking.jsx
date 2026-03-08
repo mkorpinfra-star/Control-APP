@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import QuickActions from '../components/QuickActions';
 import { TrendingUp, Clock, CheckCircle, AlertCircle, Bell, Briefcase, Building2, UserPlus, ShieldPlus, Edit, XCircle } from 'lucide-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { obrasService, apontamentosService } from '../services/api';
@@ -217,11 +216,8 @@ export default function DashboardBanking() {
 
   return (
     <div className="pb-8">
-      {/* Quick Actions */}
-      <QuickActions />
-
       {/* Stats Grid */}
-      <div className="px-4 mb-6">
+      <div className="px-4 mb-6 pt-6">
         <h2 className="text-lg font-bold mb-4 text-gray-900">Resumen</h2>
 
         {loading ? (

@@ -120,7 +120,7 @@ export default function Encarregados() {
     );
 
     return (
-        <div className="min-h-screen bg-white pb-24">
+        <div className="min-h-screen bg-white pb-32">
             {/* Header */}
             <div className="px-4 pt-6 pb-4">
                 <div className="flex items-center justify-between mb-4">

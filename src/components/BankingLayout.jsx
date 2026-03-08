@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import BankingHeader from './BankingHeader';
+import DynamicHeader from './DynamicHeader';
 import BottomNav from './BottomNav';
 
 const pageVariants = {
@@ -32,12 +32,12 @@ export default function BankingLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 overflow-hidden">
+    <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <BankingHeader />
+      <DynamicHeader />
 
       {/* Main Content with Nubank-style transitions */}
-      <main className="min-h-[calc(100vh-theme(spacing.20))] relative">
+      <main className="relative overflow-x-hidden">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
@@ -45,11 +45,7 @@ export default function BankingLayout() {
             initial="initial"
             animate="enter"
             exit="exit"
-            style={{
-              position: 'absolute',
-              width: '100%',
-              minHeight: '100%'
-            }}
+            className="w-full"
           >
             <Outlet />
           </motion.div>

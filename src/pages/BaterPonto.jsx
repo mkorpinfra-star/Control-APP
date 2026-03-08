@@ -510,7 +510,7 @@ export default function BaterPonto() {
             </div>
 
             {/* Footer Fixo - COM ESPAÇO PARA MENU FLUTUANTE */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-3 pb-24 z-10">
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-3 pb-32 z-10">
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-xs text-gray-600 font-semibold">Total semana</span>
                     <div className="flex items-center gap-1.5">

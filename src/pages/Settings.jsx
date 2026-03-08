@@ -3,7 +3,7 @@ import { Settings as SettingsIcon, Info } from 'lucide-react';
 export default function Settings() {
 
     return (
-        <div className="min-h-screen bg-white pb-24">
+        <div className="min-h-screen bg-white pb-32">
             {/* Header */}
             <div className="px-4 pt-6 pb-4 mb-4">
                 <div className="flex items-center gap-3 mb-2">

@@ -117,13 +117,13 @@ export default function Reports() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-white pb-24 flex items-center justify-center">
+        <div className="min-h-screen bg-white pb-32 flex items-center justify-center">
             <div className="text-gray-600">Cargando datos...</div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-white pb-24">
+        <div className="min-h-screen bg-white pb-32">
             {/* Header */}
             <div className="px-4 pt-6 pb-4">
                 <div className="flex items-center justify-between mb-4">
