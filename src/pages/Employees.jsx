@@ -162,7 +162,7 @@ export default function Employees() {
             </div>
 
             {/* List - SCROLLÁVEL */}
-            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex-1 overflow-y-auto pb-20" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
                 <div className="px-4 pt-4 space-y-3">
                     {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-gray-100 animate-pulse rounded-xl" />)}

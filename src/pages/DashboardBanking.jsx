@@ -317,6 +317,64 @@ export default function DashboardBanking() {
           </div>
         )}
       </div>
+
+      {/* Descubra más - Carrossel Horizontal Estilo Nubank */}
+      <div className="mb-8">
+        <h2 className="text-lg font-bold mb-3 text-gray-900 px-4">Descubra más</h2>
+
+        {/* Carrossel Horizontal com Scroll Suave */}
+        <div className="overflow-x-auto hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex gap-3 px-4 pb-2">
+            {/* Card 1: Gestão de Obras */}
+            <div className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=600&h=180&fit=crop&auto=format&q=80"
+                alt="Gestión de obras"
+                className="w-full h-32 object-cover"
+                loading="lazy"
+              />
+              <div className="p-4">
+                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Gestión completa de obras</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Controle proyectos, empleados y facturación.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 2: Registro de Horas */}
+            <div className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=180&fit=crop&auto=format&q=80"
+                alt="Registro de horas"
+                className="w-full h-32 object-cover"
+                loading="lazy"
+              />
+              <div className="p-4">
+                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Registro de horas simplificado</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Empleados registran horas con geolocalización.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 3: Informes */}
+            <div className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=180&fit=crop&auto=format&q=80"
+                alt="Informes y análisis"
+                className="w-full h-32 object-cover"
+                loading="lazy"
+              />
+              <div className="p-4">
+                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Informes detallados</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Analice costos, facturación y rentabilidad.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

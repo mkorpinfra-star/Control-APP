@@ -414,7 +414,7 @@ export default function Projects() {
             </div>
 
             {/* Projects List - SCROLLÁVEL */}
-            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {loading ? (
                     <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
                         <p className="text-gray-600">Cargando proyectos...</p>

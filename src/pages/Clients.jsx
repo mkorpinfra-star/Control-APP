@@ -91,7 +91,7 @@ export default function Clients() {
             </div>
 
             {/* Content - SCROLLÁVEL */}
-            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex-1 overflow-y-auto pb-20" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
                 <div className="px-4 pt-4 space-y-3">
                     {[1, 2, 3, 4].map(i => (
