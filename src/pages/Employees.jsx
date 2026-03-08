@@ -46,12 +46,20 @@ export default function Employees() {
     useEffect(() => {
         loadEmployees();
         loadFuncoes();
+
+        // Listener para botão + do header
+        const handleOpenModal = () => openNew();
+        window.addEventListener('openAddModal', handleOpenModal);
+        return () => window.removeEventListener('openAddModal', handleOpenModal);
     }, []);
 
     const loadEmployees = async () => {
         try {
             setLoading(true);
-            const data = await api.getEmployees();
+            const [data] = await Promise.all([
+                api.getEmployees(),
+                new Promise(resolve => setTimeout(resolve, 400)) // Mínimo 400ms skeleton
+            ]);
             setEmployees(Array.isArray(data) ? data : []);
         } catch { setEmployees([]); }
         finally { setLoading(false); }

@@ -115,9 +115,12 @@ export default function Analytics() {
                 params.append('compare_end_date', filters.compareEndDate);
             }
 
-            const res = await fetch(`${API_URL}/dashboard/analytics-advanced.php?${params}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const [res] = await Promise.all([
+                fetch(`${API_URL}/dashboard/analytics-advanced.php?${params}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                new Promise(resolve => setTimeout(resolve, 400)) // Mínimo 400ms skeleton
+            ]);
 
             const result = await res.json();
             if (result.success) {

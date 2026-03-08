@@ -15,28 +15,28 @@ export default function ConfirmDialog({
 
   const typeConfig = {
     warning: {
-      icon: AlertTriangle,
+      icon: IconAlertTriangle,
       bgColor: 'bg-amber-50',
       iconColor: 'text-amber-600',
       borderColor: 'border-amber-200',
       buttonBg: 'bg-amber-600 hover:bg-amber-700'
     },
     info: {
-      icon: Info,
+      icon: IconInfoCircle,
       bgColor: 'bg-red-50',
       iconColor: 'text-[#CE0201]',
       borderColor: 'border-red-200',
       buttonBg: 'bg-[#CE0201] hover:bg-[#A00101]'
     },
     success: {
-      icon: CheckCircle,
+      icon: IconCircleCheck,
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
       borderColor: 'border-green-200',
       buttonBg: 'bg-green-600 hover:bg-green-700'
     },
     danger: {
-      icon: XCircle,
+      icon: IconCircleX,
       bgColor: 'bg-red-50',
       iconColor: 'text-red-600',
       borderColor: 'border-red-200',

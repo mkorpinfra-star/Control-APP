@@ -392,43 +392,34 @@ export default function Projects() {
             <div className="h-full flex flex-col bg-white">
             {/* Search & Filtros - FIXO */}
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
-                <div className="flex items-center gap-3">
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div data-tour="search-input" className="relative md:col-span-2">
-                            <IconSearch stroke={1} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Buscar por número o nombre..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                            />
-                        </div>
-                        <div>
-                            <select
-                                value={filterPais}
-                                onChange={(e) => setFilterPais(e.target.value)}
-                                className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm"
-                            >
-                                <option value="all">🌍 Todos los países ({projects.length})</option>
-                                {paisesDisponiveis.map(pais => {
-                                    const count = projects.filter(p => p.pais === pais).length;
-                                    return (
-                                        <option key={pais} value={pais}>
-                                            {PAISES_FLAGS[pais] || '🏳️'} {pais} ({count})
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div data-tour="search-input" className="relative md:col-span-2">
+                        <IconSearch stroke={1} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Buscar por número o nombre..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                        />
                     </div>
-                    <button
-                        data-tour="add-button"
-                        onClick={openNewModal}
-                        className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg shrink-0"
-                    >
-                        <IconPlus stroke={1} size={24} />
-                    </button>
+                    <div>
+                        <select
+                            value={filterPais}
+                            onChange={(e) => setFilterPais(e.target.value)}
+                            className="w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm"
+                        >
+                            <option value="all">🌍 Todos los países ({projects.length})</option>
+                            {paisesDisponiveis.map(pais => {
+                                const count = projects.filter(p => p.pais === pais).length;
+                                return (
+                                    <option key={pais} value={pais}>
+                                        {PAISES_FLAGS[pais] || '🏳️'} {pais} ({count})
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
                 </div>
             </div>
 

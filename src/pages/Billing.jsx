@@ -74,9 +74,10 @@ export default function Billing() {
         try {
             const token = localStorage.getItem('token');
             const url = `${API_URL}/billing/list.php?mes=${mesReferencia}&obra_id=${obraId}`;
-            const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const [response] = await Promise.all([
+                fetch(url, { headers: { 'Authorization': `Bearer ${token}` } }),
+                new Promise(resolve => setTimeout(resolve, 400)) // Mínimo 400ms skeleton
+            ]);
             const data = await response.json();
             if (data.success) {
                 setFaturas(data.faturas || []);
