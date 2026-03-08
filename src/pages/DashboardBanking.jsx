@@ -5,6 +5,7 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { obrasService, apontamentosService } from '../services/api';
 import { notificacoesService } from '../services/notificacoes';
 import TourGuide from '../components/TourGuide';
+import { SkeletonStatCard, SkeletonNotificationCard } from '../components/SkeletonLoader';
 
 export default function DashboardBanking() {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ export default function DashboardBanking() {
     alertas: 0
   });
   const [notificacoes, setNotificacoes] = useState([]);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [selectedInfo, setSelectedInfo] = useState(null);
 
   // Auto-refresh: refetch quando volta ao app ou reconecta
   useAutoRefresh(['dashboard'], {
@@ -109,21 +112,60 @@ export default function DashboardBanking() {
     }
   };
 
-  const handleStatClick = (statId) => {
-    switch(statId) {
-      case 'active':
-        navigate('/projects'); // Vai para obras
-        break;
-      case 'pending':
-        navigate('/approvals'); // Vai para aprovações pendentes
-        break;
-      case 'completed':
-        navigate('/projects'); // Vai para obras (poderá filtrar finalizadas)
-        break;
-      case 'alerts':
-        navigate('/projects'); // Vai para obras (poderá ver alertas)
-        break;
+  const infoContent = {
+    active: {
+      title: '🏗️ Obres Actives',
+      description: 'Totes les teves obres en marxa, en un sol lloc.',
+      benefits: [
+        'Adéu paperassa! 📋❌',
+        'Control total en temps real',
+        'Assigna encarregats al instant',
+        'Veu estat i progressos d\'un cop d\'ull'
+      ],
+      cta: 'Gestionar Obres',
+      action: () => navigate('/projects')
+    },
+    pending: {
+      title: '⏰ Aprovacions Pendents',
+      description: 'Revisa i aprova hores en segons, no en hores.',
+      benefits: [
+        'Adéu planilhas! 📊❌',
+        'Aprovació amb un clic',
+        'Histórico complet de cada empleat',
+        'Integració automàtica amb folha de pagament'
+      ],
+      cta: 'Revisar Aprovacions',
+      action: () => navigate('/approvals')
+    },
+    completed: {
+      title: '✅ Obres Finalitzades',
+      description: 'Histórico complet de tots els teus projectes.',
+      benefits: [
+        'Accés instantani a obres antigues',
+        'Estadístiques i informes automàtics',
+        'Referència per futurs pressupostos',
+        'Tot organitzat, res perdut'
+      ],
+      cta: 'Veure Històrico',
+      action: () => navigate('/projects')
+    },
+    alerts: {
+      title: '⚠️ Alertes',
+      description: 'Problemes? Resol-los abans que siguin problemes.',
+      benefits: [
+        'Notificacions intel·ligents',
+        'Detecta errors abans del pagament',
+        'Obres sense encarregat? T\'avisem!',
+        'Mai més sorpreses desagradables'
+      ],
+      cta: 'Veure Alertes',
+      action: () => navigate('/projects')
     }
+  };
+
+  const handleStatClick = (statId) => {
+    setSelectedInfo(infoContent[statId]);
+    setShowInfoModal(true);
   };
 
   const handleNotificationClick = async (notificacao) => {
@@ -224,7 +266,7 @@ export default function DashboardBanking() {
         {loading ? (
           <div className="grid grid-cols-4 gap-3">
             {[1,2,3,4].map(i => (
-              <div key={i} className="skeleton h-20 rounded-xl"></div>
+              <SkeletonStatCard key={i} />
             ))}
           </div>
         ) : (
@@ -260,7 +302,7 @@ export default function DashboardBanking() {
         {loadingNotifications ? (
           <div className="space-y-3">
             {[1,2,3].map(i => (
-              <div key={i} className="skeleton h-20 rounded-2xl"></div>
+              <SkeletonNotificationCard key={i} />
             ))}
           </div>
         ) : notificacoes.length === 0 ? (
@@ -387,6 +429,59 @@ export default function DashboardBanking() {
 
       {/* Tour Tutorial */}
       <TourGuide />
+
+      {/* Info Modal */}
+      {showInfoModal && selectedInfo && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowInfoModal(false)}>
+          <div
+            className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl transform transition-all"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-br from-[#CE0201] to-[#A00101] px-6 py-8 text-white">
+              <h3 className="text-2xl font-light mb-2" style={{ fontFamily: 'IBM Plex Sans', fontWeight: 200 }}>
+                {selectedInfo.title}
+              </h3>
+              <p className="text-white/90 text-sm leading-relaxed">
+                {selectedInfo.description}
+              </p>
+            </div>
+
+            {/* Benefits */}
+            <div className="px-6 py-6 space-y-3">
+              {selectedInfo.benefits.map((benefit, idx) => (
+                <div key={idx} className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-700 text-sm leading-relaxed">{benefit}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div className="px-6 pb-6 flex gap-3">
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+              >
+                Fechar
+              </button>
+              <button
+                onClick={() => {
+                  setShowInfoModal(false);
+                  selectedInfo.action();
+                }}
+                className="flex-1 px-4 py-3 bg-[#CE0201] text-white rounded-xl font-medium hover:bg-[#A00101] transition-colors"
+              >
+                {selectedInfo.cta}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

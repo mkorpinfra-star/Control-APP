@@ -4,6 +4,8 @@ import { IconFingerprint, IconSearch, IconPlus, IconTrash, IconEdit, IconX, Icon
 import { Button } from '../components/ui/Button';
 import CustomSelect from '../components/CustomSelect';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import EmployeesTour from '../components/tours/EmployeesTour';
+import { SkeletonEmployeeCard } from '../components/SkeletonLoader';
 
 const inputCls = "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white";
 
@@ -137,10 +139,12 @@ export default function Employees() {
     }[t] || 'bg-gray-100 text-gray-600');
 
     return (
-        <div className="h-full flex flex-col bg-white">
+        <>
+            <EmployeesTour />
+            <div className="h-full flex flex-col bg-white">
             {/* Filters - FIXO */}
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex flex-col gap-3">
-                <div className="relative">
+                <div data-tour="search-employee" className="relative">
                     <IconSearch size={18} stroke={1} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
@@ -165,7 +169,7 @@ export default function Employees() {
             <div className="flex-1 overflow-y-auto pb-20" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
                 <div className="px-4 pt-4 space-y-3">
-                    {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-gray-100 animate-pulse rounded-xl" />)}
+                    {[1,2,3,4,5,6].map(i => <SkeletonEmployeeCard key={i} />)}
                 </div>
             ) : filtered.length === 0 ? (
                 <div className="text-center py-16 px-4">
@@ -174,8 +178,8 @@ export default function Employees() {
                 </div>
             ) : (
                 <div className="px-4 pt-4 space-y-3">
-                    {filtered.map(emp => (
-                        <div key={emp.id} className="bg-[#F5F5F5] rounded-2xl p-4">
+                    {filtered.map((emp, idx) => (
+                        <div key={emp.id} data-tour={idx === 0 ? "employee-card" : undefined} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white text-gray-900 font-bold text-lg shrink-0">
                                     {emp.nome?.charAt(0)?.toUpperCase()}
@@ -189,10 +193,12 @@ export default function Employees() {
                                 </div>
                                 <div className="flex gap-2 shrink-0">
                                     <button onClick={() => handleEdit(emp)}
+                                        data-tour={idx === 0 ? "edit-employee-btn" : undefined}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors">
                                         <IconEdit size={16} stroke={1} />
                                     </button>
                                     <button onClick={() => handleDelete(emp)}
+                                        data-tour={idx === 0 ? "delete-employee-btn" : undefined}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors">
                                         <IconTrash size={16} stroke={1} />
                                     </button>
@@ -359,6 +365,7 @@ export default function Employees() {
                 </div>
             )}
             </div>
-        </div>
+            </div>
+        </>
     );
 }

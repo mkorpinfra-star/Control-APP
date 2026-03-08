@@ -11,6 +11,7 @@ import { Badge } from '../components/ui/Badge';
 import { Loading } from '../components/ui/Loading';
 import CustomSelect from '../components/CustomSelect';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import ProjectsTour from '../components/tours/ProjectsTour';
 
 // ── Mini calendário de dias úteis (1 mês por vez, navegável) ───────────────
 function ObraCalendar({ dataInicio, dataFim, diasDesativados, onChange }) {
@@ -379,11 +380,13 @@ export default function Projects() {
     }, [projects]);
 
     return (
-        <div className="h-full flex flex-col bg-white">
+        <>
+            <ProjectsTour />
+            <div className="h-full flex flex-col bg-white">
             {/* Search & Filtros - FIXO */}
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="relative md:col-span-2">
+                    <div data-tour="search-input" className="relative md:col-span-2">
                         <IconSearch stroke={1} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
@@ -929,6 +932,7 @@ export default function Projects() {
                     </div>
                 </div>
             )}
-        </div>
+            </div>
+        </>
     );
 }
