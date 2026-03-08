@@ -173,7 +173,7 @@ export default function Employees() {
                     <p className="text-gray-500">{searchTerm ? 'Sin resultados' : 'No hay usuarios. Añade el primero.'}</p>
                 </div>
             ) : (
-                <div className="px-4 space-y-3">
+                <div className="px-4 pt-4 space-y-3">
                     {filtered.map(emp => (
                         <div key={emp.id} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-center gap-3">

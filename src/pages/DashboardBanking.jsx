@@ -4,6 +4,7 @@ import { TrendingUp, Clock, CheckCircle, AlertCircle, Bell, Briefcase, Building2
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { obrasService, apontamentosService } from '../services/api';
 import { notificacoesService } from '../services/notificacoes';
+import TourGuide from '../components/TourGuide';
 
 export default function DashboardBanking() {
   const navigate = useNavigate();
@@ -215,9 +216,9 @@ export default function DashboardBanking() {
   ];
 
   return (
-    <div className="h-full pb-6">
+    <div className="h-full overflow-y-auto pb-24" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Stats Grid */}
-      <div className="px-4 mb-6 pt-6">
+      <div id="stats-section" className="px-4 mb-6 pt-6">
         <h2 className="text-lg font-bold mb-4 text-gray-900">Resumen</h2>
 
         {loading ? (
@@ -319,62 +320,77 @@ export default function DashboardBanking() {
       </div>
 
       {/* Descubra más - Carrossel Horizontal Estilo Nubank */}
-      <div className="mb-8">
-        <h2 className="text-lg font-bold mb-3 text-gray-900 px-4">Descubra más</h2>
+      <div className="mb-8 px-4">
+        <h2 className="text-lg font-bold mb-4 text-gray-900">Descobreix més</h2>
 
         {/* Carrossel Horizontal com Scroll Suave */}
-        <div className="overflow-x-auto hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="flex gap-3 px-4 pb-2">
+        <div className="overflow-x-auto hide-scrollbar -mx-4 px-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex gap-3 pb-2">
             {/* Card 1: Gestão de Obras */}
-            <div className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden">
+            <button
+              onClick={() => navigate('/guide/projects')}
+              className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden text-left hover:bg-gray-200 transition-colors active:scale-[0.98]"
+            >
               <img
                 src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=600&h=180&fit=crop&auto=format&q=80"
-                alt="Gestión de obras"
+                alt="Gestió d'obres"
                 className="w-full h-32 object-cover"
                 loading="lazy"
               />
               <div className="p-4">
-                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Gestión completa de obras</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Controle proyectos, empleados y facturación.
+                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Gestió completa d'obres</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                  Controla projectes, empleats i facturació.
                 </p>
+                <span className="text-xs text-[#CE0201] font-semibold">Més informació →</span>
               </div>
-            </div>
+            </button>
 
             {/* Card 2: Registro de Horas */}
-            <div className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden">
+            <button
+              onClick={() => navigate('/guide/timesheet')}
+              className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden text-left hover:bg-gray-200 transition-colors active:scale-[0.98]"
+            >
               <img
                 src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=180&fit=crop&auto=format&q=80"
-                alt="Registro de horas"
+                alt="Registre d'hores"
                 className="w-full h-32 object-cover"
                 loading="lazy"
               />
               <div className="p-4">
-                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Registro de horas simplificado</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Empleados registran horas con geolocalización.
+                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Registre d'hores simplificat</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                  Empleats registren hores amb geolocalització.
                 </p>
+                <span className="text-xs text-[#CE0201] font-semibold">Més informació →</span>
               </div>
-            </div>
+            </button>
 
             {/* Card 3: Informes */}
-            <div className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden">
+            <button
+              onClick={() => navigate('/guide/analytics')}
+              className="flex-shrink-0 w-72 bg-[#F5F5F5] rounded-2xl overflow-hidden text-left hover:bg-gray-200 transition-colors active:scale-[0.98]"
+            >
               <img
                 src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=180&fit=crop&auto=format&q=80"
-                alt="Informes y análisis"
+                alt="Informes i anàlisi"
                 className="w-full h-32 object-cover"
                 loading="lazy"
               />
               <div className="p-4">
-                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Informes detallados</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Analice costos, facturación y rentabilidad.
+                <h3 className="font-bold text-gray-900 mb-1.5 text-base">Informes detallats</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                  Analitza costos, facturació i rentabilitat.
                 </p>
+                <span className="text-xs text-[#CE0201] font-semibold">Més informació →</span>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Tour Tutorial */}
+      <TourGuide />
     </div>
   );
 }

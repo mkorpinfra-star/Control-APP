@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Briefcase, Building2, UserPlus, ShieldPlus, Users, FileText, DollarSign, BarChart3, Settings, UserCircle, Receipt, UserCog } from 'lucide-react';
+import { LogOut, Plus, Building, Building2, UserPlus, ShieldPlus, Users, FileText, DollarSign, BarChart3, Settings, UserCircle, Receipt, UserCog } from 'lucide-react';
 import ProfileMenu from './ProfileMenu';
 
 export default function DynamicHeader() {
@@ -45,7 +45,7 @@ export default function DynamicHeader() {
         type: 'list',
         title: 'Proyectos',
         subtitle: 'Gestión de obras',
-        icon: Briefcase,
+        icon: Building,
         addAction: () => navigate('/projects?add=true')
       },
       '/clients': {
@@ -110,17 +110,16 @@ export default function DynamicHeader() {
 
   const config = getPageConfig();
 
-  // TODOS os QuickActions (mesmos do carrossel original)
+  // TODOS os QuickActions (8 itens - removido Ajustes)
   const quickActions = [
-    { label: 'Obras', icon: Briefcase, path: '/projects' },
+    { label: 'Obras', icon: Building, path: '/projects' },
     { label: 'Clientes', icon: Users, path: '/clients' },
     { label: 'Encargados', icon: UserCog, path: '/encarregados' },
     { label: 'Empleados', icon: UserCircle, path: '/employees' },
     { label: 'Folha', icon: DollarSign, path: '/payroll' },
     { label: 'Faturamento', icon: Receipt, path: '/billing' },
     { label: 'Análisis', icon: BarChart3, path: '/analytics' },
-    { label: 'Informes', icon: FileText, path: '/reports' },
-    { label: 'Ajustes', icon: Settings, path: '/settings' }
+    { label: 'Informes', icon: FileText, path: '/reports' }
   ];
 
   return (
@@ -192,7 +191,7 @@ export default function DynamicHeader() {
 
           {/* Quick Actions - só aparece no Dashboard - Grid 5 colunas x 2 linhas */}
           {config.showQuickActions && (
-            <div className="grid grid-cols-5 gap-3">
+            <div id="quick-actions" className="grid grid-cols-5 gap-3">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (

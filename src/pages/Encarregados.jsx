@@ -153,7 +153,7 @@ export default function Encarregados() {
                     </div>
                 </div>
             ) : (
-                <div className="px-4 space-y-3">
+                <div className="px-4 pt-4 space-y-3">
                     {filteredEncarregados.map((enc) => (
                         <div key={enc.id} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-start justify-between mb-3">

@@ -107,7 +107,7 @@ export default function Clients() {
                     <p className="text-gray-500 text-sm">{searchTerm ? 'Intenta con otra búsqueda' : 'Añade tu primer cliente'}</p>
                 </div>
             ) : (
-                <div className="px-4 space-y-3">
+                <div className="px-4 pt-4 space-y-3">
                     {filteredClients.map((client) => (
                         <div key={client.id} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-center gap-3 mb-3">
