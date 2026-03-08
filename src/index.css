@@ -80,7 +80,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 400;
+  font-weight: 400 !important;
   color: var(--color-black);
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -89,7 +89,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Títulos de seção com IBM Plex Sans */
 .section-title {
   font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
+  font-weight: 400 !important;
   padding-top: 0.5rem;
 }
 

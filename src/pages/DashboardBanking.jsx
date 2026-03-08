@@ -198,13 +198,13 @@ export default function DashboardBanking() {
 
   const getColorClass = (color) => {
     const colors = {
-      'blue': 'bg-blue-100 text-blue-600',
-      'green': 'bg-green-100 text-green-600',
-      'red': 'bg-red-100 text-red-600',
-      'orange': 'bg-orange-100 text-orange-600',
-      'gray': 'bg-gray-100 text-gray-600'
+      'blue': 'bg-blue-100 text-black',
+      'green': 'bg-green-100 text-black',
+      'red': 'bg-red-100 text-black',
+      'orange': 'bg-orange-100 text-black',
+      'gray': 'bg-gray-100 text-black'
     };
-    return colors[color] || 'bg-gray-100 text-gray-600';
+    return colors[color] || 'bg-gray-100 text-black';
   };
 
   const formatTimeAgo = (created_at) => {
