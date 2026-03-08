@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Fingerprint, Search, Plus, Trash2, Edit, X, User } from 'lucide-react';
+import { IconFingerprint, IconSearch, IconPlus, IconTrash, IconEdit, IconX, IconUser } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import CustomSelect from '../components/CustomSelect';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
@@ -141,7 +141,7 @@ export default function Employees() {
             {/* Filters - FIXO */}
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex flex-col gap-3">
                 <div className="relative">
-                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <IconSearch size={18} stroke={1} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Buscar por nombre o pasaporte..."
@@ -169,7 +169,7 @@ export default function Employees() {
                 </div>
             ) : filtered.length === 0 ? (
                 <div className="text-center py-16 px-4">
-                    <User size={48} className="mx-auto text-gray-300 mb-3" />
+                    <IconUser size={48} stroke={1} className="mx-auto text-gray-300 mb-3" />
                     <p className="text-gray-500">{searchTerm ? 'Sin resultados' : 'No hay usuarios. Añade el primero.'}</p>
                 </div>
             ) : (
@@ -190,11 +190,11 @@ export default function Employees() {
                                 <div className="flex gap-2 shrink-0">
                                     <button onClick={() => handleEdit(emp)}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors">
-                                        <Edit size={16} />
+                                        <IconEdit size={16} stroke={1} />
                                     </button>
                                     <button onClick={() => handleDelete(emp)}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors">
-                                        <Trash2 size={16} />
+                                        <IconTrash size={16} stroke={1} />
                                     </button>
                                 </div>
                             </div>
@@ -233,7 +233,7 @@ export default function Employees() {
                             </h2>
                             <button onClick={() => setShowModal(false)}
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                                <X size={18} />
+                                <IconX size={18} stroke={1} />
                             </button>
                         </div>
 
@@ -330,7 +330,7 @@ export default function Employees() {
                                 {/* Biometria toggle */}
                                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                                     <div className="flex items-center gap-3">
-                                        <Fingerprint size={20} className="text-gray-500" />
+                                        <IconFingerprint size={20} stroke={1} className="text-gray-500" />
                                         <div>
                                             <p className="text-sm font-medium text-gray-700">Acceso Biométrico</p>
                                             <p className="text-xs text-gray-400">Huella / Face ID en móvil</p>

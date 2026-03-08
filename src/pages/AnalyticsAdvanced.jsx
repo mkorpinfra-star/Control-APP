@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, AlertTriangle, Award, Users, Clock, Calendar, RefreshCw, Download } from 'lucide-react';
+import { IconTrendingUp, IconTrendingDown, IconAlertTriangle, IconAward, IconUsers, IconClock, IconCalendar, IconRefresh, IconDownload } from '@tabler/icons-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 

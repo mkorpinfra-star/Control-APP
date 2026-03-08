@@ -1,4 +1,4 @@
-import { AlertTriangle, Info, CheckCircle, XCircle } from 'lucide-react';
+import { IconAlertTriangle, IconInfoCircle, IconCircleCheck, IconCircleX } from '@tabler/icons-react';
 
 export default function ConfirmDialog({
   isOpen,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Clock, CheckCircle, AlertCircle, Bell, Briefcase, Building2, UserPlus, ShieldPlus, Edit, XCircle } from 'lucide-react';
+import { IconTrendingUp, IconClock, IconCircleCheck, IconAlertCircle, IconBell, IconBriefcase, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconEdit, IconCircleX } from '@tabler/icons-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { obrasService, apontamentosService } from '../services/api';
 import { notificacoesService } from '../services/notificacoes';
@@ -142,17 +142,17 @@ export default function DashboardBanking() {
 
   const getIconComponent = (iconName) => {
     const icons = {
-      'briefcase': Briefcase,
-      'edit': Edit,
-      'check-circle': CheckCircle,
-      'building-2': Building2,
-      'user-plus': UserPlus,
-      'shield-plus': ShieldPlus,
-      'clock': Clock,
-      'x-circle': XCircle,
-      'bell': Bell
+      'briefcase': IconBriefcase,
+      'edit': IconEdit,
+      'check-circle': IconCircleCheck,
+      'building-2': IconBuildingFactory2,
+      'user-plus': IconUserPlus,
+      'shield-plus': IconShieldPlus,
+      'clock': IconClock,
+      'x-circle': IconCircleX,
+      'bell': IconBell
     };
-    return icons[iconName] || Bell;
+    return icons[iconName] || IconBell;
   };
 
   const getColorClass = (color) => {
@@ -185,7 +185,7 @@ export default function DashboardBanking() {
       id: 'active',
       label: 'Obras Activas',
       value: stats.obrasAtivas,
-      icon: TrendingUp,
+      icon: IconTrendingUp,
       color: 'text-black',
       bgColor: 'bg-gray-100'
     },
@@ -193,7 +193,7 @@ export default function DashboardBanking() {
       id: 'pending',
       label: 'Aprobaciones Pendientes',
       value: stats.apontamentosPendentes,
-      icon: Clock,
+      icon: IconClock,
       color: 'text-black',
       bgColor: 'bg-gray-100'
     },
@@ -201,7 +201,7 @@ export default function DashboardBanking() {
       id: 'completed',
       label: 'Finalizadas',
       value: stats.obrasFinalizadas,
-      icon: CheckCircle,
+      icon: IconCircleCheck,
       color: 'text-black',
       bgColor: 'bg-gray-100'
     },
@@ -209,7 +209,7 @@ export default function DashboardBanking() {
       id: 'alerts',
       label: 'Alertas',
       value: stats.alertas,
-      icon: AlertCircle,
+      icon: IconAlertCircle,
       color: 'text-black',
       bgColor: 'bg-gray-100'
     }
@@ -217,35 +217,31 @@ export default function DashboardBanking() {
 
   return (
     <div className="h-full overflow-y-auto pb-24" style={{ WebkitOverflowScrolling: 'touch' }}>
-      {/* Stats Grid */}
+      {/* Stats Grid - Ícones compactos lado a lado */}
       <div id="stats-section" className="px-4 mb-6 pt-6">
         <h2 className="text-lg font-bold mb-4 text-gray-900">Resumen</h2>
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 gap-3">
             {[1,2,3,4].map(i => (
-              <div key={i} className="skeleton h-28 rounded-2xl"></div>
+              <div key={i} className="skeleton h-20 rounded-xl"></div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 gap-3">
             {statsConfig.map((stat) => {
               const Icon = stat.icon;
               return (
                 <button
                   key={stat.id}
                   onClick={() => handleStatClick(stat.id)}
-                  className="bg-[#F5F5F5] rounded-2xl p-5 text-left hover:bg-gray-200 transition-colors active:scale-95"
+                  className="bg-[#F5F5F5] rounded-xl p-3 flex flex-col items-center justify-start hover:bg-gray-200 transition-colors active:scale-95 min-h-[100px]"
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className={`w-12 h-12 rounded-xl ${stat.bgColor} ${stat.color} flex items-center justify-center shrink-0`}>
-                      <Icon size={24} strokeWidth={2.5} />
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900 leading-none">
-                      {stat.value}
-                    </p>
-                  </div>
-                  <p className="text-sm text-gray-600">
+                  <Icon size={28} stroke={1} className="text-gray-900 mb-2 mt-1" />
+                  <p className="text-2xl font-bold text-gray-900 leading-none mb-1">
+                    {stat.value}
+                  </p>
+                  <p className="text-[10px] text-gray-600 text-center leading-tight">
                     {stat.label}
                   </p>
                 </button>
@@ -269,7 +265,7 @@ export default function DashboardBanking() {
           </div>
         ) : notificacoes.length === 0 ? (
           <div className="bg-[#F5F5F5] rounded-2xl p-8 text-center">
-            <Bell size={48} className="mx-auto text-gray-400 mb-3" />
+            <IconBell size={48} stroke={1} className="mx-auto text-gray-400 mb-3" />
             <p className="text-gray-600 text-sm">
               No hay actividad reciente
             </p>
@@ -291,7 +287,7 @@ export default function DashboardBanking() {
                 >
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-xl ${colorClass} flex items-center justify-center shrink-0`}>
-                      <IconComponent size={20} strokeWidth={2.5} />
+                      <IconComponent size={20} stroke={1} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">

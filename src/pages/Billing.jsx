@@ -3,7 +3,7 @@ import Toast from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
-import { Plus, Download, Mail, Trash2, Trash } from 'lucide-react';
+import { IconPlus, IconDownload, IconMail, IconTrash } from '@tabler/icons-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
@@ -270,7 +270,7 @@ export default function Billing() {
                         disabled={loading}
                         className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg disabled:opacity-50"
                     >
-                        <Plus size={24} strokeWidth={2.5} />
+                        <IconPlus stroke={1} size={24} />
                     </button>
                 </div>
 
@@ -280,21 +280,21 @@ export default function Billing() {
                         disabled={exporting || loading}
                         className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Download size={14} /> {exporting ? 'Exportando...' : 'Excel'}
+                        <IconDownload stroke={1} size={14} /> {exporting ? 'Exportando...' : 'Excel'}
                     </button>
                     <button
                         onClick={handleSendEmail}
                         disabled={sendingEmail || loading}
                         className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Mail size={14} /> {sendingEmail ? 'Enviando...' : 'Email'}
+                        <IconMail stroke={1} size={14} /> {sendingEmail ? 'Enviando...' : 'Email'}
                     </button>
                     <button
                         onClick={handleDeleteMes}
                         disabled={faturas.length === 0}
                         className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Trash size={14} /> Limpar
+                        <IconTrash stroke={1} size={14} /> Limpar
                     </button>
                 </div>
             </div>
@@ -426,7 +426,7 @@ export default function Billing() {
                                                     className="w-8 h-8 flex items-center justify-center bg-red-600 text-white hover:bg-red-700 rounded-full mx-auto"
                                                     title="Deletar"
                                                 >
-                                                    <Trash2 size={14} />
+                                                    <IconTrash stroke={1} size={14} />
                                                 </button>
                                             </td>
                                         </tr>

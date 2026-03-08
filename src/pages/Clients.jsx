@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { clientesService } from '../services/api';
-import { Plus, Search, Edit, Trash2, Building2, Mail, Phone, MapPin } from 'lucide-react';
+import { IconPlus, IconSearch, IconEdit, IconTrash, IconBuildingFactory2, IconMail, IconPhone, IconMapPin } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '../components/ui/Modal';
@@ -79,7 +79,7 @@ export default function Clients() {
             {/* Search - FIXO */}
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
                 <div className="relative">
-                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Buscar cliente..."
@@ -100,7 +100,7 @@ export default function Clients() {
                 </div>
             ) : filteredClients.length === 0 ? (
                 <div className="text-center py-16 px-4">
-                    <Building2 size={48} className="mx-auto text-gray-300 mb-3" />
+                    <IconBuildingFactory2 size={48} className="mx-auto text-gray-300 mb-3" />
                     <h3 className="text-lg font-semibold text-gray-700 mb-1">
                         {searchTerm ? 'Sin resultados' : 'No hay clientes'}
                     </h3>
@@ -112,7 +112,7 @@ export default function Clients() {
                         <div key={client.id} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gray-900 shrink-0">
-                                    <Building2 size={24} />
+                                    <IconBuildingFactory2 size={24} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h3 className="font-semibold text-gray-900 text-base">{client.nome}</h3>
@@ -120,11 +120,11 @@ export default function Clients() {
                                 <div className="flex gap-2 shrink-0">
                                     <button onClick={() => handleEdit(client)}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors">
-                                        <Edit size={16} />
+                                        <IconEdit size={16} />
                                     </button>
                                     <button onClick={() => handleDelete(client)}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors">
-                                        <Trash2 size={16} />
+                                        <IconTrash size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -132,19 +132,19 @@ export default function Clients() {
                             <div className="space-y-1.5">
                                 {client.email && (
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Mail size={14} className="shrink-0" />
+                                        <IconMail size={14} className="shrink-0" />
                                         <span className="truncate">{client.email}</span>
                                     </div>
                                 )}
                                 {client.telefone && (
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Phone size={14} className="shrink-0" />
+                                        <IconPhone size={14} className="shrink-0" />
                                         <span>{client.telefone}</span>
                                     </div>
                                 )}
                                 {client.endereco && (
                                     <div className="flex items-start gap-2 text-sm text-gray-600">
-                                        <MapPin size={14} className="shrink-0 mt-0.5" />
+                                        <IconMapPin size={14} className="shrink-0 mt-0.5" />
                                         <span className="line-clamp-1">{client.endereco}</span>
                                     </div>
                                 )}

@@ -1,4 +1,4 @@
-import { Settings as SettingsIcon, Info } from 'lucide-react';
+import { IconSettings as SettingsIcon, IconInfoCircle as Info } from '@tabler/icons-react';
 
 export default function Settings() {
 
@@ -8,7 +8,7 @@ export default function Settings() {
                 {/* Aviso principal */}
                 <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
                     <div className="flex gap-3">
-                        <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-600" />
+                        <Info stroke={1} className="w-5 h-5 shrink-0 mt-0.5 text-blue-600" />
                         <div className="text-sm text-blue-900">
                             <p className="font-semibold mb-2">Configuraciones movidas a nivel de Obra</p>
                             <p className="mb-3">
@@ -25,7 +25,7 @@ export default function Settings() {
                 {/* Aviso sobre custo individual */}
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
                     <div className="flex gap-3">
-                        <Info className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
+                        <Info stroke={1} className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
                         <div className="text-sm text-amber-800">
                             <strong>Custo por funcionário</strong> — o valor pago a cada funcionário (salário base e custo/hora)
                             é configurado individualmente no cadastro de cada <strong>Empleado</strong>.
@@ -35,7 +35,7 @@ export default function Settings() {
 
                 {/* Placeholder para futuras configurações globais */}
                 <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
-                    <SettingsIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <SettingsIcon stroke={1} className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                     <p className="text-gray-600">
                         Configurações globais do sistema aparecerão aqui.
                     </p>

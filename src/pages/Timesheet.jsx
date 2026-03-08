@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { obrasService, apontamentosService } from '../services/api';
-import { ChevronLeft, ChevronRight, Save, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { IconChevronLeft, IconChevronRight, IconDeviceFloppy, IconSend, IconCircleCheck, IconAlertCircle } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
 import CustomSelect from '../components/CustomSelect';
@@ -283,7 +283,7 @@ export default function Timesheet() {
                 {apontamento?.status === 'rejeitado' && apontamento.observacao_rejeicao && (
                     <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
                         <div className="flex items-start gap-3">
-                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <IconAlertCircle stroke={1} className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                             <div className="flex-1">
                                 <strong className="text-red-900 font-semibold">{t('timesheet.rejectionReason')}:</strong>
                                 <p className="mt-1 text-sm text-red-700">{apontamento.observacao_rejeicao}</p>
@@ -301,8 +301,8 @@ export default function Timesheet() {
                     }`}>
                         <div className="flex items-center gap-3">
                             {message.type === 'success' ?
-                                <CheckCircle className="w-5 h-5 text-green-600" /> :
-                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                                <IconCircleCheck stroke={1} className="w-5 h-5 text-green-600" /> :
+                                <IconAlertCircle stroke={1} className="w-5 h-5 text-amber-600" />
                             }
                             <span className={`text-sm font-medium ${
                                 message.type === 'success' ? 'text-green-900' :
@@ -320,7 +320,7 @@ export default function Timesheet() {
                         className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-100 transition-colors text-gray-700"
                         aria-label="Semana anterior"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <IconChevronLeft stroke={1} className="w-5 h-5" />
                     </button>
                     <div className="text-center flex-1">
                         <div className="font-semibold text-gray-900">{formatWeekRange(weekStart)}</div>
@@ -331,7 +331,7 @@ export default function Timesheet() {
                         className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-100 transition-colors text-gray-700"
                         aria-label="Semana siguiente"
                     >
-                        <ChevronRight className="w-5 h-5" />
+                        <IconChevronRight stroke={1} className="w-5 h-5" />
                     </button>
                 </div>
 
@@ -506,7 +506,7 @@ export default function Timesheet() {
                                         </>
                                     ) : (
                                         <>
-                                            <Send className="w-5 h-5" />
+                                            <IconSend stroke={1} className="w-5 h-5" />
                                             {t('timesheet.submit')}
                                         </>
                                     )}
@@ -524,7 +524,7 @@ export default function Timesheet() {
                                         </>
                                     ) : (
                                         <>
-                                            <Save className="w-5 h-5" />
+                                            <IconDeviceFloppy stroke={1} className="w-5 h-5" />
                                             {t('timesheet.saveDraft')}
                                         </>
                                     )}
@@ -536,7 +536,7 @@ export default function Timesheet() {
                         {isReadOnly && (
                             <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
                                 <div className="flex items-center gap-3">
-                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                    <IconCircleCheck stroke={1} className="w-5 h-5 text-green-600" />
                                     <span className="text-sm font-medium text-green-900">
                                         {apontamento.status === 'enviado'
                                             ? t('timesheet.pendingApproval')

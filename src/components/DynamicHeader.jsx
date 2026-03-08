@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Building, Building2, UserPlus, ShieldPlus, Users, FileText, DollarSign, BarChart3, Settings, UserCircle, Receipt, UserCog } from 'lucide-react';
+import { IconLogout, IconPlus, IconBuilding, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconUsers, IconFileText, IconCurrencyDollar, IconChartBar, IconSettings, IconUserCircle, IconReceipt, IconUserCog } from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
 
 export default function DynamicHeader() {
@@ -45,59 +45,59 @@ export default function DynamicHeader() {
         type: 'list',
         title: 'Proyectos',
         subtitle: 'Gestión de obras',
-        icon: Building,
+        icon: IconBuilding,
         addAction: () => navigate('/projects?add=true')
       },
       '/clients': {
         type: 'list',
         title: 'Clientes',
         subtitle: 'Gestión de clientes',
-        icon: Building2,
+        icon: IconBuildingFactory2,
         addAction: () => navigate('/clients?add=true')
       },
       '/encarregados': {
         type: 'list',
         title: 'Encargados',
         subtitle: 'Gestión de encargados',
-        icon: ShieldPlus,
+        icon: IconShieldPlus,
         addAction: () => navigate('/encarregados?add=true')
       },
       '/employees': {
         type: 'list',
         title: 'Empleados',
         subtitle: 'Gestión de empleados',
-        icon: Users,
+        icon: IconUsers,
         addAction: () => navigate('/employees?add=true')
       },
       '/approvals': {
         type: 'page',
         title: 'Aprobaciones',
         subtitle: 'Registros pendientes',
-        icon: FileText
+        icon: IconFileText
       },
       '/payroll': {
         type: 'page',
         title: 'Nómina',
         subtitle: 'Folha de pagamento',
-        icon: DollarSign
+        icon: IconCurrencyDollar
       },
       '/billing': {
         type: 'page',
         title: 'Facturación',
         subtitle: 'Faturamento',
-        icon: FileText
+        icon: IconFileText
       },
       '/analytics': {
         type: 'page',
         title: 'Analíticas',
         subtitle: 'Informes y estadísticas',
-        icon: BarChart3
+        icon: IconChartBar
       },
       '/settings': {
         type: 'page',
         title: 'Configuración',
         subtitle: 'Ajustes del sistema',
-        icon: Settings
+        icon: IconSettings
       }
     };
 
@@ -112,14 +112,14 @@ export default function DynamicHeader() {
 
   // TODOS os QuickActions (8 itens - removido Ajustes)
   const quickActions = [
-    { label: 'Obras', icon: Building, path: '/projects' },
-    { label: 'Clientes', icon: Users, path: '/clients' },
-    { label: 'Encargados', icon: UserCog, path: '/encarregados' },
-    { label: 'Empleados', icon: UserCircle, path: '/employees' },
-    { label: 'Folha', icon: DollarSign, path: '/payroll' },
-    { label: 'Faturamento', icon: Receipt, path: '/billing' },
-    { label: 'Análisis', icon: BarChart3, path: '/analytics' },
-    { label: 'Informes', icon: FileText, path: '/reports' }
+    { label: 'Obras', icon: IconBuilding, path: '/projects', tourId: 'obras-btn' },
+    { label: 'Clientes', icon: IconUsers, path: '/clients', tourId: 'clientes-btn' },
+    { label: 'Encargados', icon: IconUserCog, path: '/encarregados', tourId: 'encargados-btn' },
+    { label: 'Empleados', icon: IconUserCircle, path: '/employees', tourId: 'empleados-btn' },
+    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' },
+    { label: 'Faturamento', icon: IconReceipt, path: '/billing', tourId: 'faturamento-btn' },
+    { label: 'Análisis', icon: IconChartBar, path: '/analytics', tourId: 'analisis-btn' },
+    { label: 'Informes', icon: IconFileText, path: '/reports', tourId: 'informes-btn' }
   ];
 
   return (
@@ -163,7 +163,7 @@ export default function DynamicHeader() {
               className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
               aria-label="Cerrar sesión"
             >
-              <LogOut size={20} />
+              <IconLogout stroke={1} size={20} />
             </button>
           </div>
 
@@ -182,7 +182,7 @@ export default function DynamicHeader() {
                     onClick={config.addAction}
                     className="w-12 h-12 bg-white text-[#CE0201] rounded-full hover:bg-white/90 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg ml-3 shrink-0"
                   >
-                    <Plus size={24} strokeWidth={2.5} />
+                    <IconPlus stroke={1} size={24} />
                   </button>
                 )}
               </div>
@@ -198,10 +198,11 @@ export default function DynamicHeader() {
                   <button
                     key={action.path}
                     onClick={() => navigate(action.path)}
+                    data-tour={action.tourId}
                     className="flex flex-col items-center gap-1.5 hover:opacity-80 transition-opacity active:scale-95"
                   >
                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                      <Icon size={24} strokeWidth={2.5} />
+                      <Icon stroke={1} size={24} />
                     </div>
                     <span className="text-[10px] font-medium text-center leading-tight">{action.label}</span>
                   </button>

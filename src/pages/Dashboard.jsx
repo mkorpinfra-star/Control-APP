@@ -4,9 +4,9 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import {
-    TrendingUp, TrendingDown, DollarSign, Users, Briefcase, Clock,
-    Activity, AlertCircle, RefreshCw, ChevronUp, ChevronDown
-} from 'lucide-react';
+    IconTrendingUp, IconTrendingDown, IconCurrencyDollar, IconUsers, IconBriefcase, IconClock,
+    IconActivity, IconAlertCircle, IconRefresh, IconChevronUp, IconChevronDown
+} from '@tabler/icons-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 

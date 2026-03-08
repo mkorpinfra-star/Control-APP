@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, clientesService, encarregadosService } from '../services/api';
 import { PAISES_EUROPA, PAISES_FLAGS } from '../data/paises';
-import { Plus, Search, Edit, Trash2, Users, MapPin, Mail, Briefcase, Building2, Calendar } from 'lucide-react';
+import { IconPlus, IconSearch, IconEdit, IconTrash, IconUsers, IconMapPin, IconMail, IconBriefcase, IconBuildingFactory2, IconCalendar } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import { Modal, ModalBody, ModalFooter } from '../components/ui/Modal';
@@ -63,7 +63,7 @@ function ObraCalendar({ dataInicio, dataFim, diasDesativados, onChange }) {
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
                 <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <IconCalendar stroke={1} className="w-4 h-4 text-gray-500" />
                     <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Días de trabajo</span>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -384,7 +384,7 @@ export default function Projects() {
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="relative md:col-span-2">
-                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <IconSearch stroke={1} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Buscar por número o nombre..."
@@ -421,7 +421,7 @@ export default function Projects() {
                     </div>
                 ) : filteredProjects.length === 0 ? (
                     <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
-                        <Briefcase size={48} className="mx-auto mb-4 text-gray-400 opacity-30" />
+                        <IconBriefcase stroke={1} size={48} className="mx-auto mb-4 text-gray-400 opacity-30" />
                         <h3 className="text-lg font-semibold text-gray-700 mb-2">No se encontraron obras</h3>
                         <p className="text-gray-600">Verifica tu búsqueda o crea una nueva obra.</p>
                     </div>
@@ -431,7 +431,7 @@ export default function Projects() {
                         <div key={project.id} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gray-900 shrink-0">
-                                    <Briefcase size={24} />
+                                    <IconBriefcase stroke={1} size={24} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
@@ -447,21 +447,21 @@ export default function Projects() {
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors"
                                         title="Asignar personal"
                                     >
-                                        <Users size={16} />
+                                        <IconUsers stroke={1} size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleEdit(project)}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors"
                                         title="Editar"
                                     >
-                                        <Edit size={16} />
+                                        <IconEdit stroke={1} size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(project)}
                                         className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors"
                                         title="Eliminar"
                                     >
-                                        <Trash2 size={16} />
+                                        <IconTrash stroke={1} size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -470,7 +470,7 @@ export default function Projects() {
                             <div className="space-y-1.5">
                                 {project.cliente_nome && (
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Building2 size={14} className="shrink-0" />
+                                        <IconBuildingFactory2 stroke={1} size={14} className="shrink-0" />
                                         <span className="truncate">{project.cliente_nome}</span>
                                     </div>
                                 )}
@@ -483,18 +483,18 @@ export default function Projects() {
                                     </div>
                                 )}
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Users size={14} className="shrink-0" />
+                                    <IconUsers stroke={1} size={14} className="shrink-0" />
                                     <span>{project.funcionarios_count || 0} asignados</span>
                                 </div>
                                 {project.endereco && (
                                     <div className="flex items-start gap-2 text-sm text-gray-600">
-                                        <MapPin size={14} className="mt-0.5 shrink-0" />
+                                        <IconMapPin stroke={1} size={14} className="mt-0.5 shrink-0" />
                                         <span className="line-clamp-1">{project.endereco}</span>
                                     </div>
                                 )}
                                 {project.email_financeiro && (
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Mail size={14} className="shrink-0" />
+                                        <IconMail stroke={1} size={14} className="shrink-0" />
                                         <span className="truncate">{project.email_financeiro}</span>
                                     </div>
                                 )}
@@ -510,7 +510,7 @@ export default function Projects() {
                 {/* Header fixo */}
                 <div className="bg-white px-5 py-3 flex items-center justify-between flex-shrink-0 rounded-t-xl border-b border-gray-200">
                     <div className="flex items-center gap-2">
-                        <Briefcase className="w-5 h-5 text-[#CE0201]" />
+                        <IconBriefcase stroke={1} className="w-5 h-5 text-[#CE0201]" />
                         <h2 className="text-base font-bold uppercase tracking-wide text-gray-900">
                             {editingProject ? 'Editar Obra' : 'Nueva Obra'}
                         </h2>
@@ -620,7 +620,7 @@ export default function Projects() {
                                 {/* Funcionários */}
                                 <div className="rounded-xl overflow-hidden shadow-sm bg-white">
                                     <div className="flex items-center gap-2 px-3 py-2 bg-gray-50">
-                                        <Users className="w-3.5 h-3.5 text-gray-500" />
+                                        <IconUsers stroke={1} className="w-3.5 h-3.5 text-gray-500" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Funcionarios</span>
                                         {selectedEmployees.length > 0 && (
                                             <span className="ml-auto text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold">{selectedEmployees.length}</span>
@@ -872,7 +872,7 @@ export default function Projects() {
                     <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
                         <div className="flex items-center gap-3 mb-4">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${deleteConfirm.hasRecords ? 'bg-orange-100' : 'bg-red-100'}`}>
-                                <Trash2 size={24} className={deleteConfirm.hasRecords ? 'text-orange-600' : 'text-red-600'} />
+                                <IconTrash stroke={1} size={24} className={deleteConfirm.hasRecords ? 'text-orange-600' : 'text-red-600'} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900">Eliminar Obra</h3>

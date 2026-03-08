@@ -3,22 +3,22 @@ import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import {
-    LayoutDashboard,
-    Users,
-    HardHat,
-    Building2,
-    CheckSquare,
-    Settings,
-    LogOut,
-    Menu,
-    X,
-    Clock,
-    TrendingUp,
-    FileText,
-    DollarSign,
-    BarChart3,
-    ClipboardList
-} from 'lucide-react';
+    IconLayoutDashboard,
+    IconUsers,
+    IconHelmet,
+    IconBuildingFactory2,
+    IconCheckbox,
+    IconSettings,
+    IconLogout,
+    IconMenu2,
+    IconX,
+    IconClock,
+    IconTrendingUp,
+    IconFileText,
+    IconCurrencyDollar,
+    IconChartBar,
+    IconClipboardList
+} from '@tabler/icons-react';
 
 export default function Layout() {
     const { t, i18n } = useTranslation();
@@ -40,27 +40,27 @@ export default function Layout() {
     const getNavItems = () => {
         if (isAdmin) {
             return [
-                { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-                { to: '/financial', icon: TrendingUp, label: 'Dashboard Financiero' },
-                { to: '/approved-financial', icon: CheckSquare, label: 'Aprovados c/ Valores' },
-                { to: '/payroll', icon: FileText, label: 'Folha de Pagamento' },
-                { to: '/billing', icon: DollarSign, label: 'Faturamento' },
-                { to: '/resumo-obra', icon: ClipboardList, label: 'Resumo da Obra' },
-                { to: '/employees', icon: Users, label: 'Empleados' },
-                { to: '/clients', icon: Building2, label: 'Clientes' },
-                { to: '/projects', icon: HardHat, label: 'Obras' },
-                { to: '/approvals', icon: CheckSquare, label: 'Aprobaciones' },
-                { to: '/analytics-advanced', icon: BarChart3, label: 'Analytics Avanzado' },
-                { to: '/settings', icon: Settings, label: 'Configuración' }
+                { to: '/dashboard', icon: IconLayoutDashboard, label: 'Dashboard' },
+                { to: '/financial', icon: IconTrendingUp, label: 'Dashboard Financiero' },
+                { to: '/approved-financial', icon: IconCheckbox, label: 'Aprovados c/ Valores' },
+                { to: '/payroll', icon: IconFileText, label: 'Folha de Pagamento' },
+                { to: '/billing', icon: IconCurrencyDollar, label: 'Faturamento' },
+                { to: '/resumo-obra', icon: IconClipboardList, label: 'Resumo da Obra' },
+                { to: '/employees', icon: IconUsers, label: 'Empleados' },
+                { to: '/clients', icon: IconBuildingFactory2, label: 'Clientes' },
+                { to: '/projects', icon: IconHelmet, label: 'Obras' },
+                { to: '/approvals', icon: IconCheckbox, label: 'Aprobaciones' },
+                { to: '/analytics-advanced', icon: IconChartBar, label: 'Analytics Avanzado' },
+                { to: '/settings', icon: IconSettings, label: 'Configuración' }
             ];
         }
         if (isSupervisor) {
             return [
-                { to: '/approvals', icon: CheckSquare, label: t('nav.approvals') }
+                { to: '/approvals', icon: IconCheckbox, label: t('nav.approvals') }
             ];
         }
         return [
-            { to: '/bater-ponto', icon: Clock, label: 'Bater Ponto' }
+            { to: '/bater-ponto', icon: IconClock, label: 'Bater Ponto' }
         ];
     };
 
@@ -151,7 +151,7 @@ export default function Layout() {
                         onClick={handleLogout}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
                     >
-                        <LogOut size={16} />
+                        <IconLogout size={16} />
                         <span>Cerrar sesión</span>
                     </button>
                 </div>
@@ -170,12 +170,12 @@ export default function Layout() {
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                     >
-                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                        {mobileMenuOpen ? <IconX size={24} /> : <IconMenu2 size={24} />}
                     </button>
                 </div>
             </div>
 
-            {/* Mobile Menu Overlay */}
+            {/* Mobile IconMenu2 Overlay */}
             {mobileMenuOpen && (
                 <div
                     className="md:hidden fixed inset-0 bg-black/50 z-40"
@@ -183,7 +183,7 @@ export default function Layout() {
                 />
             )}
 
-            {/* Mobile Menu */}
+            {/* Mobile IconMenu2 */}
             <div
                 className={`md:hidden fixed top-0 right-0 bottom-0 w-72 bg-white z-50 transform transition-transform duration-300 ${
                     mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
@@ -201,7 +201,7 @@ export default function Layout() {
                             onClick={() => setMobileMenuOpen(false)}
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                         >
-                            <X size={20} />
+                            <IconX size={20} />
                         </button>
                     </div>
 
@@ -269,7 +269,7 @@ export default function Layout() {
                         onClick={handleLogout}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium mb-4"
                     >
-                        <LogOut size={16} />
+                        <IconLogout size={16} />
                         <span>Cerrar sesión</span>
                     </button>
                     {/* Espaço extra para barra de navegação Android */}

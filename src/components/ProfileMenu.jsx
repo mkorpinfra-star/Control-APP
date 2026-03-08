@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { User, Lock, Camera, Globe, Info, LogOut, X } from 'lucide-react';
+import { IconUser, IconLock, IconCamera, IconWorld, IconInfoCircle, IconLogout, IconX } from '@tabler/icons-react';
 import PhotoUpload from './PhotoUpload';
 
 export default function ProfileMenu({ isOpen, onClose }) {

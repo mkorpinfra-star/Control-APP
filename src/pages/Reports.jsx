@@ -6,7 +6,7 @@ import AnalyticsDashboard from '../components/reports/AnalyticsDashboard';
 import InsightsPanel from '../components/reports/InsightsPanel';
 import EmployeeLog from '../components/reports/EmployeeLog';
 import { ChartIcon, BrainIcon, FileIcon, CloseIcon } from '../components/Icons';
-import { User, ClipboardList, BookOpen, Plus, FileText, BarChart, Brain } from 'lucide-react';
+import { IconUser, IconClipboardList, IconBook, IconPlus, IconFileText, IconChartBar, IconBrain } from '@tabler/icons-react';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
 
@@ -135,7 +135,7 @@ export default function Reports() {
                         onClick={() => setShowSavedReports(true)}
                         className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors font-medium text-sm"
                     >
-                        <FileText size={16} />
+                        <IconFileText size={16} />
                         Guardados ({savedReports.length})
                     </button>
                 </div>
@@ -153,7 +153,7 @@ export default function Reports() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                             activeTab === 'financial' ? 'bg-white/20' : 'bg-gray-100'
                         }`}>
-                            <FileText size={20} strokeWidth={2} className={activeTab === 'financial' ? 'text-white' : 'text-black'} />
+                            <IconFileText size={20} strokeWidth={2} className={activeTab === 'financial' ? 'text-white' : 'text-black'} />
                         </div>
                         <span className="font-semibold text-xs">Financiero</span>
                     </button>
@@ -168,7 +168,7 @@ export default function Reports() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                             activeTab === 'analytics' ? 'bg-white/20' : 'bg-gray-100'
                         }`}>
-                            <BarChart size={20} strokeWidth={2} className={activeTab === 'analytics' ? 'text-white' : 'text-black'} />
+                            <IconChartBar size={20} strokeWidth={2} className={activeTab === 'analytics' ? 'text-white' : 'text-black'} />
                         </div>
                         <span className="font-semibold text-xs">Performance</span>
                     </button>
@@ -183,7 +183,7 @@ export default function Reports() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                             activeTab === 'insights' ? 'bg-white/20' : 'bg-gray-100'
                         }`}>
-                            <Brain size={20} strokeWidth={2} className={activeTab === 'insights' ? 'text-white' : 'text-black'} />
+                            <IconBrain size={20} strokeWidth={2} className={activeTab === 'insights' ? 'text-white' : 'text-black'} />
                         </div>
                         <span className="font-semibold text-xs">IA Insights</span>
                     </button>
@@ -198,7 +198,7 @@ export default function Reports() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                             activeTab === 'log' ? 'bg-white/20' : 'bg-gray-100'
                         }`}>
-                            <User size={20} strokeWidth={2} className={activeTab === 'log' ? 'text-white' : 'text-black'} />
+                            <IconUser size={20} strokeWidth={2} className={activeTab === 'log' ? 'text-white' : 'text-black'} />
                         </div>
                         <span className="font-semibold text-xs">Historial</span>
                     </button>
@@ -313,7 +313,7 @@ export default function Reports() {
                         <div className="p-6">
                             {savedReports.length === 0 ? (
                                 <div className="text-center py-12 text-gray-500">
-                                    <FileText size={48} className="mx-auto mb-3 opacity-20" />
+                                    <IconFileText size={48} className="mx-auto mb-3 opacity-20" />
                                     <p>No hay informes guardados</p>
                                 </div>
                             ) : (

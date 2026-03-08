@@ -1,4 +1,4 @@
-import { Home, Building, Users, Settings, ClipboardCheck, Clock } from 'lucide-react';
+import { IconHome, IconBuilding, IconUsers, IconSettings, IconClipboardCheck, IconClock } from '@tabler/icons-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,13 +12,13 @@ export default function BottomNav() {
       return [
         {
           id: 'ponto',
-          icon: Clock,
+          icon: IconClock,
           path: '/bater-ponto',
           activePaths: ['/bater-ponto']
         },
         {
           id: 'historico',
-          icon: ClipboardCheck,
+          icon: IconClipboardCheck,
           path: '/timesheet',
           activePaths: ['/timesheet']
         }
@@ -29,7 +29,7 @@ export default function BottomNav() {
       return [
         {
           id: 'aprovacoes',
-          icon: ClipboardCheck,
+          icon: IconClipboardCheck,
           path: '/approvals',
           activePaths: ['/approvals']
         }
@@ -40,19 +40,19 @@ export default function BottomNav() {
     return [
       {
         id: 'home',
-        icon: Home,
+        icon: IconHome,
         path: '/dashboard',
         activePaths: ['/dashboard', '/']
       },
       {
         id: 'projects',
-        icon: Building,
+        icon: IconBuilding,
         path: '/projects',
         activePaths: ['/projects', '/resumo-obra']
       },
       {
         id: 'clients',
-        icon: Users,
+        icon: IconUsers,
         path: '/clients',
         activePaths: ['/clients']
       }
@@ -86,7 +86,7 @@ export default function BottomNav() {
                 )}
                 <Icon
                   size={26}
-                  strokeWidth={active ? 2.5 : 2}
+                  stroke={1}
                   className={`relative z-10 transition-colors ${
                     active ? 'text-[#CE0201]' : 'text-gray-500'
                   }`}

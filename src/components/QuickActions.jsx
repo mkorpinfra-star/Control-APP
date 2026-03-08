@@ -1,4 +1,4 @@
-import { Briefcase, Users, UserCircle, BarChart3, FileText, Settings, DollarSign, Receipt, UserCog } from 'lucide-react';
+import { IconBriefcase, IconUsers, IconUserCircle, IconChartBar, IconFileText, IconSettings, IconCurrencyDollar, IconReceipt, IconUserCog } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function QuickActions() {
@@ -8,63 +8,63 @@ export default function QuickActions() {
     {
       id: 'projects',
       label: 'Obras',
-      icon: Briefcase,
+      icon: IconBriefcase,
       path: '/projects',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'clients',
       label: 'Clientes',
-      icon: Users,
+      icon: IconUsers,
       path: '/clients',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'encarregados',
       label: 'Encargados',
-      icon: UserCog,
+      icon: IconUserCog,
       path: '/encarregados',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'employees',
       label: 'Empleados',
-      icon: UserCircle,
+      icon: IconUserCircle,
       path: '/employees',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'payroll',
       label: 'Folha',
-      icon: DollarSign,
+      icon: IconCurrencyDollar,
       path: '/payroll',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'billing',
       label: 'Faturamento',
-      icon: Receipt,
+      icon: IconReceipt,
       path: '/billing',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'analytics',
       label: 'Análisis',
-      icon: BarChart3,
+      icon: IconChartBar,
       path: '/analytics',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'reports',
       label: 'Informes',
-      icon: FileText,
+      icon: IconFileText,
       path: '/reports',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
       id: 'settings',
       label: 'Ajustes',
-      icon: Settings,
+      icon: IconSettings,
       path: '/settings',
       color: 'bg-[#F5F5F5] text-black'
     }

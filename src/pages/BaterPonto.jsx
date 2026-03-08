@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { ChevronLeft, ChevronRight, Send, Clock as ClockIcon, Minus, Plus } from 'lucide-react'
+import { IconChevronLeft, IconChevronRight, IconSend, IconClock, IconMinus, IconPlus } from '@tabler/icons-react'
 import CustomSelect from '../components/CustomSelect'
 
 const DIAS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
@@ -277,7 +277,7 @@ export default function BaterPonto() {
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-                                <ClockIcon className="w-6 h-6 text-white" />
+                                <IconClock stroke={1} className="w-6 h-6 text-white" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">Bater Ponto</h1>
@@ -372,7 +372,7 @@ export default function BaterPonto() {
                                     disabled={bloqueado || horasDia.normal <= 0}
                                     className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
-                                    <Minus size={16} strokeWidth={2.5} />
+                                    <IconMinus stroke={1} size={16} />
                                 </button>
                                 <input
                                     type="number"
@@ -392,7 +392,7 @@ export default function BaterPonto() {
                                     disabled={bloqueado || horasDia.normal >= 24}
                                     className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
-                                    <Plus size={16} strokeWidth={2.5} />
+                                    <IconPlus stroke={1} size={16} />
                                 </button>
                             </div>
                         </div>
@@ -412,7 +412,7 @@ export default function BaterPonto() {
                                     disabled={bloqueado || horasDia.extra <= 0}
                                     className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
-                                    <Minus size={16} strokeWidth={2.5} />
+                                    <IconMinus stroke={1} size={16} />
                                 </button>
                                 <input
                                     type="number"
@@ -432,7 +432,7 @@ export default function BaterPonto() {
                                     disabled={bloqueado || horasDia.extra >= 24}
                                     className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
-                                    <Plus size={16} strokeWidth={2.5} />
+                                    <IconPlus stroke={1} size={16} />
                                 </button>
                             </div>
                         </div>
@@ -452,7 +452,7 @@ export default function BaterPonto() {
                                     disabled={bloqueado || horasDia.noturna <= 0}
                                     className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
-                                    <Minus size={16} strokeWidth={2.5} />
+                                    <IconMinus stroke={1} size={16} />
                                 </button>
                                 <input
                                     type="number"
@@ -472,7 +472,7 @@ export default function BaterPonto() {
                                     disabled={bloqueado || horasDia.noturna >= 24}
                                     className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
-                                    <Plus size={16} strokeWidth={2.5} />
+                                    <IconPlus stroke={1} size={16} />
                                 </button>
                             </div>
                         </div>
@@ -483,7 +483,7 @@ export default function BaterPonto() {
                 <div className="mt-4 bg-gray-900 rounded-xl p-3 flex items-center justify-between">
                     <span className="text-white text-sm font-semibold">Total hoje</span>
                     <div className="flex items-center gap-2">
-                        <ClockIcon className="w-4 h-4 text-white" />
+                        <IconClock stroke={1} className="w-4 h-4 text-white" />
                         <span className="text-white font-black text-xl">{totalDia.toFixed(1)}h</span>
                     </div>
                 </div>
@@ -495,7 +495,7 @@ export default function BaterPonto() {
                         disabled={diaAtual === 0}
                         className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center gap-1"
                     >
-                        <ChevronLeft className="w-4 h-4" />
+                        <IconChevronLeft stroke={1} className="w-4 h-4" />
                         Ant
                     </button>
                     <button
@@ -504,7 +504,7 @@ export default function BaterPonto() {
                         className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center gap-1"
                     >
                         Sig
-                        <ChevronRight className="w-4 h-4" />
+                        <IconChevronRight stroke={1} className="w-4 h-4" />
                     </button>
                 </div>
             </div>
@@ -514,7 +514,7 @@ export default function BaterPonto() {
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-xs text-gray-600 font-semibold">Total semana</span>
                     <div className="flex items-center gap-1.5">
-                        <ClockIcon className="w-4 h-4 text-red-600" />
+                        <IconClock stroke={1} className="w-4 h-4 text-red-600" />
                         <span className="text-xl font-black text-red-600">{totalSemana.toFixed(1)}h</span>
                     </div>
                 </div>
@@ -523,7 +523,7 @@ export default function BaterPonto() {
                     disabled={bloqueado || totalSemana === 0}
                     className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold text-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 flex items-center justify-center gap-2"
                 >
-                    <Send className="w-4 h-4" />
+                    <IconSend stroke={1} className="w-4 h-4" />
                     {bloqueado ? 'Ya enviado' : 'Enviar para aprobación'}
                 </button>
             </div>

@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { Check, ChevronDown, Building2 } from 'lucide-react';
+import { IconCheck, IconChevronDown, IconBuildingFactory2 } from '@tabler/icons-react';
 
 export default function CustomSelect({ value, onChange, options, label, count }) {
     const selectedOption = options.find(opt => opt.value === value) || options[0];
@@ -16,14 +16,14 @@ export default function CustomSelect({ value, onChange, options, label, count })
                 <div className="relative">
                     <Listbox.Button className="relative w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CE0201] font-medium text-base cursor-pointer hover:bg-gray-100 transition-colors text-left">
                         <span className="flex items-center gap-2">
-                            <Building2 size={18} className="text-gray-600" strokeWidth={2} />
+                            <IconBuildingFactory2 stroke={1} size={18} className="text-gray-600" />
                             <span className="block truncate">{selectedOption.label}</span>
                         </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                            <ChevronDown
+                            <IconChevronDown
+                                stroke={1}
                                 size={20}
                                 className="text-[#CE0201]"
-                                strokeWidth={2}
                                 aria-hidden="true"
                             />
                         </span>
@@ -60,7 +60,7 @@ export default function CustomSelect({ value, onChange, options, label, count })
                                             </div>
                                             {selected ? (
                                                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#CE0201]">
-                                                    <Check size={18} strokeWidth={2.5} aria-hidden="true" />
+                                                    <IconCheck stroke={1} size={18} aria-hidden="true" />
                                                 </span>
                                             ) : null}
                                         </>

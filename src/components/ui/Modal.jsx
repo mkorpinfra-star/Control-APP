@@ -1,5 +1,5 @@
 import { cn } from '../../lib/utils'
-import { X } from 'lucide-react'
+import { IconX } from '@tabler/icons-react'
 
 export function Modal({ isOpen, onClose, children, className }) {
   if (!isOpen) return null
@@ -31,7 +31,7 @@ export function ModalHeader({ children, onClose, className }) {
           onClick={onClose}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <XIcon size={20} />
+          <IconX stroke={1} size={20} />
         </button>
       )}
     </div>

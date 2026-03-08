@@ -4,10 +4,10 @@ import SignatureCanvas from 'react-signature-canvas';
 import { apontamentosService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import {
-    User, Calendar, Check, X, Trash2, Inbox, FileText, Trash,
-    AlertTriangle, ChevronLeft, Building2, CheckCircle2,
-    Clock3, AlertCircle, PenLine, Ban, Users
-} from 'lucide-react';
+    IconUser, IconCalendar, IconCheck, IconX, IconTrash, IconInbox, IconFileText,
+    IconAlertTriangle, IconChevronLeft, IconBuilding, IconCircleCheck,
+    IconClock, IconAlertCircle, IconPencil, IconBan, IconUsers
+} from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { Modal, ModalBody, ModalFooter } from '../components/ui/Modal';
 import { Badge } from '../components/ui/Badge';
@@ -64,12 +64,12 @@ const getDayDates = (semanaInicio) => {
 };
 
 const STATUS_CFG = {
-    sem_registro:         { bg:'bg-gray-100',   text:'text-gray-500',   border:'border-gray-300',   label:'Não marcou',        icon:<Ban size={12}/> },
-    rascunho:             { bg:'bg-orange-50',  text:'text-orange-700', border:'border-orange-300', label:'Rascunho',          icon:<PenLine size={12}/> },
-    rejeitado:            { bg:'bg-red-50',     text:'text-red-700',    border:'border-red-300',    label:'Rejeitado',         icon:<AlertCircle size={12}/> },
-    enviado:              { bg:'bg-blue-50',    text:'text-blue-700',   border:'border-blue-300',   label:'Aguard. aprovação', icon:<Clock3 size={12}/> },
-    aprovado_encarregado: { bg:'bg-green-50',   text:'text-green-700',  border:'border-green-300',  label:'Aprovado',          icon:<CheckCircle2 size={12}/> },
-    aprovado:             { bg:'bg-green-50',   text:'text-green-700',  border:'border-green-300',  label:'Aprovado',          icon:<CheckCircle2 size={12}/> },
+    sem_registro:         { bg:'bg-gray-100',   text:'text-gray-500',   border:'border-gray-300',   label:'Não marcou',        icon:<IconBan size={12}/> },
+    rascunho:             { bg:'bg-orange-50',  text:'text-orange-700', border:'border-orange-300', label:'Rascunho',          icon:<IconPencil size={12}/> },
+    rejeitado:            { bg:'bg-red-50',     text:'text-red-700',    border:'border-red-300',    label:'Rejeitado',         icon:<IconAlertCircle size={12}/> },
+    enviado:              { bg:'bg-blue-50',    text:'text-blue-700',   border:'border-blue-300',   label:'Aguard. aprovação', icon:<IconClock size={12}/> },
+    aprovado_encarregado: { bg:'bg-green-50',   text:'text-green-700',  border:'border-green-300',  label:'Aprovado',          icon:<IconCircleCheck size={12}/> },
+    aprovado:             { bg:'bg-green-50',   text:'text-green-700',  border:'border-green-300',  label:'Aprovado',          icon:<IconCircleCheck size={12}/> },
 };
 
 const DAYS      = ['mon','tue','wed','thu','fri','sat'];
@@ -348,7 +348,7 @@ export default function Approvals() {
                     'bg-yellow-50 border-yellow-200 text-yellow-800'
                 }`}>
                     <span className="font-semibold">{message.text}</span>
-                    <button onClick={() => setMessage(null)}><X size={18}/></button>
+                    <button onClick={() => setMessage(null)}><IconX size={18}/></button>
                 </div>
             )}
 
@@ -384,7 +384,7 @@ export default function Approvals() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-3">
                                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                                        <Building2 size={18} strokeWidth={2} className="text-black" />
+                                        <IconBuilding size={18} strokeWidth={2} className="text-black" />
                                     </div>
                                 </div>
                                 <div className="text-3xl font-black text-black mb-1">{obras.length}</div>
@@ -394,7 +394,7 @@ export default function Approvals() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-3">
                                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                                        <Clock3 size={18} strokeWidth={2} className="text-black" />
+                                        <IconClock size={18} strokeWidth={2} className="text-black" />
                                     </div>
                                 </div>
                                 <div className="text-3xl font-black text-black mb-1">{pending.length}</div>
@@ -404,7 +404,7 @@ export default function Approvals() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-3">
                                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                                        <Users size={18} strokeWidth={2} className="text-black" />
+                                        <IconUsers size={18} strokeWidth={2} className="text-black" />
                                     </div>
                                 </div>
                                 <div className="text-3xl font-black text-black mb-1">
@@ -416,7 +416,7 @@ export default function Approvals() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-3">
                                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                                        <CheckCircle2 size={18} strokeWidth={2} className="text-black" />
+                                        <IconCircleCheck size={18} strokeWidth={2} className="text-black" />
                                     </div>
                                 </div>
                                 <div className="text-3xl font-black text-black mb-1">
@@ -428,7 +428,7 @@ export default function Approvals() {
 
                         {obras.length === 0 ? (
                             <div className="text-center py-20">
-                                <Building2 size={56} className="mx-auto mb-4 text-gray-300"/>
+                                <IconBuilding size={56} className="mx-auto mb-4 text-gray-300"/>
                                 <p className="text-gray-400 font-semibold">Nenhuma obra ativa atribuída a você.</p>
                             </div>
                         ) : (
@@ -453,7 +453,7 @@ export default function Approvals() {
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                                                         res.pendentes > 0 ? 'bg-blue-50' : 'bg-[#F5F5F5]'
                                                     }`}>
-                                                        <Building2 size={18} className={res.pendentes > 0 ? 'text-blue-600' : 'text-gray-700'}/>
+                                                        <IconBuilding size={18} className={res.pendentes > 0 ? 'text-blue-600' : 'text-gray-700'}/>
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-gray-900 text-sm leading-tight">{obra.nome}</div>
@@ -470,7 +470,7 @@ export default function Approvals() {
                                             {/* Cliente */}
                                             {obra.cliente_nome && (
                                                 <div className="text-xs text-gray-600 mb-3 flex items-center gap-1">
-                                                    <Users size={12}/>
+                                                    <IconUsers size={12}/>
                                                     {obra.cliente_nome}
                                                 </div>
                                             )}
@@ -501,7 +501,7 @@ export default function Approvals() {
                                     onClick={() => { setObraSelecionada(null); setSituacao(null); }}
                                     className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-j2s-red font-semibold transition-colors"
                                 >
-                                    <ChevronLeft size={16}/> Todas as obras
+                                    <IconChevronLeft size={16}/> Todas as obras
                                 </button>
                                 <span className="text-gray-300">/</span>
                                 <div>
@@ -525,7 +525,7 @@ export default function Approvals() {
                         <div className="bg-white rounded-xl border border-gray-200 p-4 mb-5 flex flex-wrap items-center gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-gradient-to-br from-[#CE0201] to-[#A00101] rounded-full flex items-center justify-center flex-shrink-0">
-                                    <Building2 size={18} className="text-white"/>
+                                    <IconBuilding size={18} className="text-white"/>
                                 </div>
                                 <div>
                                     <div className="font-bold text-gray-900 text-sm">{obraSelecionada.nome}</div>
@@ -556,7 +556,7 @@ export default function Approvals() {
                                         </div>
                                         {situacao.contagem.aprovado === situacao.contagem.total_alocados && situacao.contagem.total_alocados > 0 && (
                                             <span className="flex items-center gap-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-                                                <CheckCircle2 size={13}/> Todos aprovados
+                                                <IconCircleCheck size={13}/> Todos aprovados
                                             </span>
                                         )}
                                     </div>
@@ -578,7 +578,7 @@ export default function Approvals() {
                                 {/* ── Alerta: quem não enviou ainda ── */}
                                 {situacao && (situacao.contagem.sem_registro + situacao.contagem.rascunho) > 0 && (
                                     <div className="mb-4 flex items-start gap-2 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl text-sm text-amber-800">
-                                        <AlertTriangle size={18} className="flex-shrink-0 mt-0.5"/>
+                                        <IconAlertTriangle size={18} className="flex-shrink-0 mt-0.5"/>
                                         <div>
                                             <strong>Funcionários que ainda não enviaram as horas:</strong>{' '}
                                             {[...situacao.sem_registro, ...situacao.rascunho].map(f => f.funcionario_nome.split(' ')[0]).join(', ')}.
@@ -611,7 +611,7 @@ export default function Approvals() {
                                                             />
                                                         ) : (
                                                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border-2 border-white shadow-sm">
-                                                                <User size={18} className="text-gray-500"/>
+                                                                <IconUser size={18} className="text-gray-500"/>
                                                             </div>
                                                         )}
                                                         <div>
@@ -630,13 +630,13 @@ export default function Approvals() {
                                                                 onClick={() => openApproveModal(pendEntry)}
                                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors active:scale-95"
                                                             >
-                                                                <Check size={13}/> Aprovar
+                                                                <IconCheck size={13}/> Aprovar
                                                             </button>
                                                             <button
                                                                 onClick={() => openRejectModal(pendEntry)}
                                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors active:scale-95"
                                                             >
-                                                                <X size={13}/> Rejeitar
+                                                                <IconX size={13}/> Rejeitar
                                                             </button>
                                                         </div>
                                                     ) : (
@@ -677,7 +677,7 @@ export default function Approvals() {
 
                                     {funcsObra().length === 0 && (
                                         <div className="text-center py-16 text-gray-400">
-                                            <Users size={48} className="mx-auto mb-3 opacity-30"/>
+                                            <IconUsers size={48} className="mx-auto mb-3 opacity-30"/>
                                             <p className="font-semibold">Nenhum funcionário alocado nesta obra.</p>
                                         </div>
                                     )}
@@ -705,13 +705,13 @@ export default function Approvals() {
                         onClick={handleDeleteAll}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 text-white hover:bg-red-800 rounded-lg text-xs font-semibold"
                     >
-                        <Trash size={14}/> Limpar Todos
+                        <IconTrash size={14}/> Limpar Todos
                     </button>
                 </div>
 
                 {pending.length === 0 ? (
                     <div className="text-center py-16 px-4">
-                        <Inbox size={56} className="mx-auto mb-4 text-gray-300"/>
+                        <IconInbox size={56} className="mx-auto mb-4 text-gray-300"/>
                         <h3 className="text-lg font-bold text-gray-600 mb-1">{t('approvals.noEntries')}</h3>
                         <p className="text-gray-400 text-sm">{t('approvals.noEntriesText')}</p>
                     </div>
@@ -727,7 +727,7 @@ export default function Approvals() {
                             return Object.values(map).map(obra => (
                                 <div key={obra.numero} className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
                                     <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
-                                        <Building2 size={15} className="text-gray-500"/>
+                                        <IconBuilding size={15} className="text-gray-500"/>
                                         <span className="font-bold text-gray-700 text-sm">{obra.numero} — {obra.nome}</span>
                                         <span className="bg-j2s-red text-white text-xs font-bold px-2 py-0.5 rounded-full ml-auto">
                                             {obra.entries.length} pendente{obra.entries.length > 1 ? 's' : ''}
@@ -742,7 +742,7 @@ export default function Approvals() {
                                                         <div>
                                                             <div className="font-bold text-gray-900">{entry.funcionario_nome}</div>
                                                             <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
-                                                                <Calendar size={12}/>
+                                                                <IconCalendar size={12}/>
                                                                 {formatDate(entry.semana_inicio)}
                                                                 <span className="font-bold text-j2s-red">{totals.total}h</span>
                                                             </div>
@@ -755,11 +755,11 @@ export default function Approvals() {
                                                     </div>
                                                     <HoursDetail horasDiarias={entry.horas_diarias} semanaInicio={entry.semana_inicio}/>
                                                     <div className="flex flex-wrap gap-2 mt-2">
-                                                        <Button onClick={() => openApproveModal(entry)} variant="success"   className="flex-1 min-w-[110px]"><Check size={15}/> Aprovar</Button>
-                                                        <Button onClick={() => openRejectModal(entry)}  variant="secondary" className="flex-1 min-w-[110px]"><X size={15}/> Rejeitar</Button>
-                                                        <Button onClick={() => handleDelete(entry)}     variant="danger"    className="flex-1 min-w-[100px]"><Trash2 size={15}/> Eliminar</Button>
+                                                        <Button onClick={() => openApproveModal(entry)} variant="success"   className="flex-1 min-w-[110px]"><IconCheck size={15}/> Aprovar</Button>
+                                                        <Button onClick={() => openRejectModal(entry)}  variant="secondary" className="flex-1 min-w-[110px]"><IconX size={15}/> Rejeitar</Button>
+                                                        <Button onClick={() => handleDelete(entry)}     variant="danger"    className="flex-1 min-w-[100px]"><IconTrash size={15}/> Eliminar</Button>
                                                         <Button onClick={() => handleGenerateWeeklyReport(entry)} disabled={generatingReport} variant="primary" className="flex-1 min-w-[110px]">
-                                                            <FileText size={15}/> {generatingReport ? 'Gerando...' : 'Relatório'}
+                                                            <IconFileText size={15}/> {generatingReport ? 'Gerando...' : 'Relatório'}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -785,11 +785,11 @@ export default function Approvals() {
                         <>
                             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-3 mb-1">
-                                    <User size={18}/>
+                                    <IconUser size={18}/>
                                     <span className="font-bold text-black">{selectedEntry.funcionario_nome}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Calendar size={14}/>
+                                    <IconCalendar size={14}/>
                                     <span>{selectedEntry.obra_numero} · {formatDate(selectedEntry.semana_inicio)}</span>
                                 </div>
                             </div>
@@ -818,7 +818,7 @@ export default function Approvals() {
                                     />
                                 </div>
                                 <button onClick={clearSignature} className="mt-2 flex items-center gap-2 px-3 py-1.5 text-sm border-2 border-gray-300 text-gray-700 hover:border-j2s-red hover:text-j2s-red rounded-lg transition-all">
-                                    <Trash2 size={14}/> {t('approvals.clearSignature')}
+                                    <IconTrash size={14}/> {t('approvals.clearSignature')}
                                 </button>
                             </div>
                             <div className="mb-4">
@@ -838,7 +838,7 @@ export default function Approvals() {
                 <ModalFooter className="bg-gray-50">
                     <Button variant="secondary" onClick={closeModals} disabled={processing}>{t('common.cancel')}</Button>
                     <Button variant="success" onClick={handleApprove} loading={processing}>
-                        <Check size={18}/> {t('approvals.confirmApprove')}
+                        <IconCheck size={18}/> {t('approvals.confirmApprove')}
                     </Button>
                 </ModalFooter>
             </Modal>
@@ -854,7 +854,7 @@ export default function Approvals() {
                         <>
                             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-3 mb-1">
-                                    <User size={18}/>
+                                    <IconUser size={18}/>
                                     <span className="font-bold text-black">{selectedEntry.funcionario_nome}</span>
                                 </div>
                                 <div className="text-sm text-gray-600">{selectedEntry.obra_numero} · {formatDate(selectedEntry.semana_inicio)}</div>
@@ -875,7 +875,7 @@ export default function Approvals() {
                 <ModalFooter className="bg-gray-50">
                     <Button variant="secondary" onClick={closeModals} disabled={processing}>{t('common.cancel')}</Button>
                     <Button variant="danger" onClick={handleReject} loading={processing}>
-                        <X size={18}/> {t('approvals.confirmReject')}
+                        <IconX size={18}/> {t('approvals.confirmReject')}
                     </Button>
                 </ModalFooter>
             </Modal>

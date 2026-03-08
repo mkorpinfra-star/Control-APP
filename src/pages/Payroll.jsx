@@ -3,7 +3,7 @@ import Toast from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
-import { Plus, Download, Mail, Printer, Trash2, Trash } from 'lucide-react';
+import { IconPlus, IconDownload, IconMail, IconPrinter, IconTrash } from '@tabler/icons-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
@@ -345,7 +345,7 @@ export default function Payroll() {
                         disabled={loading}
                         className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg disabled:opacity-50"
                     >
-                        <Plus size={24} strokeWidth={2.5} />
+                        <IconPlus stroke={1} size={24} />
                     </button>
                 </div>
 
@@ -355,28 +355,28 @@ export default function Payroll() {
                         disabled={folhas.length === 0}
                         className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Download size={14} /> CSV
+                        <IconDownload stroke={1} size={14} /> CSV
                     </button>
                     <button
                         onClick={handleExportPDF}
                         disabled={folhas.length === 0}
                         className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Printer size={14} /> PDF
+                        <IconPrinter stroke={1} size={14} /> PDF
                     </button>
                     <button
                         onClick={handleSendEmail}
                         disabled={folhas.length === 0}
                         className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Mail size={14} /> Email
+                        <IconMail stroke={1} size={14} /> Email
                     </button>
                     <button
                         onClick={handleDeleteMes}
                         disabled={folhas.length === 0}
                         className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Trash size={14} /> Limpar
+                        <IconTrash stroke={1} size={14} /> Limpar
                     </button>
                 </div>
             </div>
@@ -551,7 +551,7 @@ export default function Payroll() {
                                         ) : (
                                             <div className="flex gap-1">
                                                 <button onClick={() => handleEdit(folha)} className="px-3 py-1.5 bg-white text-gray-900 hover:bg-gray-100 font-medium rounded-full text-xs">Editar</button>
-                                                <button onClick={() => handleDeleteRow(folha.id, folha.funcionario_nome)} className="w-8 h-8 flex items-center justify-center bg-red-600 text-white hover:bg-red-700 rounded-full" title="Deletar"><Trash2 size={14}/></button>
+                                                <button onClick={() => handleDeleteRow(folha.id, folha.funcionario_nome)} className="w-8 h-8 flex items-center justify-center bg-red-600 text-white hover:bg-red-700 rounded-full" title="Deletar"><IconTrash stroke={1} size={14}/></button>
                                             </div>
                                         )}
                                     </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut } from 'lucide-react';
+import { IconLogout } from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
 
 export default function BankingHeader() {
@@ -78,7 +78,7 @@ export default function BankingHeader() {
               className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
               aria-label="Cerrar sesión"
             >
-              <LogOut size={20} />
+              <IconLogout size={20} />
             </button>
           </div>
 

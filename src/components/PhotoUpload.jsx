@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, Camera, Upload } from 'lucide-react';
+import { IconX, IconCamera, IconUpload } from '@tabler/icons-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 

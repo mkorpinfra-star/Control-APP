@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
-import { Download, Calendar, User, Clock, AlertCircle, Printer } from 'lucide-react';
+import { IconDownload, IconCalendar, IconUser, IconClock, IconAlertCircle, IconPrinter } from '@tabler/icons-react';
 import CustomSelect from '../CustomSelect';
 import CustomDatePicker from '../CustomDatePicker';
 
@@ -83,7 +83,7 @@ export default function EmployeeLog() {
                             onClick={print}
                             className="flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-gray-900 text-gray-900 rounded-xl hover:bg-[#F5F5F5] transition-colors font-semibold text-sm"
                         >
-                            <Printer size={18} strokeWidth={2} />
+                            <IconPrinter size={18} strokeWidth={2} />
                         </button>
                     )}
                 </div>
@@ -125,7 +125,7 @@ export default function EmployeeLog() {
                                             <div key={idx} className="flex items-center justify-between py-2 border-b border-dashed border-gray-200 last:border-0">
                                                 <div className="flex-1 font-medium text-gray-900">{entry.obra}</div>
                                                 <div className="flex items-center gap-2 text-gray-600 text-sm">
-                                                    <Clock size={14} strokeWidth={2} />
+                                                    <IconClock size={14} strokeWidth={2} />
                                                     <span>{entry.entrada} - {entry.saida}</span>
                                                 </div>
                                                 <div className="w-20 text-right font-bold text-gray-900">{entry.total}h</div>

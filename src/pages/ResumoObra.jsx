@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
-    Building2, ChevronDown, RefreshCw, Save, AlertCircle,
-    FileText, TrendingUp, DollarSign, Calculator
-} from 'lucide-react';
+    IconBuilding, IconChevronDown, IconRefresh, IconDeviceFloppy, IconAlertCircle,
+    IconFileText, IconTrendingUp, IconCurrencyDollar, IconCalculator
+} from '@tabler/icons-react';
 import CustomSelect from '../components/CustomSelect';
 
 const API_URL = import.meta.env.VITE_API_URL || '/backend/api';
@@ -162,7 +162,7 @@ export default function ResumoObra() {
                     disabled={loading || !obraId}
                     className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm font-medium"
                 >
-                    <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                    <IconRefresh stroke={1} size={16} className={loading ? 'animate-spin' : ''} />
                     Atualizar
                 </button>
             </div>
@@ -212,14 +212,14 @@ export default function ResumoObra() {
             {/* Erro */}
             {error && (
                 <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                    <AlertCircle size={16} /> {error}
+                    <IconAlertCircle stroke={1} size={16} /> {error}
                 </div>
             )}
 
             {/* Loading */}
             {loading && (
                 <div className="flex items-center justify-center py-16 text-gray-400">
-                    <RefreshCw size={24} className="animate-spin mr-2" /> Carregando…
+                    <IconRefresh stroke={1} size={24} className="animate-spin mr-2" /> Carregando…
                 </div>
             )}
 
@@ -229,7 +229,7 @@ export default function ResumoObra() {
                     {/* Info da obra */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4">
                         <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Building2 size={22} className="text-amber-600" />
+                            <IconBuilding stroke={1} size={22} className="text-amber-600" />
                         </div>
                         <div>
                             <div className="font-bold text-gray-900 text-lg">
@@ -251,7 +251,7 @@ export default function ResumoObra() {
                         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                             {/* Cabeçalho da tabela — amarelo como na planilha */}
                             <div className="bg-amber-400 px-5 py-3 flex items-center gap-2">
-                                <FileText size={16} className="text-amber-900" />
+                                <IconFileText stroke={1} size={16} className="text-amber-900" />
                                 <span className="font-bold text-amber-900 text-sm uppercase tracking-wide">
                                     Funcionários — {MESES_NOME[mes]} {ano}
                                 </span>
@@ -411,7 +411,7 @@ export default function ResumoObra() {
                     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                         <div className="bg-gray-700 px-5 py-3 flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <Calculator size={16} className="text-gray-200" />
+                                <IconCalculator stroke={1} size={16} className="text-gray-200" />
                                 <span className="font-bold text-white text-sm uppercase tracking-wide">Despesas Indiretas Mensais</span>
                             </div>
                             <button
@@ -419,7 +419,7 @@ export default function ResumoObra() {
                                 disabled={savingDesp}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-800 rounded-lg text-xs font-semibold hover:bg-gray-100 disabled:opacity-50"
                             >
-                                <Save size={13} />
+                                <IconDeviceFloppy stroke={1} size={13} />
                                 {savingDesp ? 'Salvando…' : despSaved ? '✓ Salvo' : 'Salvar'}
                             </button>
                         </div>
@@ -450,7 +450,7 @@ export default function ResumoObra() {
                     {/* ═══ RESUMO DE VALORES (bloco final da planilha) ═════════════════ */}
                     <div className="bg-white border-2 border-orange-400 rounded-xl overflow-hidden">
                         <div className="bg-orange-400 px-5 py-3 flex items-center gap-2">
-                            <TrendingUp size={16} className="text-orange-900" />
+                            <IconTrendingUp stroke={1} size={16} className="text-orange-900" />
                             <span className="font-bold text-orange-900 text-sm uppercase tracking-wide">Resumo de Valores</span>
                         </div>
 
@@ -521,7 +521,7 @@ export default function ResumoObra() {
                     {(fat.horas_normais > 0 || fat.valor_total_servicos > 0) && (
                         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                             <div className="bg-green-600 px-5 py-3 flex items-center gap-2">
-                                <DollarSign size={16} className="text-white" />
+                                <IconCurrencyDollar stroke={1} size={16} className="text-white" />
                                 <span className="font-bold text-white text-sm uppercase tracking-wide">Resumo da Fatura (Cliente)</span>
                             </div>
                             <div className="p-5">
@@ -576,7 +576,7 @@ export default function ResumoObra() {
             {/* Estado inicial / sem dados */}
             {!loading && !resumo && !error && (
                 <div className="bg-white border border-gray-200 rounded-xl p-12 text-center text-gray-400">
-                    <Building2 size={40} className="mx-auto mb-3 text-gray-300" />
+                    <IconBuilding stroke={1} size={40} className="mx-auto mb-3 text-gray-300" />
                     <p>Selecione uma obra para ver o resumo</p>
                 </div>
             )}

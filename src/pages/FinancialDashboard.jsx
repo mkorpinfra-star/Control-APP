@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { IconChartBar, IconCurrencyDollar, IconTrendingUp, IconTrendingDown } from '@tabler/icons-react';
 import { Card } from '../components/ui/Card';
 import CustomDatePicker from '../components/CustomDatePicker';
 

@@ -12,9 +12,9 @@ import {
     Legend
 } from 'chart.js';
 import {
-    Clock, DollarSign, Users, Building2,
-    TrendingUp, Download, Mail, Plus
-} from 'lucide-react';
+    IconClock, IconCurrencyDollar, IconUsers, IconBuildingFactory2,
+    IconTrendingUp, IconDownload, IconMail, IconPlus
+} from '@tabler/icons-react';
 
 // Register Chart.js components
 ChartJS.register(

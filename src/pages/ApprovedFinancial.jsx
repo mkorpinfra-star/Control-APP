@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, DollarSign } from 'lucide-react';
+import { IconCircleCheck, IconCurrencyDollar } from '@tabler/icons-react';
 import { Card } from '../components/ui/Card';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';

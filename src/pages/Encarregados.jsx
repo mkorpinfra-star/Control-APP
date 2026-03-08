@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { encarregadosService } from '../services/api';
-import { Plus, Search, Edit, Trash2, Users2, Mail, Phone, CreditCard } from 'lucide-react';
+import { IconPlus, IconSearch, IconEdit, IconTrash, IconUsers, IconMail, IconPhone, IconCreditCard } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
@@ -124,7 +124,7 @@ export default function Encarregados() {
             {/* Search - FIXO */}
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} stroke={1} />
                     <input
                         type="text"
                         placeholder="Buscar encargado..."
@@ -146,7 +146,7 @@ export default function Encarregados() {
             ) : filteredEncarregados.length === 0 ? (
                 <div className="px-4">
                     <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
-                        <Users2 size={48} className="mx-auto text-gray-400 mb-3" />
+                        <IconUsers size={48} className="mx-auto text-gray-400 mb-3" stroke={1} />
                         <p className="text-gray-600 text-base">
                             {searchTerm ? 'No se encontraron encargados' : 'No hay encargados registrados'}
                         </p>
@@ -161,19 +161,19 @@ export default function Encarregados() {
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">{enc.nome}</h3>
                                     {enc.email && (
                                         <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                                            <Mail size={14} className="shrink-0" />
+                                            <IconMail size={14} className="shrink-0" stroke={1} />
                                             <span className="truncate">{enc.email}</span>
                                         </div>
                                     )}
                                     {enc.telefone && (
                                         <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                                            <Phone size={14} className="shrink-0" />
+                                            <IconPhone size={14} className="shrink-0" stroke={1} />
                                             <span>{enc.telefone}</span>
                                         </div>
                                     )}
                                     {enc.passaporte && (
                                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <CreditCard size={14} className="shrink-0" />
+                                            <IconCreditCard size={14} className="shrink-0" stroke={1} />
                                             <span>{enc.passaporte}</span>
                                         </div>
                                     )}
@@ -183,13 +183,13 @@ export default function Encarregados() {
                                         onClick={() => handleEdit(enc)}
                                         className="w-10 h-10 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
                                     >
-                                        <Edit size={18} />
+                                        <IconEdit size={18} stroke={1} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(enc.id, enc.nome)}
                                         className="w-10 h-10 flex items-center justify-center bg-white text-red-600 hover:bg-red-50 rounded-full transition-colors"
                                     >
-                                        <Trash2 size={18} />
+                                        <IconTrash size={18} stroke={1} />
                                     </button>
                                 </div>
                             </div>
@@ -312,7 +312,7 @@ export default function Encarregados() {
                     <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                <Trash2 size={24} className="text-red-600" />
+                                <IconTrash size={24} className="text-red-600" stroke={1} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900">Eliminar Encargado</h3>

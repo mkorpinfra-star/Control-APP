@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Camera, Lock, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { IconCamera, IconLock, IconCircleCheck, IconAlertTriangle, IconLoader2 } from '@tabler/icons-react';
 import PhotoUpload from '../components/PhotoUpload';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
@@ -162,7 +162,7 @@ export default function SetupObrigatorio() {
                 {/* Error Alert */}
                 {error && (
                     <div className="bg-danger-light border border-danger text-danger p-3 rounded-lg mb-6 flex items-center gap-2 text-sm">
-                        <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                        <IconAlertTriangle className="w-5 h-5 flex-shrink-0" />
                         {error}
                     </div>
                 )}
@@ -171,7 +171,7 @@ export default function SetupObrigatorio() {
                 {step === 1 && (
                     <>
                         <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
-                            <Camera className="w-6 h-6" />
+                            <IconCamera className="w-6 h-6" />
                             Foto de Perfil
                         </h2>
                         <p className="text-sm text-gray-600 mb-8 text-center leading-relaxed">
@@ -183,7 +183,7 @@ export default function SetupObrigatorio() {
 
                         {photoUploaded && (
                             <div className="text-center mt-6 text-success font-semibold flex items-center justify-center gap-2">
-                                <CheckCircle className="w-5 h-5" />
+                                <IconCircleCheck className="w-5 h-5" />
                                 Foto cadastrada com sucesso!
                             </div>
                         )}
@@ -194,7 +194,7 @@ export default function SetupObrigatorio() {
                 {step === 2 && (
                     <>
                         <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
-                            <Lock className="w-6 h-6" />
+                            <IconLock className="w-6 h-6" />
                             Cadastro de Biometria
                         </h2>
                         <p className="text-sm text-gray-600 mb-8 text-center leading-relaxed">
@@ -208,11 +208,11 @@ export default function SetupObrigatorio() {
                                 <div className="flex justify-center mb-6">
                                     {loading ? (
                                         <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
-                                            <Loader2 className="w-10 h-10 animate-spin text-gray-600" />
+                                            <IconLoader2 className="w-10 h-10 animate-spin text-gray-600" />
                                         </div>
                                     ) : (
                                         <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center border-2 border-j2s-red">
-                                            <Lock className="w-10 h-10 text-j2s-red" />
+                                            <IconLock className="w-10 h-10 text-j2s-red" />
                                         </div>
                                     )}
                                 </div>
@@ -228,7 +228,7 @@ export default function SetupObrigatorio() {
                                     disabled={loading}
                                     className="w-full py-3 bg-j2s-red text-white rounded-lg font-semibold mb-3 flex items-center justify-center gap-2 transition-opacity disabled:opacity-70"
                                 >
-                                    <Lock className="w-5 h-5" />
+                                    <IconLock className="w-5 h-5" />
                                     {loading ? 'Cadastrando...' : 'Cadastrar Biometria'}
                                 </button>
 
@@ -247,7 +247,7 @@ export default function SetupObrigatorio() {
                         ) : (
                             <>
                                 <div className="bg-warning-light border border-warning text-warning p-3 rounded-lg mb-6 flex items-center gap-2 text-sm">
-                                    <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                                    <IconAlertTriangle className="w-5 h-5 flex-shrink-0" />
                                     Biometria não disponível neste dispositivo. Entre em contato com o administrador para usar apenas senha.
                                 </div>
                                 <button

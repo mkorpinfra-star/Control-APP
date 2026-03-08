@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Calendar } from 'lucide-react';
+import { IconCalendar } from '@tabler/icons-react';
 
 // Custom Input Component
 const CustomInput = forwardRef(({ value, onClick, label }, ref) => (
