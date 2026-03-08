@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { clientesService } from '../services/api';
-import { IconPlus, IconSearch, IconEdit, IconTrash, IconBuildingFactory2, IconMail, IconPhone, IconMapPin } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconEdit, IconTrash, IconBuildingStore, IconMail, IconPhone, IconMapPin } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '../components/ui/Modal';
@@ -100,7 +100,7 @@ export default function Clients() {
                 </div>
             ) : filteredClients.length === 0 ? (
                 <div className="text-center py-16 px-4">
-                    <IconBuildingFactory2 size={48} className="mx-auto text-gray-300 mb-3" />
+                    <IconBuildingStore size={48} stroke={1} className="mx-auto text-gray-300 mb-3" />
                     <h3 className="text-lg font-semibold text-gray-700 mb-1">
                         {searchTerm ? 'Sin resultados' : 'No hay clientes'}
                     </h3>
@@ -112,7 +112,7 @@ export default function Clients() {
                         <div key={client.id} className="bg-[#F5F5F5] rounded-2xl p-4">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gray-900 shrink-0">
-                                    <IconBuildingFactory2 size={24} />
+                                    <IconBuildingStore size={24} stroke={1} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h3 className="font-semibold text-gray-900 text-base">{client.nome}</h3>

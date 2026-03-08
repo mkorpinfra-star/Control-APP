@@ -163,6 +163,17 @@ export default function DashboardBanking() {
   };
 
   const handleStatClick = (statId) => {
+    // Navegação direta para Clientes e Empleados
+    if (statId === 'clients') {
+      navigate('/clients');
+      return;
+    }
+    if (statId === 'employees') {
+      navigate('/employees');
+      return;
+    }
+
+    // Para outros cards, mostra modal informativo
     setSelectedInfo(infoContent[statId]);
     setShowInfoModal(true);
   };
