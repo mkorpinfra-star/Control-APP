@@ -76,22 +76,8 @@ export default function Clients() {
 
     return (
         <div className="min-h-screen bg-white pb-32">
-            {/* Header */}
-            <div className="px-4 pt-6 pb-4 flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Gestión de clientes</p>
-                </div>
-                <button
-                    onClick={openNewModal}
-                    className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg"
-                >
-                    <Plus size={24} strokeWidth={2.5} />
-                </button>
-            </div>
-
             {/* Search */}
-            <div className="px-4 mb-4">
+            <div className="px-4 pt-6 mb-4">
                 <div className="relative">
                     <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input

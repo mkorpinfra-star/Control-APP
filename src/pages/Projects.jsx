@@ -380,22 +380,8 @@ export default function Projects() {
 
     return (
         <div className="min-h-screen bg-white pb-32">
-            {/* Header */}
+            {/* Search & Filtros */}
             <div className="px-4 pt-6 pb-4">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Proyectos</h1>
-                        <p className="text-sm text-gray-500 mt-0.5">Gestión de obras</p>
-                    </div>
-                    <button
-                        onClick={openNewModal}
-                        className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg"
-                    >
-                        <Plus size={24} strokeWidth={2.5} />
-                    </button>
-                </div>
-
-                {/* Search & Filtros */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="relative md:col-span-2">
                         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
