@@ -78,15 +78,23 @@ export default function Clients() {
         <div className="h-full flex flex-col bg-white">
             {/* Search - FIXO */}
             <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
-                <div className="relative">
-                    <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Buscar cliente..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                    />
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="relative flex-1">
+                        <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Buscar cliente..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                        />
+                    </div>
+                    <button
+                        onClick={openNewModal}
+                        className="w-12 h-12 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg shrink-0"
+                    >
+                        <IconPlus stroke={1} size={24} />
+                    </button>
                 </div>
             </div>
 

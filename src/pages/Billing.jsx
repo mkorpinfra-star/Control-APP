@@ -5,6 +5,7 @@ import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
 import { IconPlus, IconDownload, IconMail, IconTrash, IconCalendar } from '@tabler/icons-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import { SkeletonStatCard, SkeletonCard } from '../components/SkeletonLoader';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
@@ -360,9 +361,19 @@ export default function Billing() {
 
             {/* Billing Table */}
             {loading ? (
-                <div className="px-4">
-                    <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
-                        <p className="text-gray-600 text-base">Cargando...</p>
+                <div className="px-4 space-y-3">
+                    {/* Skeleton Summary Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
+                    </div>
+                    {/* Skeleton Table */}
+                    <div className="bg-[#F5F5F5] rounded-2xl p-4 animate-pulse space-y-3">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className="h-16 bg-gray-300 rounded-xl"></div>
+                        ))}
                     </div>
                 </div>
             ) : faturas.length === 0 ? (

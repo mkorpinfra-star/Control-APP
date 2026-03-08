@@ -9,6 +9,7 @@ import { ChartIcon, BrainIcon, FileIcon, CloseIcon } from '../components/Icons';
 import { IconUser, IconClipboardList, IconBook, IconPlus, IconFileText, IconChartBar, IconBrain, IconCalendar } from '@tabler/icons-react';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
+import { SkeletonStatCard, SkeletonCard } from '../components/SkeletonLoader';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -117,8 +118,19 @@ export default function Reports() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-white pb-32 flex items-center justify-center">
-            <div className="text-gray-600">Cargando datos...</div>
+        <div className="min-h-screen bg-white pb-32">
+            <div className="px-4 pt-6 pb-4">
+                <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-64 mb-4 animate-pulse"></div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="bg-[#F5F5F5] rounded-2xl p-4 h-32 animate-pulse">
+                            <div className="h-12 w-12 bg-gray-300 rounded-full mx-auto mb-2"></div>
+                            <div className="h-3 bg-gray-300 rounded w-20 mx-auto"></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 
@@ -276,6 +288,25 @@ export default function Reports() {
                                 {activeTab === 'insights' && (
                                     <InsightsPanel relatorio={relatorio} />
                                 )}
+                            </div>
+                        )}
+
+                        {loadingRelatorio && (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <SkeletonStatCard />
+                                    <SkeletonStatCard />
+                                    <SkeletonStatCard />
+                                    <SkeletonStatCard />
+                                </div>
+                                <div className="bg-white rounded-2xl p-5 border border-gray-200 animate-pulse">
+                                    <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+                                    <div className="space-y-3">
+                                        {[1, 2, 3, 4, 5].map(i => (
+                                            <div key={i} className="h-12 bg-gray-100 rounded-xl"></div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         )}
 

@@ -34,6 +34,7 @@ import { Alert } from '../components/ui/Alert';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { SkeletonStatCard, SkeletonCard } from '../components/SkeletonLoader';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -312,7 +313,24 @@ export default function Analytics() {
             </div>
 
             {loading ? (
-                <Loading />
+                <div className="px-4 space-y-4">
+                    {/* Skeleton KPIs */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
+                    </div>
+                    {/* Skeleton Charts */}
+                    <div className="bg-white rounded-2xl p-5 border border-gray-200">
+                        <div className="h-8 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
+                        <div className="h-[300px] bg-gray-100 rounded-xl animate-pulse"></div>
+                    </div>
+                    <div className="bg-white rounded-2xl p-5 border border-gray-200">
+                        <div className="h-8 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
+                        <div className="h-[300px] bg-gray-100 rounded-xl animate-pulse"></div>
+                    </div>
+                </div>
             ) : data ? (
                 <>
                     {/* KPIs */}

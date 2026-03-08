@@ -5,6 +5,7 @@ import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
 import { IconPlus, IconDownload, IconMail, IconPrinter, IconTrash, IconCalendar } from '@tabler/icons-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import { SkeletonStatCard } from '../components/SkeletonLoader';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
 
@@ -497,10 +498,24 @@ export default function Payroll() {
 
             {/* Payroll Cards */}
             {loading ? (
-                <div className="px-4">
-                    <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
-                        <p className="text-gray-600 text-base">Cargando...</p>
+                <div className="px-4 space-y-3">
+                    {/* Skeleton Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
+                        <SkeletonStatCard />
                     </div>
+                    {/* Skeleton Cards */}
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="bg-[#F5F5F5] rounded-2xl p-4 animate-pulse">
+                            <div className="h-12 bg-gray-300 rounded-xl mb-3"></div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div className="h-32 bg-white rounded-xl"></div>
+                                <div className="h-32 bg-white rounded-xl"></div>
+                                <div className="h-32 bg-white rounded-xl"></div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : folhas.length === 0 ? (
                 <div className="px-4">
