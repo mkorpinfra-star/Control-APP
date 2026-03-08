@@ -3,9 +3,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import DynamicHeader from './DynamicHeader';
 import BottomNav from './BottomNav';
 
+// Otimizado para 60fps - apenas transform e opacity (GPU-accelerated)
 const pageVariants = {
   initial: {
-    x: '100%',
+    x: 30,
     opacity: 0
   },
   enter: {
@@ -13,17 +14,20 @@ const pageVariants = {
     opacity: 1,
     transition: {
       type: 'spring',
-      stiffness: 300,
-      damping: 30,
-      mass: 0.8
+      stiffness: 380,
+      damping: 32,
+      mass: 0.6
     }
   },
   exit: {
-    x: '-20%',
+    x: -20,
     opacity: 0,
     transition: {
-      duration: 0.2,
-      ease: 'easeInOut'
+      type: 'spring',
+      stiffness: 380,
+      damping: 32,
+      mass: 0.6,
+      duration: 0.15
     }
   }
 };
@@ -37,7 +41,7 @@ export default function BankingLayout() {
       <DynamicHeader />
 
       {/* Main Content Scrollável com Nubank-style transitions */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden" style={{
+      <main className="flex-1 overflow-y-auto overflow-x-hidden relative" style={{
         WebkitOverflowScrolling: 'touch',
         scrollBehavior: 'smooth'
       }}>
@@ -48,7 +52,10 @@ export default function BankingLayout() {
             initial="initial"
             animate="enter"
             exit="exit"
-            className="w-full min-h-full"
+            className="w-full h-full"
+            style={{
+              willChange: 'transform, opacity'
+            }}
           >
             <Outlet />
           </motion.div>

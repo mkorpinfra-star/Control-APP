@@ -3,21 +3,8 @@ import { Settings as SettingsIcon, Info } from 'lucide-react';
 export default function Settings() {
 
     return (
-        <div className="min-h-screen bg-white pb-32">
-            {/* Header */}
-            <div className="px-4 pt-6 pb-4 mb-4">
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                        <SettingsIcon className="w-5 h-5 text-black" />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Configuración</h1>
-                        <p className="text-sm text-gray-500 mt-0.5">Valores y parámetros del sistema</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="px-4 space-y-4">
+        <div className="h-full bg-white">
+            <div className="h-full overflow-y-auto px-4 pt-6 pb-6 space-y-4" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {/* Aviso principal */}
                 <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
                     <div className="flex gap-3">
