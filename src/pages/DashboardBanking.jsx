@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconTrendingUp, IconClock, IconUsers, IconUserCircle, IconBell, IconBriefcase, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconEdit, IconCircleX } from '@tabler/icons-react';
+import { IconTrendingUp, IconClock, IconUsers, IconUserCircle, IconBell, IconBriefcase, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconEdit, IconCircleX, IconCircleCheck } from '@tabler/icons-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { obrasService, apontamentosService, clientesService, usuariosService } from '../services/api';
 import { notificacoesService } from '../services/notificacoes';
@@ -197,14 +197,8 @@ export default function DashboardBanking() {
   };
 
   const getColorClass = (color) => {
-    const colors = {
-      'blue': 'bg-blue-100 text-black',
-      'green': 'bg-green-100 text-black',
-      'red': 'bg-red-100 text-black',
-      'orange': 'bg-orange-100 text-black',
-      'gray': 'bg-gray-100 text-black'
-    };
-    return colors[color] || 'bg-gray-100 text-black';
+    // Sempre retorna fundo cinza neutro com ícone preto
+    return 'bg-gray-100 text-black';
   };
 
   const formatTimeAgo = (created_at) => {

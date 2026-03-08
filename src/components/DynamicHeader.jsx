@@ -110,7 +110,7 @@ export default function DynamicHeader() {
 
   const config = getPageConfig();
 
-  // TODOS os QuickActions (8 itens) - Folha movido para baixo ao lado de Informes
+  // TODOS os QuickActions (8 itens) - Folha ao lado DIREITO de Informes
   const quickActions = [
     { label: 'Obras', icon: IconBuilding, path: '/projects', tourId: 'obras-btn' },
     { label: 'Clientes', icon: IconUsers, path: '/clients', tourId: 'clientes-btn' },
@@ -118,8 +118,8 @@ export default function DynamicHeader() {
     { label: 'Empleados', icon: IconUserCircle, path: '/employees', tourId: 'empleados-btn' },
     { label: 'Faturamento', icon: IconReceipt, path: '/billing', tourId: 'faturamento-btn' },
     { label: 'Análisis', icon: IconChartBar, path: '/analytics', tourId: 'analisis-btn' },
-    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' },
-    { label: 'Informes', icon: IconFileText, path: '/reports', tourId: 'informes-btn' }
+    { label: 'Informes', icon: IconFileText, path: '/reports', tourId: 'informes-btn' },
+    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' }
   ];
 
   return (
@@ -173,7 +173,7 @@ export default function DynamicHeader() {
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-xs opacity-80 mb-1">{config.subtitle}</p>
-                  <p className="text-xl font-bold tracking-tight">{config.title}</p>
+                  <p className="text-xl tracking-tight" style={{ fontFamily: 'IBM Plex Sans', fontWeight: 400 }}>{config.title}</p>
                 </div>
 
                 {/* Botão de adicionar para páginas de lista */}
