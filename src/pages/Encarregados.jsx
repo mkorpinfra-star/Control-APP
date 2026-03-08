@@ -120,9 +120,9 @@ export default function Encarregados() {
     );
 
     return (
-        <div className="min-h-screen bg-white pb-32">
-            {/* Search */}
-            <div className="px-4 pt-6 pb-4">
+        <div className="h-full flex flex-col bg-white">
+            {/* Search - FIXO */}
+            <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <input
@@ -130,14 +130,15 @@ export default function Encarregados() {
                         placeholder="Buscar encargado..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] rounded-2xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full pl-10 pr-4 py-3 bg-[#F5F5F5] rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     />
                 </div>
             </div>
 
-            {/* Lista */}
+            {/* Lista - SCROLLÁVEL */}
+            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
-                <div className="px-4 space-y-3">
+                <div className="px-4 pt-4 space-y-3">
                     {[1,2,3].map(i => (
                         <div key={i} className="skeleton h-24 rounded-2xl"></div>
                     ))}
@@ -346,6 +347,7 @@ export default function Encarregados() {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }

@@ -215,7 +215,7 @@ export default function DashboardBanking() {
   ];
 
   return (
-    <div className="pb-8">
+    <div className="h-full pb-6">
       {/* Stats Grid */}
       <div className="px-4 mb-6 pt-6">
         <h2 className="text-lg font-bold mb-4 text-gray-900">Resumen</h2>

@@ -379,9 +379,9 @@ export default function Projects() {
     }, [projects]);
 
     return (
-        <div className="min-h-screen bg-white pb-32">
-            {/* Search & Filtros */}
-            <div className="px-4 pt-6 pb-4">
+        <div className="h-full flex flex-col bg-white">
+            {/* Search & Filtros - FIXO */}
+            <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="relative md:col-span-2">
                         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -413,8 +413,8 @@ export default function Projects() {
                 </div>
             </div>
 
-            {/* Projects List */}
-            <div className="px-4">
+            {/* Projects List - SCROLLÁVEL */}
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {loading ? (
                     <div className="bg-[#F5F5F5] rounded-2xl p-12 text-center">
                         <p className="text-gray-600">Cargando proyectos...</p>

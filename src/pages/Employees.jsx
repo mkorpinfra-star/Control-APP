@@ -137,9 +137,9 @@ export default function Employees() {
     }[t] || 'bg-gray-100 text-gray-600');
 
     return (
-        <div className="min-h-screen bg-white pb-32">
-            {/* Filters */}
-            <div className="px-4 pt-6 mb-4 flex flex-col gap-3">
+        <div className="h-full flex flex-col bg-white">
+            {/* Filters - FIXO */}
+            <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex flex-col gap-3">
                 <div className="relative">
                     <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -161,9 +161,10 @@ export default function Employees() {
                 />
             </div>
 
-            {/* List */}
+            {/* List - SCROLLÁVEL */}
+            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
-                <div className="px-4 space-y-3">
+                <div className="px-4 pt-4 space-y-3">
                     {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-gray-100 animate-pulse rounded-xl" />)}
                 </div>
             ) : filtered.length === 0 ? (
@@ -357,6 +358,7 @@ export default function Employees() {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }
