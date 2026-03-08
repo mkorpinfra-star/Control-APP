@@ -360,7 +360,7 @@ export default function Login() {
                     <div className="flex items-center gap-4">
                         {/* Ícone quadrado BRANCO com J2S VERMELHO */}
                         <div className="w-28 h-28 bg-white rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden">
-                            <span className="text-[5rem] font-black text-[#CE0201] -tracking-[0.15em] leading-none -ml-1">
+                            <span className="text-[5rem] text-[#CE0201] -tracking-[0.15em] leading-none -ml-1" style={{ fontFamily: 'IBM Plex Sans', fontWeight: 400 }}>
                                 J2S
                             </span>
                         </div>
@@ -368,7 +368,7 @@ export default function Login() {
                         {/* Hores com Lottie - SEM fundo, texto branco */}
                         <div className="flex items-center gap-3">
                             <div ref={lottieRef} className="w-14 h-14" style={{filter: 'brightness(0) invert(1)'}}></div>
-                            <span className="text-4xl font-black text-white tracking-tight">Hores</span>
+                            <span className="text-4xl text-white tracking-tight" style={{ fontFamily: 'IBM Plex Sans', fontWeight: 400 }}>Hores</span>
                         </div>
                     </div>
 

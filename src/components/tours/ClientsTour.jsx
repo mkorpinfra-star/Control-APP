@@ -25,7 +25,7 @@ export default function ClientsTour() {
           {
             element: '[data-tour="add-client-btn"]',
             popover: {
-              title: '➕ Afegir Client',
+              title: 'Afegir Client',
               description: 'Benvingut a Clients! Aquí gestiones la teva cartera. Registra nous clients amb nom, email, telèfon i adreça. Després podràs assignar-los obres.',
               side: 'bottom',
               align: 'start'
@@ -34,7 +34,7 @@ export default function ClientsTour() {
           {
             element: '[data-tour="search-client"]',
             popover: {
-              title: '🔍 Cerca de Clients',
+              title: 'Cerca de Clients',
               description: 'Troba clients ràpidament pel nom o dades de contacte.',
               side: 'bottom',
               align: 'start'
@@ -43,7 +43,7 @@ export default function ClientsTour() {
           {
             element: '[data-tour="client-card"]',
             popover: {
-              title: '📋 Fitxa de Client',
+              title: 'Fitxa de Client',
               description: 'Cada targeta mostra informació essencial: nom, contacte i número d\'obres associades.',
               side: 'top',
               align: 'start'

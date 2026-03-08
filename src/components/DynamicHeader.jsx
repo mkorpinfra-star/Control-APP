@@ -110,15 +110,15 @@ export default function DynamicHeader() {
 
   const config = getPageConfig();
 
-  // TODOS os QuickActions (8 itens - removido Ajustes)
+  // TODOS os QuickActions (8 itens) - Folha movido para baixo ao lado de Informes
   const quickActions = [
     { label: 'Obras', icon: IconBuilding, path: '/projects', tourId: 'obras-btn' },
     { label: 'Clientes', icon: IconUsers, path: '/clients', tourId: 'clientes-btn' },
     { label: 'Encargados', icon: IconUserCog, path: '/encarregados', tourId: 'encargados-btn' },
     { label: 'Empleados', icon: IconUserCircle, path: '/employees', tourId: 'empleados-btn' },
-    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' },
     { label: 'Faturamento', icon: IconReceipt, path: '/billing', tourId: 'faturamento-btn' },
     { label: 'Análisis', icon: IconChartBar, path: '/analytics', tourId: 'analisis-btn' },
+    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' },
     { label: 'Informes', icon: IconFileText, path: '/reports', tourId: 'informes-btn' }
   ];
 

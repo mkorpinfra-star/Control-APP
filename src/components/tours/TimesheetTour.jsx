@@ -25,7 +25,7 @@ export default function TimesheetTour() {
           {
             element: '[data-tour="employee-select"]',
             popover: {
-              title: '👤 Seleccionar Empleat',
+              title: 'Seleccionar Empleat',
               description: 'Benvingut al Registre d\'Hores! Primer selecciona l\'empleat que va treballar. Si ets encarregat, pots registrar hores de qualsevol empleat del teu equip.',
               side: 'bottom',
               align: 'start'
@@ -34,7 +34,7 @@ export default function TimesheetTour() {
           {
             element: '[data-tour="project-select"]',
             popover: {
-              title: '🏗️ Seleccionar Obra',
+              title: 'Seleccionar Obra',
               description: 'Després selecciona a quina obra va treballar l\'empleat aquest dia.',
               side: 'bottom',
               align: 'start'
@@ -43,7 +43,7 @@ export default function TimesheetTour() {
           {
             element: '[data-tour="date-picker"]',
             popover: {
-              title: '📅 Data del Treball',
+              title: 'Data del Treball',
               description: 'Indica en quina data es van realitzar les hores. Pots registrar hores d\'avui o de dies anteriors.',
               side: 'bottom',
               align: 'start'
@@ -52,7 +52,7 @@ export default function TimesheetTour() {
           {
             element: '[data-tour="hours-input"]',
             popover: {
-              title: '⏱️ Registrar Hores',
+              title: 'Registrar Hores',
               description: 'Introdueix les hores treballades: normals (8h/dia màxim), extra (fins 10h) i nocturnes (22h-6h). El sistema calcularà automàticament els valors.',
               side: 'bottom',
               align: 'start'
@@ -61,7 +61,7 @@ export default function TimesheetTour() {
           {
             element: '[data-tour="save-timesheet-btn"]',
             popover: {
-              title: '💾 Guardar Registre',
+              title: 'Guardar Registre',
               description: 'Un cop omplertes totes les dades, fes clic per guardar. Les hores quedaran pendents d\'aprovació per l\'administrador.',
               side: 'bottom',
               align: 'start'

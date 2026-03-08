@@ -25,7 +25,7 @@ export default function EmployeesTour() {
           {
             element: '[data-tour="add-employee-btn"]',
             popover: {
-              title: '➕ Afegir Empleat',
+              title: 'Afegir Empleat',
               description: 'Benvingut a Empleats! Fes clic aquí per registrar un nou empleat amb totes les dades: nom, funcions, salari base, percentatges de CASS i assigna-lo a obres.',
               side: 'bottom',
               align: 'start'
@@ -34,7 +34,7 @@ export default function EmployeesTour() {
           {
             element: '[data-tour="search-employee"]',
             popover: {
-              title: '🔍 Cerca d\'Empleats',
+              title: 'Cerca d\'Empleats',
               description: 'Busca empleats pel nom o pel número de targeta biométrica de forma ràpida.',
               side: 'bottom',
               align: 'start'
@@ -43,7 +43,7 @@ export default function EmployeesTour() {
           {
             element: '[data-tour="employee-card"]',
             popover: {
-              title: '📋 Fitxa d\'Empleat',
+              title: 'Fitxa d\'Empleat',
               description: 'Veus tota la informació de cada empleat: nom, funció, targeta biométrica, salari base i obres assignades.',
               side: 'top',
               align: 'start'
@@ -52,7 +52,7 @@ export default function EmployeesTour() {
           {
             element: '[data-tour="edit-employee-btn"]',
             popover: {
-              title: '✏️ Editar Empleat',
+              title: 'Editar Empleat',
               description: 'Actualitza qualsevol dada de l\'empleat: canvia salari, modifica funcions, assigna a noves obres.',
               side: 'left',
               align: 'start'
@@ -61,7 +61,7 @@ export default function EmployeesTour() {
           {
             element: '[data-tour="delete-employee-btn"]',
             popover: {
-              title: '🗑️ Eliminar Empleat',
+              title: 'Eliminar Empleat',
               description: 'Si un empleat ja no treballa a l\'empresa, pots eliminar-lo del sistema amb confirmació prèvia.',
               side: 'left',
               align: 'start'

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconTrendingUp, IconClock, IconCircleCheck, IconAlertCircle, IconBell, IconBriefcase, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconEdit, IconCircleX } from '@tabler/icons-react';
+import { IconTrendingUp, IconClock, IconUsers, IconUserCircle, IconBell, IconBriefcase, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconEdit, IconCircleX } from '@tabler/icons-react';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
-import { obrasService, apontamentosService } from '../services/api';
+import { obrasService, apontamentosService, clientesService, usuariosService } from '../services/api';
 import { notificacoesService } from '../services/notificacoes';
 import TourGuide from '../components/TourGuide';
 import { SkeletonStatCard, SkeletonNotificationCard } from '../components/SkeletonLoader';
@@ -14,8 +14,8 @@ export default function DashboardBanking() {
   const [stats, setStats] = useState({
     obrasAtivas: 0,
     apontamentosPendentes: 0,
-    obrasFinalizadas: 0,
-    alertas: 0
+    clientes: 0,
+    empleados: 0
   });
   const [notificacoes, setNotificacoes] = useState([]);
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -64,8 +64,15 @@ export default function DashboardBanking() {
       });
       console.log('✅ Obras ativas filtradas:', obrasAtivas.length);
 
-      // Obras finalizadas = 0 (por enquanto não temos campo de finalização explícita)
-      const obrasFinalizadas = 0;
+      // Buscar clientes
+      const clientesRes = await clientesService.getAll();
+      const clientes = Array.isArray(clientesRes) ? clientesRes : (clientesRes.clientes || []);
+      console.log('✅ Clientes carregados:', clientes.length);
+
+      // Buscar funcionários (empleados) - tipo 'funcionario'
+      const funcionariosRes = await usuariosService.getAll('funcionario');
+      const funcionarios = Array.isArray(funcionariosRes) ? funcionariosRes : (funcionariosRes.usuarios || []);
+      console.log('✅ Funcionários carregados:', funcionarios.length);
 
       // Buscar apontamentos pendentes
       const apontRes = await apontamentosService.getAll();
@@ -83,26 +90,18 @@ export default function DashboardBanking() {
       });
       console.log('✅ Apontamentos pendentes:', pendentes.length);
 
-      // Alertas: obras sem encarregado + apontamentos pendentes há mais de 7 dias
-      const obrasSemEncarregado = obrasAtivas.filter(o => !o.encarregado_id);
-      const apontamentosAtrasados = pendentes.filter(a => {
-        if (!a.created_at) return false;
-        const dias = Math.floor((Date.now() - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24));
-        return dias > 7;
-      });
-
       console.log('📊 STATS FINAIS:', {
         obrasAtivas: obrasAtivas.length,
         pendentes: pendentes.length,
-        finalizadas: 0,
-        alertas: obrasSemEncarregado.length + apontamentosAtrasados.length
+        clientes: clientes.length,
+        empleados: funcionarios.length
       });
 
       setStats({
         obrasAtivas: obrasAtivas.length,
         apontamentosPendentes: pendentes.length,
-        obrasFinalizadas: 0,
-        alertas: obrasSemEncarregado.length + apontamentosAtrasados.length
+        clientes: clientes.length,
+        empleados: funcionarios.length
       });
 
     } catch (error) {
@@ -114,10 +113,10 @@ export default function DashboardBanking() {
 
   const infoContent = {
     active: {
-      title: '🏗️ Obres Actives',
+      title: 'Obres Actives',
       description: 'Totes les teves obres en marxa, en un sol lloc.',
       benefits: [
-        'Adéu paperassa! 📋❌',
+        'Adéu paperassa!',
         'Control total en temps real',
         'Assigna encarregats al instant',
         'Veu estat i progressos d\'un cop d\'ull'
@@ -126,10 +125,10 @@ export default function DashboardBanking() {
       action: () => navigate('/projects')
     },
     pending: {
-      title: '⏰ Aprovacions Pendents',
+      title: 'Aprovacions Pendents',
       description: 'Revisa i aprova hores en segons, no en hores.',
       benefits: [
-        'Adéu planilhas! 📊❌',
+        'Adéu planilhas!',
         'Aprovació amb un clic',
         'Histórico complet de cada empleat',
         'Integració automàtica amb folha de pagament'
@@ -137,29 +136,29 @@ export default function DashboardBanking() {
       cta: 'Revisar Aprovacions',
       action: () => navigate('/approvals')
     },
-    completed: {
-      title: '✅ Obres Finalitzades',
-      description: 'Histórico complet de tots els teus projectes.',
+    clients: {
+      title: 'Clientes',
+      description: 'Tota la teva cartera de clients en un sol lloc.',
       benefits: [
-        'Accés instantani a obres antigues',
-        'Estadístiques i informes automàtics',
-        'Referència per futurs pressupostos',
-        'Tot organitzat, res perdut'
+        'Adéu fulls de càlcul desorganitzats!',
+        'Contactes actualitzats sempre',
+        'Veu totes les obres per client',
+        'Gestió ràpida i professional'
       ],
-      cta: 'Veure Històrico',
-      action: () => navigate('/projects')
+      cta: 'Gestionar Clients',
+      action: () => navigate('/clients')
     },
-    alerts: {
-      title: '⚠️ Alertes',
-      description: 'Problemes? Resol-los abans que siguin problemes.',
+    employees: {
+      title: 'Empleados',
+      description: 'Gestió completa de la teva plantilla.',
       benefits: [
-        'Notificacions intel·ligents',
-        'Detecta errors abans del pagament',
-        'Obres sense encarregat? T\'avisem!',
-        'Mai més sorpreses desagradables'
+        'Fitxes completes de cada empleat',
+        'Control de salaris i CASS',
+        'Assignació a obres en segons',
+        'Tot centralitzat, zero confusió'
       ],
-      cta: 'Veure Alertes',
-      action: () => navigate('/projects')
+      cta: 'Gestionar Empleats',
+      action: () => navigate('/employees')
     }
   };
 
@@ -240,18 +239,18 @@ export default function DashboardBanking() {
       bgColor: 'bg-gray-100'
     },
     {
-      id: 'completed',
-      label: 'Finalizadas',
-      value: stats.obrasFinalizadas,
-      icon: IconCircleCheck,
+      id: 'clients',
+      label: 'Clientes',
+      value: stats.clientes,
+      icon: IconUsers,
       color: 'text-black',
       bgColor: 'bg-gray-100'
     },
     {
-      id: 'alerts',
-      label: 'Alertas',
-      value: stats.alertas,
-      icon: IconAlertCircle,
+      id: 'employees',
+      label: 'Empleados',
+      value: stats.empleados,
+      icon: IconUserCircle,
       color: 'text-black',
       bgColor: 'bg-gray-100'
     }
@@ -358,7 +357,8 @@ export default function DashboardBanking() {
       </div>
 
       {/* Descubra más - Carrossel Horizontal Estilo Nubank */}
-      <div className="mb-8 px-4">
+      {/* OCULTO TEMPORARIAMENTE - manter código para uso futuro */}
+      <div className="mb-8 px-4 hidden">
         <h2 className="text-lg font-bold mb-4 text-gray-900">Descobreix més</h2>
 
         {/* Carrossel Horizontal com Scroll Suave */}
@@ -439,7 +439,7 @@ export default function DashboardBanking() {
           >
             {/* Header */}
             <div className="bg-gradient-to-br from-[#CE0201] to-[#A00101] px-6 py-8 text-white">
-              <h3 className="text-2xl font-light mb-2" style={{ fontFamily: 'IBM Plex Sans', fontWeight: 200 }}>
+              <h3 className="text-2xl mb-2" style={{ fontFamily: 'IBM Plex Sans', fontWeight: 400 }}>
                 {selectedInfo.title}
               </h3>
               <p className="text-white/90 text-sm leading-relaxed">

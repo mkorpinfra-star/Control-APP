@@ -22,7 +22,7 @@ export default function TourGuide() {
           steps: [
             {
               popover: {
-                title: 'Benvingut a J2S Hores! 🎉',
+                title: 'Benvingut a J2S Hores!',
                 description: 'El teu sistema de gestió d\'obres. Aquest tutorial va ajudar-te a optimitzar el teu temps i gestionar les teves obres de forma més eficient. Comencem?',
                 side: 'bottom',
                 align: 'center'
@@ -49,7 +49,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="obras-btn"]',
               popover: {
-                title: '🏗️ Obras',
+                title: 'Obras',
                 description: 'Gestiona totes les teves obres: crea noves, edita informació, assigna encarregats i controla l\'estat de cada projecte.',
                 side: 'bottom',
                 align: 'start'
@@ -58,7 +58,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="clientes-btn"]',
               popover: {
-                title: '🏢 Clientes',
+                title: 'Clientes',
                 description: 'Gestiona la teva cartera de clients: afegeix nous, actualitza dades de contacte i visualitza totes les obres associades a cada client.',
                 side: 'bottom',
                 align: 'start'
@@ -67,7 +67,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="encargados-btn"]',
               popover: {
-                title: '👷 Encarregados',
+                title: 'Encarregados',
                 description: 'Gestiona els teus encarregats: assigna-los a obres, controla el seu accés i revisa les seves aprovacions pendents.',
                 side: 'bottom',
                 align: 'start'
@@ -76,7 +76,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="empleados-btn"]',
               popover: {
-                title: '👥 Empleados',
+                title: 'Empleados',
                 description: 'Gestiona la teva plantilla: afegeix nous empleats, actualitza dades, assigna-los a obres i controla les seves hores treballades.',
                 side: 'bottom',
                 align: 'start'
@@ -85,7 +85,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="folha-btn"]',
               popover: {
-                title: '💰 Folha de Pagamento',
+                title: 'Folha de Pagamento',
                 description: 'Genera la folha de pagament automàticament basant-te en les hores aprovades. Revisa, edita i exporta les nòmines dels teus empleats.',
                 side: 'bottom',
                 align: 'start'
@@ -94,7 +94,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="faturamento-btn"]',
               popover: {
-                title: '📊 Faturamento',
+                title: 'Faturamento',
                 description: 'Controla la facturació de cada obra: genera factures automàtiques basades en les hores treballades i valors acordats amb el client.',
                 side: 'bottom',
                 align: 'start'
@@ -103,7 +103,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="analisis-btn"]',
               popover: {
-                title: '📈 Análisis',
+                title: 'Análisis',
                 description: 'Visualitza gràfics i estadístiques detallades: rendiment per obra, productivitat d\'empleats, costos i marges de benefici.',
                 side: 'bottom',
                 align: 'start'
@@ -112,7 +112,7 @@ export default function TourGuide() {
             {
               element: '[data-tour="informes-btn"]',
               popover: {
-                title: '📄 Informes',
+                title: 'Informes',
                 description: 'Genera informes personalitzats: registre d\'empleats, històric d\'hores, moviments per obra i exporta tot en PDF o Excel.',
                 side: 'bottom',
                 align: 'start'
@@ -129,7 +129,7 @@ export default function TourGuide() {
             },
             {
               popover: {
-                title: 'Tot llest! ✅',
+                title: 'Tot llest!',
                 description: 'Ara ja coneixes J2S Hores. Comença a gestionar les teves obres de forma més eficient i estalvia temps en tasques administratives. Bon treball!',
                 side: 'bottom',
                 align: 'center'

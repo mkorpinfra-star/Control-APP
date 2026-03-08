@@ -25,7 +25,7 @@ export default function ProjectsTour() {
           {
             element: '[data-tour="add-project-btn"]',
             popover: {
-              title: '➕ Crear Nova Obra',
+              title: 'Crear Nova Obra',
               description: 'Benvingut a Obres! Aquí crees noves obres amb totes les dades: nom, client, encarregat, dates i valors de facturació.',
               side: 'bottom',
               align: 'start'
@@ -34,7 +34,7 @@ export default function ProjectsTour() {
           {
             element: '[data-tour="search-input"]',
             popover: {
-              title: '🔍 Cerca Ràpida',
+              title: 'Cerca Ràpida',
               description: 'Utilitza aquesta barra per buscar obres per nom, número o client. La cerca és instantània.',
               side: 'bottom',
               align: 'start'
@@ -43,7 +43,7 @@ export default function ProjectsTour() {
           {
             element: '[data-tour="project-card"]',
             popover: {
-              title: '📋 Targeta d\'Obra',
+              title: 'Targeta d\'Obra',
               description: 'Cada targeta mostra informació essencial de l\'obra: client, encarregat, dates i estat. Fes clic per veure més detalls.',
               side: 'top',
               align: 'start'
@@ -52,7 +52,7 @@ export default function ProjectsTour() {
           {
             element: '[data-tour="edit-project-btn"]',
             popover: {
-              title: '✏️ Editar Obra',
+              title: 'Editar Obra',
               description: 'Fes clic en l\'icona de llapis per editar qualsevol informació de l\'obra: canviar encarregat, actualitzar dates, etc.',
               side: 'left',
               align: 'start'
@@ -61,7 +61,7 @@ export default function ProjectsTour() {
           {
             element: '[data-tour="delete-project-btn"]',
             popover: {
-              title: '🗑️ Eliminar Obra',
+              title: 'Eliminar Obra',
               description: 'Si necessites eliminar una obra, fes clic en l\'icona de paperera. El sistema demanarà confirmació abans d\'eliminar.',
               side: 'left',
               align: 'start'
