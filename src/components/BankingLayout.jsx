@@ -6,7 +6,7 @@ import BottomNav from './BottomNav';
 // Transição estilo Nubank - Slide horizontal suave
 const pageVariants = {
   initial: {
-    x: 100,
+    x: '100%',
     opacity: 0
   },
   enter: {
@@ -14,18 +14,17 @@ const pageVariants = {
     opacity: 1,
     transition: {
       type: 'spring',
-      stiffness: 260,
-      damping: 25,
-      mass: 0.6,
-      duration: 0.4
+      stiffness: 300,
+      damping: 30,
+      mass: 0.8
     }
   },
   exit: {
-    x: -30,
+    x: '-100%',
     opacity: 0,
     transition: {
-      duration: 0.2,
-      ease: 'easeInOut'
+      duration: 0.3,
+      ease: 'easeOut'
     }
   }
 };
@@ -39,25 +38,17 @@ export default function BankingLayout() {
       <DynamicHeader />
 
       {/* Main Content Scrollável com transição Nubank */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden relative" style={{
-        WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'smooth'
-      }}>
-        <AnimatePresence mode="wait">
+      <main className="flex-1 overflow-hidden relative">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
             variants={pageVariants}
             initial="initial"
             animate="enter"
             exit="exit"
+            className="absolute inset-0 overflow-y-auto overflow-x-hidden"
             style={{
-              width: '100%',
-              height: '100%',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              willChange: 'transform, opacity'
+              WebkitOverflowScrolling: 'touch'
             }}
           >
             <Outlet />

@@ -46,28 +46,28 @@ export default function DynamicHeader() {
         title: 'Proyectos',
         subtitle: 'Gestión de obras',
         icon: IconBuilding,
-        addAction: () => navigate('/projects?add=true')
+        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'projects' } }))
       },
       '/clients': {
         type: 'list',
         title: 'Clientes',
         subtitle: 'Gestión de clientes',
         icon: IconBuildingFactory2,
-        addAction: () => navigate('/clients?add=true')
+        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'clients' } }))
       },
       '/encarregados': {
         type: 'list',
         title: 'Encargados',
         subtitle: 'Gestión de encargados',
         icon: IconShieldPlus,
-        addAction: () => navigate('/encarregados?add=true')
+        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'encarregados' } }))
       },
       '/employees': {
         type: 'list',
         title: 'Empleados',
         subtitle: 'Gestión de empleados',
         icon: IconUsers,
-        addAction: () => navigate('/employees?add=true')
+        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'employees' } }))
       },
       '/approvals': {
         type: 'page',

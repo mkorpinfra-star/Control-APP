@@ -19,7 +19,14 @@ export default function Clients() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => { loadData(); }, []);
+    useEffect(() => {
+        loadData();
+
+        // Listener para botão + do header
+        const handleOpenModal = () => openNewModal();
+        window.addEventListener('openAddModal', handleOpenModal);
+        return () => window.removeEventListener('openAddModal', handleOpenModal);
+    }, []);
 
     const loadData = async () => {
         try {
