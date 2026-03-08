@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import {
     IconClock, IconCurrencyDollar, IconUsers, IconBuildingFactory2,
-    IconTrendingUp, IconDownload, IconMail, IconPlus
+    IconTrendingUp, IconDownload, IconMail, IconPlus, IconCalendar
 } from '@tabler/icons-react';
 
 // Register Chart.js components
@@ -297,7 +297,7 @@ export default function Analytics() {
                         disabled={exporting || !filters}
                         className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Download size={14} />
+                        <IconDownload stroke={1} size={14} />
                         {exporting ? 'Generando...' : 'Excel'}
                     </button>
                     <button
@@ -305,7 +305,7 @@ export default function Analytics() {
                         disabled={!filters}
                         className="flex items-center gap-1.5 px-3 py-2 bg-[#F5F5F5] text-gray-700 hover:bg-gray-200 transition-colors font-medium rounded-full text-sm disabled:opacity-40"
                     >
-                        <Mail size={14} />
+                        <IconMail stroke={1} size={14} />
                         Email
                     </button>
                 </div>
@@ -321,7 +321,7 @@ export default function Analytics() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-1">
                                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <Clock className="w-4 h-4 text-black" />
+                                        <IconClock className="w-4 h-4 text-black" />
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-600 mb-1">Horas Totales</p>
@@ -330,7 +330,7 @@ export default function Analytics() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-1">
                                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <DollarSign className="w-4 h-4 text-black" />
+                                        <IconCurrencyDollar className="w-4 h-4 text-black" />
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-600 mb-1">Costo Total</p>
@@ -339,7 +339,7 @@ export default function Analytics() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-1">
                                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <Users className="w-4 h-4 text-black" />
+                                        <IconUsers className="w-4 h-4 text-black" />
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-600 mb-1">Empleados</p>
@@ -348,7 +348,7 @@ export default function Analytics() {
                             <div className="bg-[#F5F5F5] rounded-2xl p-4">
                                 <div className="flex items-center gap-2 mb-1">
                                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <Building2 className="w-4 h-4 text-black" />
+                                        <IconBuildingFactory2 className="w-4 h-4 text-black" />
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-600 mb-1">Obras</p>
@@ -363,7 +363,7 @@ export default function Analytics() {
                             <div className="bg-white rounded-2xl p-5 border border-gray-200">
                                 <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <TrendingUp className="w-4 h-4 text-black" />
+                                        <IconTrendingUp className="w-4 h-4 text-black" />
                                     </div>
                                     Evolución Temporal
                                 </h3>
@@ -380,7 +380,7 @@ export default function Analytics() {
                             <div className="bg-white rounded-2xl p-5 border border-gray-200">
                                 <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <Users className="w-4 h-4 text-black" />
+                                        <IconUsers className="w-4 h-4 text-black" />
                                     </div>
                                     Top 10 Empleados
                                 </h3>
@@ -489,7 +489,7 @@ export default function Analytics() {
                                     'Enviando...'
                                 ) : (
                                     <>
-                                        <Mail className="w-4 h-4" />
+                                        <IconMail className="w-4 h-4" />
                                         Enviar
                                     </>
                                 )}

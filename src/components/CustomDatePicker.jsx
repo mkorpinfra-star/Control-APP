@@ -18,7 +18,7 @@ const CustomInput = forwardRef(({ value, onClick, label }, ref) => (
             className="relative w-full px-4 py-3 bg-[#F5F5F5] border-0 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CE0201] font-medium text-base cursor-pointer hover:bg-gray-100 transition-colors text-left"
         >
             <span className="flex items-center gap-2">
-                <Calendar size={18} className="text-gray-600" strokeWidth={2} />
+                <IconCalendar size={18} className="text-gray-600" strokeWidth={2} />
                 <span className="block truncate">{value || 'Seleccionar fecha'}</span>
             </span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">

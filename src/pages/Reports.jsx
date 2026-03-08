@@ -6,7 +6,7 @@ import AnalyticsDashboard from '../components/reports/AnalyticsDashboard';
 import InsightsPanel from '../components/reports/InsightsPanel';
 import EmployeeLog from '../components/reports/EmployeeLog';
 import { ChartIcon, BrainIcon, FileIcon, CloseIcon } from '../components/Icons';
-import { IconUser, IconClipboardList, IconBook, IconPlus, IconFileText, IconChartBar, IconBrain } from '@tabler/icons-react';
+import { IconUser, IconClipboardList, IconBook, IconPlus, IconFileText, IconChartBar, IconBrain, IconCalendar } from '@tabler/icons-react';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
 
