@@ -18,17 +18,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/tenant_middleware.php';
+require_once __DIR__ . '/../../includes/jwt.php';
 
-// Autenticação e validação de tenant
-$auth = validateTenantAccess();
-$tenant_id = $auth['tenant_id'];
+$headers = getallheaders();
+$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
 
-if ($auth['tipo'] !== 'admin' && $auth['tipo'] !== 'encarregado') {
+if (empty($authHeader)) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+
+$token = str_replace('Bearer ', '', $authHeader);
+$payload = validateJWT($token);
+
+if (!$payload) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Invalid token']);
+    exit;
+}
+
+if ($payload['tipo'] !== 'admin' && $payload['tipo'] !== 'encarregado') {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden']);
     exit;
 }
+
+$tenant_id = $payload['empresa_id'] ?? $payload['tenant_id'] ?? null;
+if (!$tenant_id) {
+    http_response_code(400);
+    echo json_encode(['error' => 'tenant_id ausente no token']);
+    exit;
+}
+
+$auth = [
+    'tenant_id' => $tenant_id,
+    'tipo' => $payload['tipo'],
+    'user_id' => $payload['id']
+];
 
 $obraId       = isset($_GET['obra_id'])       ? intval($_GET['obra_id'])           : 0;
 $semanaInicio = isset($_GET['semana_inicio'])  ? trim($_GET['semana_inicio'])        : '';
@@ -78,13 +105,13 @@ try {
             a.id            AS apontamento_id,
             a.semana_inicio
         FROM funcionario_obra fo
-        INNER JOIN usuarios u ON u.id = fo.funcionario_id AND u.tenant_id = :tenant_id
-        INNER JOIN obras    o ON o.id = fo.obra_id AND o.tenant_id = :tenant_id
+        INNER JOIN usuarios u ON u.id = fo.funcionario_id AND u.tenant_id = :tenant_id_u
+        INNER JOIN obras    o ON o.id = fo.obra_id AND o.tenant_id = :tenant_id_o
         LEFT JOIN apontamentos a
                ON a.funcionario_id = fo.funcionario_id
               AND a.obra_id        = fo.obra_id
               AND a.semana_inicio  = :semana_inicio
-              AND a.tenant_id      = :tenant_id
+              AND a.tenant_id      = :tenant_id_a
         WHERE fo.ativo = 1
           AND u.ativo  = 1
           AND o.ativo  = 1
@@ -93,7 +120,12 @@ try {
         ORDER BY o.nome, u.nome
     ";
 
-    $params = array_merge([':semana_inicio' => $semanaInicio, ':tenant_id' => $tenant_id], $obraParams);
+    $params = array_merge([
+        ':semana_inicio' => $semanaInicio,
+        ':tenant_id_u' => $tenant_id,
+        ':tenant_id_o' => $tenant_id,
+        ':tenant_id_a' => $tenant_id
+    ], $obraParams);
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

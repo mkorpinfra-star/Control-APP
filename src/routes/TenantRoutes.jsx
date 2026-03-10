@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 // Public pages
 import LandingHome from '../pages/landing/Home';
 import Login from '../pages/Login';
+import ApprovePublic from '../pages/ApprovePublic';
 
 // User pages
 import BaterPonto from '../pages/BaterPonto';
@@ -82,6 +83,7 @@ export default function TenantRoutes() {
       {/* Páginas públicas */}
       <Route path="/" element={isAuthenticated ? <HomeRouter /> : <LandingHome />} />
       <Route path="/login" element={isAuthenticated ? <HomeRouter /> : <Login />} />
+      <Route path="/approve/:token" element={<ApprovePublic />} />
 
       {/* Rotas protegidas com layout - FLAT STRUCTURE (sem /admin/*) */}
       <Route element={

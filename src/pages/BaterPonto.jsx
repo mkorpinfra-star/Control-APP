@@ -190,6 +190,13 @@ export default function BaterPonto() {
                 const data = await res.json()
                 if (data.success) {
                     loadApontamento()
+
+                    // Abrir WhatsApp automaticamente
+                    if (data.whatsapp_link) {
+                        setTimeout(() => {
+                            window.open(data.whatsapp_link, '_blank')
+                        }, 500)
+                    }
                 }
             } catch (err) {
                 console.error(err)
@@ -216,7 +223,16 @@ export default function BaterPonto() {
                     })
                     .then(r => r.json())
                     .then(data => {
-                        if (data.success) loadApontamento()
+                        if (data.success) {
+                            loadApontamento()
+
+                            // Abrir WhatsApp automaticamente
+                            if (data.whatsapp_link) {
+                                setTimeout(() => {
+                                    window.open(data.whatsapp_link, '_blank')
+                                }, 500)
+                            }
+                        }
                     })
                 }
                 return prev
@@ -246,7 +262,27 @@ export default function BaterPonto() {
         }
     }
 
-    const bloqueado = apontamento?.status === 'enviado' || apontamento?.status === 'aprovado'
+    function nextWeek() {
+        const d = new Date(semanaInicio)
+        d.setDate(d.getDate() + 7)
+        setSemanaInicio(d.toISOString().split('T')[0])
+    }
+
+    function prevWeek() {
+        const d = new Date(semanaInicio)
+        d.setDate(d.getDate() - 7)
+        setSemanaInicio(d.toISOString().split('T')[0])
+    }
+
+    function goToCurrentWeek() {
+        setSemanaInicio(getMonday(new Date()))
+    }
+
+    const isCurrentWeek = semanaInicio === getMonday(new Date())
+
+    // Só bloqueia se APROVADO (aprovado_encarregado ou aprovado)
+    // Se está apenas "enviado", funcionário pode corrigir
+    const bloqueado = apontamento?.status === 'aprovado_encarregado' || apontamento?.status === 'aprovado'
     const diaKey = DIAS[diaAtual]
     const horasDia = horas[diaKey]
     const totalDia = (parseFloat(horasDia.normal) || 0) + (parseFloat(horasDia.extra) || 0) + (parseFloat(horasDia.noturna) || 0)
@@ -268,7 +304,7 @@ export default function BaterPonto() {
                                 <IconClock stroke={1} className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Bater Ponto</h1>
+                                <h1 className="text-2xl font-bold text-gray-900">Hores treballades</h1>
                                 <p className="text-sm text-gray-500">{user?.nome}</p>
                             </div>
                         </div>
@@ -293,6 +329,34 @@ export default function BaterPonto() {
                             label: `${o.numero} — ${o.nome}`
                         }))}
                     />
+
+                    {/* Navegação de Semanas */}
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                        <button
+                            onClick={prevWeek}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+                        >
+                            <IconChevronLeft className="w-4 h-4" />
+                            Semana anterior
+                        </button>
+
+                        {!isCurrentWeek && (
+                            <button
+                                onClick={goToCurrentWeek}
+                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold text-white transition-colors"
+                            >
+                                Semana actual
+                            </button>
+                        )}
+
+                        <button
+                            onClick={nextWeek}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+                        >
+                            Semana siguiente
+                            <IconChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
 
                 </div>
 
@@ -324,9 +388,9 @@ export default function BaterPonto() {
                         apontamento.status === 'rejeitado' ? 'bg-red-100 text-red-800' :
                         'bg-gray-100 text-gray-700'
                     }`}>
-                        {apontamento.status === 'aprovado' && '✅ APROBADO'}
-                        {apontamento.status === 'enviado' && '⏳ ENVIADO - Esperando aprobación'}
-                        {apontamento.status === 'rejeitado' && '❌ RECHAZADO: ' + (apontamento.observacao_rejeicao || '')}
+                        {(apontamento.status === 'aprovado' || apontamento.status === 'aprovado_encarregado') && '✅ APROBADO - No se puede editar'}
+                        {apontamento.status === 'enviado' && '⏳ ENVIADO - Puedes corregir antes de la aprobación'}
+                        {apontamento.status === 'rejeitado' && '❌ RECHAZADO: ' + (apontamento.observacao_rejeicao || 'Corrige y envía nuevamente')}
                         {apontamento.status === 'rascunho' && '💾 Guardado automáticamente'}
                     </div>
                 )}

@@ -185,11 +185,13 @@ export default function Approvals() {
             const obrasRes = await fetch(`${API_URL}/obras/list.php`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const obrasData = await obrasRes.json();
+            const obrasJson = await obrasRes.json();
+            const obrasData = Array.isArray(obrasJson?.obras) ? obrasJson.obras : [];
+
             // encarregado vê só suas obras
             const minhasObras = isEncarregado
-                ? (obrasData || []).filter(o => String(o.encarregado_id) === String(user?.id))
-                : (obrasData || []);
+                ? obrasData.filter(o => String(o.encarregado_id) === String(user?.id))
+                : obrasData;
             setObras(minhasObras);
 
             // pending

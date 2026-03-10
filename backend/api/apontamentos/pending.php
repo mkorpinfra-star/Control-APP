@@ -22,18 +22,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/tenant_middleware.php';
+require_once __DIR__ . '/../../includes/jwt.php';
 
-// Autenticação e validação de tenant
-$auth = validateTenantAccess();
-$tenant_id = $auth['tenant_id'];
+$headers = getallheaders();
+$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
 
-// Admin e encarregado podem ver aprovações pendentes
-if ($auth['tipo'] !== 'admin' && $auth['tipo'] !== 'encarregado') {
+if (empty($authHeader)) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+
+$token = str_replace('Bearer ', '', $authHeader);
+$payload = validateJWT($token);
+
+if (!$payload) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Invalid token']);
+    exit;
+}
+
+if ($payload['tipo'] !== 'admin' && $payload['tipo'] !== 'encarregado') {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden', 'message' => 'Sem permissão para esta ação']);
     exit;
 }
+
+$tenant_id = $payload['empresa_id'] ?? $payload['tenant_id'] ?? null;
+if (!$tenant_id) {
+    http_response_code(400);
+    echo json_encode(['error' => 'tenant_id ausente no token']);
+    exit;
+}
+
+$auth = [
+    'tenant_id' => $tenant_id,
+    'tipo' => $payload['tipo'],
+    'user_id' => $payload['id']
+];
 
 try {
     $pdo = getConnection();
