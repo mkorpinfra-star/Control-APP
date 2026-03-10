@@ -58,6 +58,11 @@ try {
 
     $pdo = getConnection();
 
+    // DEBUG: Ver qual tenant_id a obra realmente tem
+    $debugStmt = $pdo->prepare("SELECT id, tenant_id FROM obras WHERE id = ?");
+    $debugStmt->execute([$data['id']]);
+    $obraDebug = $debugStmt->fetch(PDO::FETCH_ASSOC);
+
     // Verificar se a obra pertence à empresa do usuário
     $checkStmt = $pdo->prepare("SELECT id FROM obras WHERE id = ? AND tenant_id = ?");
     $checkStmt->execute([$data['id'], $empresaId]);
@@ -69,31 +74,35 @@ try {
             'error' => 'Obra não encontrada',
             'debug' => [
                 'obra_id' => $data['id'],
-                'tenant_id' => $empresaId,
+                'expected_tenant_id' => $empresaId,
+                'actual_tenant_id' => $obraDebug['tenant_id'] ?? 'NULL',
+                'obra_exists_in_db' => $obraDebug ? true : false,
                 'force' => $data['force'] ?? false
             ]
         ]);
         exit;
     }
 
-    // VERIFICAR SE TEM APONTAMENTOS - PRESERVAR HISTÓRICO
-    $checkStmt = $pdo->prepare("
-        SELECT COUNT(*) as total
-        FROM apontamentos a
-        INNER JOIN obras o ON o.id = a.obra_id
-        WHERE a.obra_id = ? AND o.tenant_id = ?
-    ");
-    $checkStmt->execute([$data['id'], $empresaId]);
-    $apontamentosCount = $checkStmt->fetch(PDO::FETCH_ASSOC)['total'];
+    // Se não for force delete, sempre pedir confirmação primeiro
+    if (empty($data['force'])) {
+        // Verificar se tem apontamentos
+        $checkStmt = $pdo->prepare("
+            SELECT COUNT(*) as total
+            FROM apontamentos a
+            INNER JOIN obras o ON o.id = a.obra_id
+            WHERE a.obra_id = ? AND o.tenant_id = ?
+        ");
+        $checkStmt->execute([$data['id'], $empresaId]);
+        $apontamentosCount = $checkStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-    if ($apontamentosCount > 0 && empty($data['force'])) {
-        // Return 200 so frontend can handle the confirmation flow
         http_response_code(200);
         echo json_encode([
             'success' => false,
             'error' => 'has_records',
             'count' => $apontamentosCount,
-            'message' => "Esta obra tiene {$apontamentosCount} registros de horas en el sistema."
+            'message' => $apontamentosCount > 0
+                ? "Esta obra tiene {$apontamentosCount} registros de horas en el sistema."
+                : "¿Estás seguro de que deseas eliminar esta obra?"
         ]);
         exit;
     }
