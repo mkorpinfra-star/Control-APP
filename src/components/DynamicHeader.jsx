@@ -125,7 +125,7 @@ export default function DynamicHeader() {
   return (
     <>
       <header className="bg-gradient-to-br from-[#CE0201] to-[#A00101] text-white safe-area-top">
-        <div className="px-4 pt-6 pb-6">
+        <div className={`px-4 pt-6 ${user?.tipo === 'admin' ? 'pb-6' : 'pb-3'}`}>
           {/* Top Row - Avatar + Logout */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -168,7 +168,7 @@ export default function DynamicHeader() {
           </div>
 
           {/* Title Section - Só para páginas que NÃO são Dashboard */}
-          {!config.showQuickActions && (
+          {!config.showQuickActions && user?.tipo === 'admin' && (
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
               <div className="flex items-center justify-between">
                 <div className="flex-1">

@@ -28,6 +28,7 @@ export default function BaterPonto() {
         fri: { normal: '', extra: '', noturna: '' },
         sat: { normal: '', extra: '', noturna: '' }
     })
+    const [showConfirmModal, setShowConfirmModal] = useState(false)
 
     function getMonday(date) {
         const d = new Date(date)
@@ -168,6 +169,12 @@ export default function BaterPonto() {
     }
 
     async function handleSubmit() {
+        setShowConfirmModal(true)
+    }
+
+    async function confirmSubmit() {
+        setShowConfirmModal(false)
+
         // Se já tem ID, vai direto pro submit
         if (apontamento?.id) {
             try {
@@ -182,34 +189,23 @@ export default function BaterPonto() {
 
                 const data = await res.json()
                 if (data.success) {
-                    alert('✅ Enviado para aprobación')
                     loadApontamento()
-                } else {
-                    alert('❌ ' + (data.message || 'Error al enviar'))
                 }
             } catch (err) {
-                alert('❌ Error al enviar')
+                console.error(err)
             }
             return
         }
 
-        // Não tem ID ainda: salvar primeiro (UMA tentativa, sem loop)
+        // Não tem ID ainda: salvar primeiro
         const saved = await handleAutoSave()
-        if (!saved) {
-            alert('❌ Error al guardar. Intenta de nuevo.')
-            return
-        }
+        if (!saved) return
 
-        // Recarregar para obter o ID
         await loadApontamento()
 
-        // Agora tenta enviar (apontamento state ainda pode não estar atualizado,
-        // loadApontamento é async mas o state do React só atualiza no próximo render)
-        // Usamos um pequeno delay para garantir que o state atualizou
         setTimeout(async () => {
             setApontamento(prev => {
                 if (prev?.id) {
-                    // Enviar de forma assíncrona sem depender do state
                     fetch('https://puntoclicks.com/backend/api/apontamentos/submit.php', {
                         method: 'POST',
                         headers: {
@@ -220,16 +216,8 @@ export default function BaterPonto() {
                     })
                     .then(r => r.json())
                     .then(data => {
-                        if (data.success) {
-                            alert('✅ Enviado para aprobación')
-                            loadApontamento()
-                        } else {
-                            alert('❌ ' + (data.message || 'Error al enviar'))
-                        }
+                        if (data.success) loadApontamento()
                     })
-                    .catch(() => alert('❌ Error al enviar'))
-                } else {
-                    alert('❌ No se pudo obtener el registro. Intenta de nuevo.')
                 }
                 return prev
             })
@@ -527,6 +515,72 @@ export default function BaterPonto() {
                     {bloqueado ? 'Ya enviado' : 'Enviar para aprobación'}
                 </button>
             </div>
+
+            {/* Modal de Confirmación */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 sm:rounded-t-2xl rounded-t-3xl">
+                            <h2 className="text-xl font-bold text-gray-900">Confirmar envío</h2>
+                            <p className="text-sm text-gray-500 mt-1">Revisa tus horas antes de enviar</p>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            {/* Obra */}
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Obra</p>
+                                <p className="text-base font-bold text-gray-900">{obraAtual?.numero} - {obraAtual?.nome}</p>
+                            </div>
+
+                            {/* Semana */}
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Semana</p>
+                                {DIAS.map((dia, idx) => {
+                                    const horasDia = horas[dia]
+                                    const totalDia = (parseFloat(horasDia.normal) || 0) + (parseFloat(horasDia.extra) || 0) + (parseFloat(horasDia.noturna) || 0)
+                                    if (totalDia === 0) return null
+
+                                    return (
+                                        <div key={dia} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
+                                            <span className="text-sm font-medium text-gray-700">{DIAS_NOME[idx]}</span>
+                                            <div className="flex items-center gap-3 text-xs">
+                                                {horasDia.normal > 0 && <span className="text-gray-600">N: {horasDia.normal}h</span>}
+                                                {horasDia.extra > 0 && <span className="text-blue-600">E: {horasDia.extra}h</span>}
+                                                {horasDia.noturna > 0 && <span className="text-purple-600">Nc: {horasDia.noturna}h</span>}
+                                                <span className="font-bold text-gray-900 ml-2">{totalDia.toFixed(1)}h</span>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            {/* Total */}
+                            <div className="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-bold text-gray-700">TOTAL SEMANA</span>
+                                    <span className="text-2xl font-black text-red-600">{totalSemana.toFixed(1)}h</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 flex gap-3 sm:rounded-b-2xl">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmSubmit}
+                                className="flex-1 px-4 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <IconSend size={18} stroke={2} />
+                                Enviar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

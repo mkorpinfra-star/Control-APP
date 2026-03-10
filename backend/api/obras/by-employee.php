@@ -20,10 +20,11 @@ require_once __DIR__ . '/../../includes/jwt.php';
 
 $user = requireAuth();
 
-$empresaId = $user['empresa_id'] ?? null;
+// Support both empresa_id and tenant_id
+$empresaId = $user['empresa_id'] ?? $user['tenant_id'] ?? null;
 if (!$empresaId) {
     http_response_code(400);
-    echo json_encode(['error' => 'empresa_id ausente no token']);
+    echo json_encode(['error' => 'empresa_id/tenant_id ausente no token']);
     exit;
 }
 
@@ -38,7 +39,7 @@ if ($user['tipo'] === 'funcionario' && $funcionarioId != $user['id']) {
 
 // Verificar se o funcionário pertence à mesma empresa
 $pdo = getConnection();
-$checkStmt = $pdo->prepare("SELECT id FROM usuarios WHERE id = ? AND empresa_id = ?");
+$checkStmt = $pdo->prepare("SELECT id FROM usuarios WHERE id = ? AND tenant_id = ?");
 $checkStmt->execute([$funcionarioId, $empresaId]);
 if (!$checkStmt->fetch()) {
     http_response_code(404);
@@ -53,10 +54,10 @@ try {
                e.nome as encarregado_nome
         FROM obras o
         INNER JOIN funcionario_obra fo ON fo.obra_id = o.id
-        LEFT JOIN clientes c ON c.id = o.cliente_id AND c.empresa_id = ?
-        LEFT JOIN encarregados e ON e.id = o.encarregado_id AND e.empresa_id = ?
+        LEFT JOIN clientes c ON c.id = o.cliente_id AND c.tenant_id = ?
+        LEFT JOIN encarregados e ON e.id = o.encarregado_id AND e.tenant_id = ?
         WHERE fo.funcionario_id = ?
-          AND o.empresa_id = ?
+          AND o.tenant_id = ?
           AND (o.ativa = 1 OR o.ativo = 1)
         ORDER BY o.numero
     ");
