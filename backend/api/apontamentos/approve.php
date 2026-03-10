@@ -22,31 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 require_once __DIR__ . '/../../includes/email.php';
 require_once __DIR__ . '/../../includes/notificacao_helper.php';
 
-// Autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Autenticação e validação de tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 // Apenas admin e encarregado podem aprovar
-if ($user['tipo'] !== 'admin' && $user['tipo'] !== 'encarregado') {
+if ($auth['tipo'] !== 'admin' && $auth['tipo'] !== 'encarregado') {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden']);
     exit;
@@ -67,44 +52,44 @@ try {
     $pdo = getConnection();
 
     // Determinar qual status buscar baseado no tipo de usuário
-    if ($user['tipo'] === 'admin') {
+    if ($auth['tipo'] === 'admin') {
         // Admin aprova registros que já foram aprovados pelo encarregado
         $statusBuscar = 'aprovado_encarregado';
         $novoStatus = 'aprovado';
 
         $stmt = $pdo->prepare("
-            SELECT a.*, 
+            SELECT a.*,
                    u.nome as funcionario_nome, u.email as funcionario_email, u.foto_url as funcionario_foto,
                    o.numero as obra_numero, o.nome as obra_nome,
-                   c.nome as cliente_nome, 
+                   c.nome as cliente_nome,
                    COALESCE(c.email_financeiro, c.email) as email_financeiro,
                    enc.nome as encarregado_nome
             FROM apontamentos a
-            INNER JOIN usuarios u ON u.id = a.funcionario_id
-            INNER JOIN obras o ON o.id = a.obra_id
-            LEFT JOIN clientes c ON c.id = o.cliente_id
-            LEFT JOIN usuarios enc ON enc.id = a.aprovado_por
-            WHERE a.id = ? AND a.status = ?
+            INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            LEFT JOIN clientes c ON c.id = o.cliente_id AND c.tenant_id = ?
+            LEFT JOIN usuarios enc ON enc.id = a.aprovado_por AND enc.tenant_id = ?
+            WHERE a.id = ? AND a.status = ? AND a.tenant_id = ?
         ");
-        $stmt->execute([$apontamentoId, $statusBuscar]);
+        $stmt->execute([$tenant_id, $tenant_id, $tenant_id, $tenant_id, $apontamentoId, $statusBuscar, $tenant_id]);
     } else {
         // Encarregado aprova registros enviados pelos funcionários
         $statusBuscar = 'enviado';
         $novoStatus = 'aprovado_encarregado';
 
         $stmt = $pdo->prepare("
-            SELECT a.*, 
+            SELECT a.*,
                    u.nome as funcionario_nome, u.email as funcionario_email, u.foto_url as funcionario_foto,
                    o.numero as obra_numero, o.nome as obra_nome,
-                   c.nome as cliente_nome, 
+                   c.nome as cliente_nome,
                    COALESCE(c.email_financeiro, c.email) as email_financeiro
             FROM apontamentos a
-            INNER JOIN usuarios u ON u.id = a.funcionario_id
-            INNER JOIN obras o ON o.id = a.obra_id
-            LEFT JOIN clientes c ON c.id = o.cliente_id
-            WHERE a.id = ? AND o.encarregado_id = ? AND a.status = ?
+            INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            LEFT JOIN clientes c ON c.id = o.cliente_id AND c.tenant_id = ?
+            WHERE a.id = ? AND o.encarregado_id = ? AND a.status = ? AND a.tenant_id = ?
         ");
-        $stmt->execute([$apontamentoId, $user['id'], $statusBuscar]);
+        $stmt->execute([$tenant_id, $tenant_id, $tenant_id, $apontamentoId, $auth['user_id'], $statusBuscar, $tenant_id]);
     }
 
     $apontamento = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -116,17 +101,17 @@ try {
     }
 
     // Atualizar status
-    if ($user['tipo'] === 'admin') {
+    if ($auth['tipo'] === 'admin') {
         // Admin aprova - atualiza aprovação final
         $stmt = $pdo->prepare("
-            UPDATE apontamentos 
+            UPDATE apontamentos
             SET status = ?, aprovado_admin_em = NOW(), aprovado_admin_por = ?, assinatura_admin_base64 = ?
-            WHERE id = ?
+            WHERE id = ? AND tenant_id = ?
         ");
-        $stmt->execute([$novoStatus, $user['id'], $assinatura, $apontamentoId]);
+        $stmt->execute([$novoStatus, $auth['user_id'], $assinatura, $apontamentoId, $tenant_id]);
 
         // Preparar dados para e-mail final (para J2S)
-        $apontamento['aprovado_admin_por_nome'] = $user['nome'];
+        $apontamento['aprovado_admin_por_nome'] = $auth['nome'];
         $apontamento['aprovado_admin_em'] = date('d/m/Y H:i');
 
         // Enviar email final para J2S
@@ -140,12 +125,12 @@ try {
         $stmt = $pdo->prepare("
             UPDATE apontamentos
             SET status = ?, aprovado_em = NOW(), aprovado_por = ?, assinatura_base64 = ?
-            WHERE id = ?
+            WHERE id = ? AND tenant_id = ?
         ");
-        $stmt->execute([$novoStatus, $user['id'], $assinatura, $apontamentoId]);
+        $stmt->execute([$novoStatus, $auth['user_id'], $assinatura, $apontamentoId, $tenant_id]);
 
         // Preparar dados para e-mail
-        $apontamento['aprovado_por_nome'] = $user['nome'];
+        $apontamento['aprovado_por_nome'] = $auth['nome'];
         $apontamento['aprovado_em'] = date('d/m/Y H:i');
 
         // Notificar admin/RH que há registro pendente
@@ -163,9 +148,10 @@ try {
             FROM apontamentos
             WHERE obra_id = ?
               AND semana_inicio = ?
+              AND tenant_id = ?
               AND status IN ('enviado', 'aprovado_encarregado', 'aprovado')
         ");
-        $stmtTotal->execute([$obraId, $semanaInicio]);
+        $stmtTotal->execute([$obraId, $semanaInicio, $tenant_id]);
         $totalAlocados = (int)$stmtTotal->fetchColumn();
 
         // Total já aprovados nessa semana (incluindo o que acabou de ser aprovado)
@@ -174,9 +160,10 @@ try {
             FROM apontamentos
             WHERE obra_id = ?
               AND semana_inicio = ?
+              AND tenant_id = ?
               AND status IN ('aprovado_encarregado', 'aprovado')
         ");
-        $stmtAprovados->execute([$obraId, $semanaInicio]);
+        $stmtAprovados->execute([$obraId, $semanaInicio, $tenant_id]);
         $totalAprovados = (int)$stmtAprovados->fetchColumn();
 
         $todosAprovados = ($totalAlocados > 0 && $totalAprovados >= $totalAlocados);
@@ -228,9 +215,9 @@ try {
             'url' => '/approvals',
             'entidade_tipo' => 'apontamento',
             'entidade_id' => $apontamentoId,
-            'usuario_id' => $user['id'],
-            'usuario_nome' => $user['nome'] ?? 'Admin',
-            'usuario_tipo' => $user['tipo']
+            'usuario_id' => $auth['user_id'],
+            'usuario_nome' => $auth['nome'] ?? 'Admin',
+            'usuario_tipo' => $auth['tipo']
         ]
     );
 
@@ -241,7 +228,7 @@ try {
     ];
 
     // Para o encarregado, retornar progresso de aprovação da semana
-    if ($user['tipo'] !== 'admin' && isset($totalAprovados)) {
+    if ($auth['tipo'] !== 'admin' && isset($totalAprovados)) {
         $responseData['aprovados']       = $totalAprovados;
         $responseData['total_alocados']  = $totalAlocados;
         $responseData['todos_aprovados'] = $todosAprovados;

@@ -3,7 +3,7 @@ import { IconChartBar, IconCurrencyDollar, IconTrendingUp, IconTrendingDown } fr
 import { Card } from '../components/ui/Card';
 import CustomDatePicker from '../components/CustomDatePicker';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
 
 export default function FinancialDashboard() {
     const [mesReferencia, setMesReferencia] = useState(() => {

@@ -22,29 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Autenticação e validação de tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 // Admin e encarregado podem ver aprovações pendentes
-if ($user['tipo'] !== 'admin' && $user['tipo'] !== 'encarregado') {
+if ($auth['tipo'] !== 'admin' && $auth['tipo'] !== 'encarregado') {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden', 'message' => 'Sem permissão para esta ação']);
     exit;
@@ -53,39 +38,40 @@ if ($user['tipo'] !== 'admin' && $user['tipo'] !== 'encarregado') {
 try {
     $pdo = getConnection();
 
-    if ($user['tipo'] === 'admin') {
+    if ($auth['tipo'] === 'admin') {
         // Admin vê registros que já foram aprovados pelo encarregado
         // Status: 'aprovado_encarregado' - pendentes de aprovação final
-        $stmt = $pdo->query("
-            SELECT a.id, a.funcionario_id, a.obra_id, a.semana_inicio, 
+        $stmt = $pdo->prepare("
+            SELECT a.id, a.funcionario_id, a.obra_id, a.semana_inicio,
                    a.horas_diarias, a.total_horas, a.status, a.enviado_em,
                    a.aprovado_em, a.aprovado_por, a.assinatura_base64,
                    u.nome as funcionario_nome, u.passaporte as funcionario_passaporte, u.foto_url as funcionario_foto,
                    o.numero as obra_numero, o.nome as obra_nome,
                    enc.nome as encarregado_nome
             FROM apontamentos a
-            INNER JOIN usuarios u ON u.id = a.funcionario_id
-            INNER JOIN obras o ON o.id = a.obra_id
-            LEFT JOIN usuarios enc ON enc.id = a.aprovado_por
-            WHERE a.status = 'aprovado_encarregado'
+            INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            LEFT JOIN usuarios enc ON enc.id = a.aprovado_por AND enc.tenant_id = ?
+            WHERE a.status = 'aprovado_encarregado' AND a.tenant_id = ?
             ORDER BY a.aprovado_em ASC
         ");
+        $stmt->execute([$tenant_id, $tenant_id, $tenant_id, $tenant_id]);
         $apontamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
         // Encarregado vê registros enviados pelos funcionários das suas obras
         // Status: 'enviado' - pendentes de primeira aprovação
         $stmt = $pdo->prepare("
-            SELECT a.id, a.funcionario_id, a.obra_id, a.semana_inicio, 
+            SELECT a.id, a.funcionario_id, a.obra_id, a.semana_inicio,
                    a.horas_diarias, a.total_horas, a.status, a.enviado_em,
                    u.nome as funcionario_nome, u.passaporte as funcionario_passaporte, u.foto_url as funcionario_foto,
                    o.numero as obra_numero, o.nome as obra_nome
             FROM apontamentos a
-            INNER JOIN usuarios u ON u.id = a.funcionario_id
-            INNER JOIN obras o ON o.id = a.obra_id
-            WHERE o.encarregado_id = ? AND a.status = 'enviado'
+            INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            WHERE o.encarregado_id = ? AND a.status = 'enviado' AND a.tenant_id = ?
             ORDER BY a.enviado_em ASC
         ");
-        $stmt->execute([$user['id']]);
+        $stmt->execute([$tenant_id, $tenant_id, $auth['user_id'], $tenant_id]);
         $apontamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -99,8 +85,8 @@ try {
     echo json_encode([
         'success' => true,
         'apontamentos' => $apontamentos,
-        'tipo_usuario' => $user['tipo'],
-        'status_buscado' => $user['tipo'] === 'admin' ? 'aprovado_encarregado' : 'enviado'
+        'tipo_usuario' => $auth['tipo'],
+        'status_buscado' => $auth['tipo'] === 'admin' ? 'aprovado_encarregado' : 'enviado'
     ]);
 
 } catch (Exception $e) {

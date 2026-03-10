@@ -1,14 +1,24 @@
 <?php
 /**
- * CRIAR ENCARREGADO
+ * CRIAR ENCARREGADO - MULTI-TENANT
  */
 
 header('Content-Type: application/json; charset=utf-8');
-require_once '../../includes/auth.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 require_once '../../config/database.php';
+require_once '../../includes/tenant_middleware.php';
 require_once '../../includes/notificacao_helper.php';
 
-$user = authMiddleware(['admin']);
+$auth = validateTenantAccess();
+requireAdmin($auth);
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -19,10 +29,10 @@ try {
 
     $pdo = getConnection();
 
-    // Verificar email duplicado
+    // Verificar email duplicado dentro do tenant
     if (!empty($data['email'])) {
-        $checkEmail = $pdo->prepare("SELECT id FROM encarregados WHERE email = ?");
-        $checkEmail->execute([$data['email']]);
+        $checkEmail = $pdo->prepare("SELECT id FROM encarregados WHERE email = ? AND tenant_id = ?");
+        $checkEmail->execute([$data['email'], $auth['tenant_id']]);
         if ($checkEmail->fetch()) {
             throw new Exception('Email já cadastrado');
         }
@@ -36,13 +46,14 @@ try {
 
     $stmt = $pdo->prepare("
         INSERT INTO encarregados (
-            nome, email, telefone, passaporte, senha, ativo
+            tenant_id, nome, email, telefone, passaporte, senha, ativo
         ) VALUES (
-            :nome, :email, :telefone, :passaporte, :senha, :ativo
+            :tenant_id, :nome, :email, :telefone, :passaporte, :senha, :ativo
         )
     ");
 
     $stmt->execute([
+        'tenant_id' => $auth['tenant_id'],
         'nome' => $data['nome'],
         'email' => $data['email'] ?? null,
         'telefone' => $data['telefone'] ?? null,
@@ -65,9 +76,10 @@ try {
             'url' => '/staff',
             'entidade_tipo' => 'encarregado',
             'entidade_id' => $id,
-            'usuario_id' => $user['id'],
-            'usuario_nome' => $user['nome'] ?? 'Admin',
-            'usuario_tipo' => $user['tipo']
+            'usuario_id' => $auth['user_id'],
+            'usuario_nome' => $auth['nome'] ?? 'Admin',
+            'usuario_tipo' => $auth['tipo'],
+            'tenant_id' => $auth['tenant_id']
         ]
     );
 

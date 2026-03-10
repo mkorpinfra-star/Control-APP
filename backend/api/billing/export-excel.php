@@ -15,26 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Verificar autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Não autorizado']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user || $user['tipo'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Permissão negada']);
-    exit;
-}
+$auth = validateTenantAccess(['admin']);
+$tenant_id = $auth['tenant_id'];
 
 try {
     $mes = $_GET['mes'] ?? date('Y-m');
@@ -51,15 +35,16 @@ try {
             o.nome as obra_nome,
             c.nome as cliente_nome
         FROM faturamento f
-        INNER JOIN obras o ON o.id = f.obra_id
-        LEFT JOIN clientes c ON c.id = o.cliente_id
-        WHERE f.mes_referencia = :mes
+        INNER JOIN obras o ON o.id = f.obra_id AND o.tenant_id = :tenant_id
+        LEFT JOIN clientes c ON c.id = o.cliente_id AND c.tenant_id = :tenant_id
+        WHERE f.tenant_id = :tenant_id
+        AND f.mes_referencia = :mes
         $whereObra
         ORDER BY o.numero
     ";
 
     $stmt = $pdo->prepare($sql);
-    $params = ['mes' => $mes];
+    $params = ['tenant_id' => $tenant_id, 'mes' => $mes];
     if ($obraId !== 'all') $params['obra_id'] = $obraId;
     $stmt->execute($params);
     $faturas = $stmt->fetchAll(PDO::FETCH_ASSOC);

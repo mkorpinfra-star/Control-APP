@@ -1,4 +1,13 @@
 <?php
+/**
+ * API: Trocar Senha do Usuário
+ * POST /api/usuarios/change-password.php
+ * MULTI-TENANT: Isolado por tenant_id
+ */
+
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -9,16 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Verificar autenticação
-$user = verificarToken();
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'No autorizado']);
-    exit;
-}
+// Validar acesso multi-tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 // Só aceita POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -49,9 +54,9 @@ if (strlen($new_password) < 6) {
 try {
     $db = getConnection();
 
-    // Buscar usuário atual
-    $stmt = $db->prepare("SELECT senha FROM usuarios WHERE id = ?");
-    $stmt->execute([$user['id']]);
+    // Buscar usuário atual (filtrado por tenant)
+    $stmt = $db->prepare("SELECT senha_hash FROM usuarios WHERE id = ? AND tenant_id = ?");
+    $stmt->execute([$auth['user_id'], $tenant_id]);
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$usuario) {
@@ -61,7 +66,7 @@ try {
     }
 
     // Verificar senha atual
-    if (!password_verify($current_password, $usuario['senha'])) {
+    if (!password_verify($current_password, $usuario['senha_hash'])) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Contraseña actual incorrecta']);
         exit;
@@ -70,9 +75,9 @@ try {
     // Hash da nova senha
     $new_password_hash = password_hash($new_password, PASSWORD_DEFAULT);
 
-    // Atualizar senha
-    $stmt = $db->prepare("UPDATE usuarios SET senha = ?, updated_at = NOW() WHERE id = ?");
-    $stmt->execute([$new_password_hash, $user['id']]);
+    // Atualizar senha (filtrado por tenant)
+    $stmt = $db->prepare("UPDATE usuarios SET senha_hash = ? WHERE id = ? AND tenant_id = ?");
+    $stmt->execute([$new_password_hash, $auth['user_id'], $tenant_id]);
 
     echo json_encode([
         'success' => true,

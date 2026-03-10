@@ -18,26 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Autenticação e validação de tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 $semanaInicio = isset($_GET['semana_inicio']) ? $_GET['semana_inicio'] : date('Y-m-d', strtotime('monday this week'));
 $obraId = isset($_GET['obra_id']) ? (int)$_GET['obra_id'] : null;
@@ -53,11 +38,11 @@ try {
                    a.observacao_rejeicao, a.enviado_em, a.aprovado_em,
                    o.numero as obra_numero, o.nome as obra_nome
             FROM apontamentos a
-            INNER JOIN obras o ON o.id = a.obra_id
-            WHERE a.funcionario_id = ? AND a.obra_id = ? AND a.semana_inicio = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            WHERE a.funcionario_id = ? AND a.obra_id = ? AND a.semana_inicio = ? AND a.tenant_id = ?
             LIMIT 1
         ");
-        $stmt->execute([$user['id'], $obraId, $semanaInicio]);
+        $stmt->execute([$tenant_id, $auth['user_id'], $obraId, $semanaInicio, $tenant_id]);
     } else {
         $stmt = $pdo->prepare("
             SELECT a.id, a.funcionario_id, a.obra_id, a.semana_inicio,
@@ -65,11 +50,11 @@ try {
                    a.observacao_rejeicao, a.enviado_em, a.aprovado_em,
                    o.numero as obra_numero, o.nome as obra_nome
             FROM apontamentos a
-            INNER JOIN obras o ON o.id = a.obra_id
-            WHERE a.funcionario_id = ? AND a.semana_inicio = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            WHERE a.funcionario_id = ? AND a.semana_inicio = ? AND a.tenant_id = ?
             LIMIT 1
         ");
-        $stmt->execute([$user['id'], $semanaInicio]);
+        $stmt->execute([$tenant_id, $auth['user_id'], $semanaInicio, $tenant_id]);
     }
     $apontamento = $stmt->fetch(PDO::FETCH_ASSOC);
 

@@ -5,10 +5,20 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
-require_once '../../includes/auth.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+require_once '../../includes/tenant_middleware.php';
 require_once '../../config/database.php';
 
-$user = authMiddleware(['admin']);
+$auth = validateTenantAccess(['admin']);
+$tenant_id = $auth['tenant_id'];
 
 try {
     $inicio = $_GET['inicio'] ?? null;
@@ -49,7 +59,7 @@ try {
     $selectAprovadorNome = $hasAprovadoPor ? "aprovador.nome as aprovador_nome" : "NULL as aprovador_nome";
 
     $whereObra = $obraId ? " AND a.obra_id = :obra_id" : "";
-    $params = ['inicio' => $inicio, 'fim' => $fim];
+    $params = ['inicio' => $inicio, 'fim' => $fim, 'tenant_id' => $tenant_id];
     if ($obraId) $params['obra_id'] = $obraId;
 
     $stmt = $pdo->prepare("
@@ -75,13 +85,14 @@ try {
             {$selectAprovadorNome}
 
         FROM apontamentos a
-        INNER JOIN usuarios u ON u.id = a.funcionario_id
-        INNER JOIN obras o ON o.id = a.obra_id AND (o.ativo = 1 OR o.ativa = 1)
+        INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = :tenant_id
+        INNER JOIN obras o ON o.id = a.obra_id AND (o.ativo = 1 OR o.ativa = 1) AND o.tenant_id = :tenant_id
         {$joinAprovador}
 
         WHERE a.status IN ('aprovado', 'aprovado_encarregado')
         AND a.semana_inicio >= :inicio
         AND a.semana_inicio <= :fim
+        AND a.tenant_id = :tenant_id
         $whereObra
 
         ORDER BY a.semana_inicio DESC, o.numero, u.nome

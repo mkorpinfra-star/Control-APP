@@ -17,6 +17,7 @@ require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
 $user = authMiddleware(['admin']);
+$tenantId = $user['tenant_id'];
 
 $mesReferencia = $_GET['mes']      ?? date('Y-m');
 $obraId        = isset($_GET['obra_id']) && $_GET['obra_id'] !== 'all' ? (int)$_GET['obra_id'] : null;
@@ -27,7 +28,7 @@ try {
     $pdo = getConnection();
 
     $whereObra = $obraId ? " AND fp.obra_id = :obra_id" : "";
-    $params = ['mes_referencia' => $mesReferencia];
+    $params = ['mes_referencia' => $mesReferencia, 'tenant_id' => $tenantId];
     if ($obraId) $params['obra_id'] = $obraId;
 
     $stmt = $pdo->prepare("
@@ -46,6 +47,9 @@ try {
         INNER JOIN usuarios u ON u.id = fp.funcionario_id
         INNER JOIN obras o ON o.id = fp.obra_id
         WHERE fp.mes_referencia = :mes_referencia
+        AND fp.tenant_id = :tenant_id
+        AND u.tenant_id = :tenant_id
+        AND o.tenant_id = :tenant_id
         $whereObra
         ORDER BY o.nome, u.nome
     ");
@@ -125,8 +129,8 @@ try {
 
         if (empty($emailDestino)) {
             // Tentar buscar email do admin logado
-            $stmtU = $pdo->prepare("SELECT email FROM usuarios WHERE id = ?");
-            $stmtU->execute([$user['id']]);
+            $stmtU = $pdo->prepare("SELECT email FROM usuarios WHERE id = ? AND tenant_id = ?");
+            $stmtU->execute([$user['id'], $tenantId]);
             $emailDestino = $stmtU->fetchColumn() ?: '';
         }
 

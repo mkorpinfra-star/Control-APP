@@ -9,6 +9,7 @@ require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
 $user = authMiddleware(['admin']);
+$tenantId = $user['tenant_id'];
 
 try {
     $mesReferencia = $_GET['mes'] ?? date('Y-m');
@@ -17,7 +18,7 @@ try {
     $pdo = getConnection();
 
     $whereObra = $obraId ? " AND fp.obra_id = :obra_id" : "";
-    $params = ['mes_referencia' => $mesReferencia];
+    $params = ['mes_referencia' => $mesReferencia, 'tenant_id' => $tenantId];
     if ($obraId) $params['obra_id'] = $obraId;
 
     $stmt = $pdo->prepare("
@@ -49,6 +50,9 @@ try {
         INNER JOIN usuarios u ON u.id = fp.funcionario_id
         INNER JOIN obras o ON o.id = fp.obra_id
         WHERE fp.mes_referencia = :mes_referencia
+        AND fp.tenant_id = :tenant_id
+        AND u.tenant_id = :tenant_id
+        AND o.tenant_id = :tenant_id
         $whereObra
         ORDER BY o.nome, u.nome
     ");
@@ -63,6 +67,7 @@ try {
             COALESCE(SUM(custo_total_empresa), 0) as total_custo_empresa
         FROM folha_pagamento
         WHERE mes_referencia = :mes_referencia
+        AND tenant_id = :tenant_id
         $whereObra
     ");
     $totaisStmt->execute($params);

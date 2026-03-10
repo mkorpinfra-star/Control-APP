@@ -18,30 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 require_once __DIR__ . '/../../includes/email.php';
 
-// Autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Autenticação e validação de tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 // Apenas admin e encarregado podem rejeitar
-if ($user['tipo'] !== 'admin' && $user['tipo'] !== 'encarregado') {
+if ($auth['tipo'] !== 'admin' && $auth['tipo'] !== 'encarregado') {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden']);
     exit;
@@ -64,28 +49,28 @@ try {
     // Aceita status enviado OU aprovado (admin pode reverter aprovações)
     $statusAceitos = "'enviado','aprovado','aprovado_encarregado','aprovado_admin'";
 
-    if ($user['tipo'] === 'admin') {
+    if ($auth['tipo'] === 'admin') {
         $stmt = $pdo->prepare("
             SELECT a.*,
                    u.nome as funcionario_nome, u.email as funcionario_email,
                    o.numero as obra_numero, o.nome as obra_nome
             FROM apontamentos a
-            INNER JOIN usuarios u ON u.id = a.funcionario_id
-            INNER JOIN obras o ON o.id = a.obra_id
-            WHERE a.id = ? AND a.status IN ('enviado','aprovado','aprovado_encarregado','aprovado_admin')
+            INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            WHERE a.id = ? AND a.tenant_id = ? AND a.status IN ('enviado','aprovado','aprovado_encarregado','aprovado_admin')
         ");
-        $stmt->execute([$apontamentoId]);
+        $stmt->execute([$tenant_id, $tenant_id, $apontamentoId, $tenant_id]);
     } else {
         $stmt = $pdo->prepare("
             SELECT a.*,
                    u.nome as funcionario_nome, u.email as funcionario_email,
                    o.numero as obra_numero, o.nome as obra_nome
             FROM apontamentos a
-            INNER JOIN usuarios u ON u.id = a.funcionario_id
-            INNER JOIN obras o ON o.id = a.obra_id
-            WHERE a.id = ? AND o.encarregado_id = ? AND a.status IN ('enviado','aprovado','aprovado_encarregado')
+            INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = ?
+            INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+            WHERE a.id = ? AND a.tenant_id = ? AND o.encarregado_id = ? AND a.status IN ('enviado','aprovado','aprovado_encarregado')
         ");
-        $stmt->execute([$apontamentoId, $user['id']]);
+        $stmt->execute([$tenant_id, $tenant_id, $apontamentoId, $tenant_id, $auth['user_id']]);
     }
 
     $apontamento = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -97,9 +82,9 @@ try {
     }
 
     // Se admin e observacao = '__DELETE__' — excluir o registro permanentemente
-    if ($user['tipo'] === 'admin' && $observacao === '__DELETE__') {
-        $stmt = $pdo->prepare("DELETE FROM apontamentos WHERE id = ?");
-        $stmt->execute([$apontamentoId]);
+    if ($auth['tipo'] === 'admin' && $observacao === '__DELETE__') {
+        $stmt = $pdo->prepare("DELETE FROM apontamentos WHERE id = ? AND tenant_id = ?");
+        $stmt->execute([$apontamentoId, $tenant_id]);
         echo json_encode(['success' => true, 'message' => 'Registro eliminado']);
         exit;
     }
@@ -108,9 +93,9 @@ try {
     $stmt = $pdo->prepare("
         UPDATE apontamentos
         SET status = 'rejeitado', observacao_rejeicao = ?
-        WHERE id = ?
+        WHERE id = ? AND tenant_id = ?
     ");
-    $stmt->execute([$observacao, $apontamentoId]);
+    $stmt->execute([$observacao, $apontamentoId, $tenant_id]);
 
     // Enviar e-mail ao funcionário
     if (isset($apontamento['funcionario_email']) && $apontamento['funcionario_email']) {

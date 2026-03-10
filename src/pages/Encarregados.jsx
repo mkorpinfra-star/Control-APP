@@ -38,6 +38,17 @@ export default function Encarregados() {
         loadEncarregados();
     }, []);
 
+    // Listen for header + button click
+    useEffect(() => {
+        const handleAddEvent = (e) => {
+            if (e.detail.page === 'encarregados') {
+                handleAdd();
+            }
+        };
+        window.addEventListener('openAddModal', handleAddEvent);
+        return () => window.removeEventListener('openAddModal', handleAddEvent);
+    }, []);
+
     const loadEncarregados = async () => {
         try {
             setLoading(true);

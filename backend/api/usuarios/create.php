@@ -2,6 +2,7 @@
 /**
  * API: Criar Usuário
  * POST /api/usuarios/create.php
+ * MULTI-TENANT: Isolado por tenant_id
  */
 
 error_reporting(E_ALL);
@@ -18,25 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$payload = validateJWT($token);
-
-if (!$payload || $payload['tipo'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden - Only admin']);
-    exit;
-}
+// Validar acesso multi-tenant e permissão de admin
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
+requireAdmin($auth);
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -49,12 +37,12 @@ try {
 
     $pdo = getConnection();
 
-    // Verificar se passaporte já existe
-    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE passaporte = ?");
-    $stmt->execute([strtoupper($data['passaporte'])]);
+    // Verificar se passaporte já existe no tenant
+    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE passaporte = ? AND tenant_id = ?");
+    $stmt->execute([strtoupper($data['passaporte']), $tenant_id]);
     if ($stmt->fetch()) {
         http_response_code(400);
-        echo json_encode(['error' => 'Passaporte já cadastrado']);
+        echo json_encode(['error' => 'Passaporte já cadastrado neste tenant']);
         exit;
     }
 
@@ -92,10 +80,11 @@ try {
     $hasBiometriaColumn = in_array('biometria', $existingCols);
     $hasBonificacaoColumn = in_array('bonificacao', $existingCols);
 
-    // Construir SQL dinamicamente
-    $colsList = "passaporte, senha_hash, nome, email, telefone, funcao, funcao_id, tipo, ativo, salario_base, salario_hora, salario_base_mensal, valor_hora_venda, vale_moradia, ibf";
-    $placeholders = "?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?";
+    // Construir SQL dinamicamente (incluindo tenant_id)
+    $colsList = "tenant_id, passaporte, senha_hash, nome, email, telefone, funcao, funcao_id, tipo, ativo, salario_base, salario_hora, salario_base_mensal, valor_hora_venda, vale_moradia, ibf";
+    $placeholders = "?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?";
     $params = [
+        $tenant_id,
         strtoupper($data['passaporte']), $senhaHash, $data['nome'],
         $data['email'] ?? null, $data['telefone'] ?? null,
         $data['funcao'] ?? null, $data['funcao_id'] ?? null,

@@ -13,9 +13,9 @@ try {
     $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
     $somenteNaoLidas = isset($_GET['nao_lidas']) && $_GET['nao_lidas'] === 'true';
 
-    // Query base
-    $sql = "SELECT * FROM notificacoes WHERE 1=1";
-    $params = [];
+    // Query base com filtro de tenant
+    $sql = "SELECT * FROM notificacoes WHERE tenant_id = :tenant_id";
+    $params = ['tenant_id' => $user['tenant_id']];
 
     if ($somenteNaoLidas) {
         $sql .= " AND lida = 0";
@@ -24,14 +24,16 @@ try {
     $sql .= " ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
 
     $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':tenant_id', $user['tenant_id'], PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
 
     $notificacoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Contar total não lidas
-    $stmtCount = $pdo->query("SELECT COUNT(*) as total FROM notificacoes WHERE lida = 0");
+    // Contar total não lidas do tenant
+    $stmtCount = $pdo->prepare("SELECT COUNT(*) as total FROM notificacoes WHERE tenant_id = :tenant_id AND lida = 0");
+    $stmtCount->execute(['tenant_id' => $user['tenant_id']]);
     $countResult = $stmtCount->fetch(PDO::FETCH_ASSOC);
 
     echo json_encode([

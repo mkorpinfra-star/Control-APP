@@ -16,27 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 require_once __DIR__ . '/../../includes/email.php';
 
-// Verificar autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Não autorizado']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user || $user['tipo'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Permissão negada']);
-    exit;
-}
+$auth = validateTenantAccess(['admin']);
+$tenant_id = $auth['tenant_id'];
+$user_nome = $auth['nome'];
 
 try {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -54,15 +39,16 @@ try {
             o.nome as obra_nome,
             c.nome as cliente_nome
         FROM faturamento f
-        INNER JOIN obras o ON o.id = f.obra_id
-        LEFT JOIN clientes c ON c.id = o.cliente_id
-        WHERE f.mes_referencia = :mes
+        INNER JOIN obras o ON o.id = f.obra_id AND o.tenant_id = :tenant_id
+        LEFT JOIN clientes c ON c.id = o.cliente_id AND c.tenant_id = :tenant_id
+        WHERE f.tenant_id = :tenant_id
+        AND f.mes_referencia = :mes
         $whereObra
         ORDER BY o.numero
     ";
 
     $stmt = $pdo->prepare($sql);
-    $params = ['mes' => $mes];
+    $params = ['tenant_id' => $tenant_id, 'mes' => $mes];
     if ($obraId !== 'all') $params['obra_id'] = $obraId;
     $stmt->execute($params);
     $faturas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -102,7 +88,7 @@ try {
         </tr>";
     }
 
-    $html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#1f2937}.container{max-width:700px;margin:0 auto;padding:20px}.header{background:linear-gradient(135deg,#dc2626 0%,#991b1b 100%);color:white;padding:25px;text-align:center;border-radius:12px 12px 0 0}.content{background:#f9fafb;padding:30px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px}table{width:100%;border-collapse:collapse;background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}th{padding:12px 8px;text-align:left;font-weight:600;background:#f8f9fa;border-bottom:2px solid #e5e7eb}.footer{text-align:center;padding:20px;font-size:12px;color:#6b7280}</style></head><body><div class='container'><div class='header'><h1 style='margin:0;font-size:24px'>💰 RESUMEN FATURAMENTO</h1><p style='margin:8px 0 0;opacity:0.95;font-size:16px'>{$mes}</p></div><div class='content'><div style='background:#dcfce7;border:2px solid #16a34a;border-radius:8px;padding:16px;margin-bottom:20px;text-align:center'><div style='font-size:14px;color:#166534;margin-bottom:4px'>TOTAL A FATURAR (con IGI)</div><div style='font-size:36px;font-weight:700;color:#16a34a'>€" . number_format($totais['total_liquido'], 2) . "</div></div><h3 style='margin-top:25px;margin-bottom:15px'>📊 Detalle por Obra</h3><table><thead><tr><th>Obra</th><th style='text-align:right'>Horas</th><th style='text-align:right'>Subtotal</th><th style='text-align:right'>IGI (4.5%)</th><th style='text-align:right'>Total</th></tr></thead><tbody>{$faturasHtml}</tbody><tfoot><tr style='background:#16a34a;color:white'><td style='padding:12px 8px;font-weight:700'>TOTAL</td><td style='padding:12px 8px;text-align:right;font-weight:600'>" . number_format($totais['total_horas'], 1) . "h</td><td style='padding:12px 8px;text-align:right;font-weight:600'>€" . number_format($totais['total_bruto'], 2) . "</td><td style='padding:12px 8px;text-align:right;font-weight:600'>€" . number_format($totais['igi_valor'], 2) . "</td><td style='padding:12px 8px;text-align:right;font-weight:700;font-size:18px'>€" . number_format($totais['total_liquido'], 2) . "</td></tr></tfoot></table></div><div class='footer'><p>Enviado por {$user['nome']} desde el Sistema de Faturamento</p><p style='color:#dc2626;font-weight:600'>J2S Enginyeria & Instal·lacions</p></div></div></body></html>";
+    $html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#1f2937}.container{max-width:700px;margin:0 auto;padding:20px}.header{background:linear-gradient(135deg,#dc2626 0%,#991b1b 100%);color:white;padding:25px;text-align:center;border-radius:12px 12px 0 0}.content{background:#f9fafb;padding:30px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px}table{width:100%;border-collapse:collapse;background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}th{padding:12px 8px;text-align:left;font-weight:600;background:#f8f9fa;border-bottom:2px solid #e5e7eb}.footer{text-align:center;padding:20px;font-size:12px;color:#6b7280}</style></head><body><div class='container'><div class='header'><h1 style='margin:0;font-size:24px'>💰 RESUMEN FATURAMENTO</h1><p style='margin:8px 0 0;opacity:0.95;font-size:16px'>{$mes}</p></div><div class='content'><div style='background:#dcfce7;border:2px solid #16a34a;border-radius:8px;padding:16px;margin-bottom:20px;text-align:center'><div style='font-size:14px;color:#166534;margin-bottom:4px'>TOTAL A FATURAR (con IGI)</div><div style='font-size:36px;font-weight:700;color:#16a34a'>€" . number_format($totais['total_liquido'], 2) . "</div></div><h3 style='margin-top:25px;margin-bottom:15px'>📊 Detalle por Obra</h3><table><thead><tr><th>Obra</th><th style='text-align:right'>Horas</th><th style='text-align:right'>Subtotal</th><th style='text-align:right'>IGI (4.5%)</th><th style='text-align:right'>Total</th></tr></thead><tbody>{$faturasHtml}</tbody><tfoot><tr style='background:#16a34a;color:white'><td style='padding:12px 8px;font-weight:700'>TOTAL</td><td style='padding:12px 8px;text-align:right;font-weight:600'>" . number_format($totais['total_horas'], 1) . "h</td><td style='padding:12px 8px;text-align:right;font-weight:600'>€" . number_format($totais['total_bruto'], 2) . "</td><td style='padding:12px 8px;text-align:right;font-weight:600'>€" . number_format($totais['igi_valor'], 2) . "</td><td style='padding:12px 8px;text-align:right;font-weight:700;font-size:18px'>€" . number_format($totais['total_liquido'], 2) . "</td></tr></tfoot></table></div><div class='footer'><p>Enviado por {$user_nome} desde el Sistema de Faturamento</p><p style='color:#dc2626;font-weight:600'>J2S Enginyeria & Instal·lacions</p></div></div></body></html>";
 
     // Enviar email
     $emailTo = 'contactes@j2s.ad';

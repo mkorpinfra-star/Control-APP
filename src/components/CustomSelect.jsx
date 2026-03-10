@@ -3,7 +3,7 @@ import { Listbox, Transition } from '@headlessui/react';
 import { IconCheck, IconChevronDown, IconBuildingFactory2 } from '@tabler/icons-react';
 
 export default function CustomSelect({ value, onChange, options, label, count }) {
-    const selectedOption = options.find(opt => opt.value === value) || options[0];
+    const selectedOption = options.find(opt => opt.value === value) || options[0] || { label: 'Selecione', value: '' };
 
     return (
         <div className="w-full">
@@ -49,10 +49,10 @@ export default function CustomSelect({ value, onChange, options, label, count })
                                     {({ selected, active }) => (
                                         <>
                                             <div className="flex items-center gap-2">
-                                                <Building2
+                                                <IconBuildingFactory2
                                                     size={16}
                                                     className={selected ? 'text-[#CE0201]' : 'text-gray-400'}
-                                                    strokeWidth={2}
+                                                    stroke={2}
                                                 />
                                                 <span className={`block truncate ${selected ? 'font-bold text-gray-900' : 'font-medium'}`}>
                                                     {option.label}

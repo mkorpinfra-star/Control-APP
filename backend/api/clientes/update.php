@@ -2,6 +2,7 @@
 /**
  * API: Atualizar Cliente
  * PUT /api/clientes/update.php
+ * Multi-tenant enabled
  */
 
 header('Content-Type: application/json');
@@ -15,25 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user || $user['tipo'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden']);
-    exit;
-}
+$auth = validateTenantAccess();
+requireAdmin($auth);
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -59,9 +45,15 @@ try {
     $stmt = $pdo->prepare("
         UPDATE clientes
         SET nome = ?, documento = ?, nif = ?, email = ?, telefone = ?, email_financeiro = ?, endereco = ?, pessoa_contato = ?
-        WHERE id = ?
+        WHERE id = ? AND tenant_id = ?
     ");
-    $stmt->execute([$nome, $documento, $nif, $email, $telefone, $email_financeiro, $endereco, $pessoa_contato, $id]);
+    $stmt->execute([$nome, $documento, $nif, $email, $telefone, $email_financeiro, $endereco, $pessoa_contato, $id, $auth['tenant_id']]);
+
+    if ($stmt->rowCount() === 0) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Cliente não encontrado ou sem permissão']);
+        exit;
+    }
 
     echo json_encode([
         'success' => true,

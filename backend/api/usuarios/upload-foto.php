@@ -3,6 +3,7 @@
  * API: Upload de Foto do Funcionário
  * POST /api/usuarios/upload-foto.php
  * Converte para WebP e salva
+ * MULTI-TENANT: Isolado por tenant_id
  */
 
 error_reporting(E_ALL);
@@ -19,26 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Verificar autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader) || strpos($authHeader, 'Bearer ') !== 0) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$payload = validateJWT($token);
-
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Validar acesso multi-tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -90,7 +76,16 @@ if (!$sourceImage) {
 
 try {
     $pdo = getConnection();
-    $userId = $payload['id'];
+    $userId = $auth['user_id'];
+
+    // Verificar se usuário pertence ao tenant
+    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE id = ? AND tenant_id = ?");
+    $stmt->execute([$userId, $tenant_id]);
+    if (!$stmt->fetch()) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Forbidden', 'message' => 'Usuário não pertence a este tenant']);
+        exit;
+    }
 
     // Redimensionar para 200x200 (quadrado)
     $width = imagesx($sourceImage);
@@ -126,9 +121,9 @@ try {
     // URL para acesso
     $fotoUrl = '/login/backend/uploads/fotos/' . $filename;
 
-    // Atualizar no banco
-    $stmt = $pdo->prepare("UPDATE usuarios SET foto_url = ? WHERE id = ?");
-    $stmt->execute([$fotoUrl, $userId]);
+    // Atualizar no banco (com filtro de tenant)
+    $stmt = $pdo->prepare("UPDATE usuarios SET foto_url = ? WHERE id = ? AND tenant_id = ?");
+    $stmt->execute([$fotoUrl, $userId, $tenant_id]);
 
     echo json_encode([
         'success' => true,

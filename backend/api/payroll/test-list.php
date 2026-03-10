@@ -13,6 +13,7 @@ require_once '../../config/database.php';
 
 try {
     $user = authMiddleware(['admin']);
+    $tenantId = $user['tenant_id'];
 
     $mesReferencia = $_GET['mes'] ?? date('Y-m');
     $obraId = isset($_GET['obra_id']) && $_GET['obra_id'] !== 'all' ? (int)$_GET['obra_id'] : null;
@@ -20,7 +21,7 @@ try {
     $pdo = getConnection();
 
     $whereObra = $obraId ? " AND fp.obra_id = :obra_id" : "";
-    $params = ['mes_referencia' => $mesReferencia];
+    $params = ['mes_referencia' => $mesReferencia, 'tenant_id' => $tenantId];
     if ($obraId) $params['obra_id'] = $obraId;
 
     // Testar query simples primeiro
@@ -28,6 +29,7 @@ try {
         SELECT COUNT(*) as total
         FROM folha_pagamento fp
         WHERE fp.mes_referencia = :mes_referencia
+        AND fp.tenant_id = :tenant_id
         $whereObra
     ");
     $testStmt->execute($params);

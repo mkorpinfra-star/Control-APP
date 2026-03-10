@@ -2,6 +2,7 @@
 /**
  * API: Atualizar Usuário
  * PUT /api/usuarios/update.php
+ * MULTI-TENANT: Isolado por tenant_id
  */
 
 error_reporting(E_ALL);
@@ -18,25 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$payload = validateJWT($token);
-
-if (!$payload || $payload['tipo'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden - Only admin']);
-    exit;
-}
+// Validar acesso multi-tenant e permissão de admin
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
+requireAdmin($auth);
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -48,6 +36,15 @@ try {
     }
 
     $pdo = getConnection();
+
+    // Verificar se usuário pertence ao tenant
+    $checkStmt = $pdo->prepare("SELECT id FROM usuarios WHERE id = ? AND tenant_id = ?");
+    $checkStmt->execute([$data['id'], $tenant_id]);
+    if (!$checkStmt->fetch()) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Usuário não encontrado ou não pertence a este tenant']);
+        exit;
+    }
 
     // Garantir que colunas financeiras existam (migração automática)
     $financialCols = [
@@ -155,8 +152,9 @@ try {
         exit;
     }
 
-    $sql = "UPDATE usuarios SET " . implode(', ', $updates) . " WHERE id = ?";
+    $sql = "UPDATE usuarios SET " . implode(', ', $updates) . " WHERE id = ? AND tenant_id = ?";
     $params[] = $data['id'];
+    $params[] = $tenant_id;
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

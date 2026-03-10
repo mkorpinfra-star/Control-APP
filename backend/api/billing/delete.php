@@ -14,10 +14,11 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
-require_once '../../includes/auth.php';
+require_once '../../includes/tenant_middleware.php';
 require_once '../../config/database.php';
 
-$user = authMiddleware(['admin']);
+$auth = validateTenantAccess(['admin']);
+$tenant_id = $auth['tenant_id'];
 
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
 
@@ -25,19 +26,20 @@ try {
     $pdo = getConnection();
 
     if (!empty($input['all'])) {
-        $stmt = $pdo->query("DELETE FROM faturamento");
+        $stmt = $pdo->prepare("DELETE FROM faturamento WHERE tenant_id = ?");
+        $stmt->execute([$tenant_id]);
         echo json_encode(['success' => true, 'deleted' => $stmt->rowCount(), 'message' => 'Todo o faturamento foi apagado']);
 
     } elseif (!empty($input['mes'])) {
         $colFat = $pdo->query("SHOW COLUMNS FROM faturamento")->fetchAll(PDO::FETCH_COLUMN);
         $colMes = in_array('mes_referencia', $colFat) ? 'mes_referencia' : 'mes';
-        $stmt = $pdo->prepare("DELETE FROM faturamento WHERE {$colMes} = ?");
-        $stmt->execute([$input['mes']]);
+        $stmt = $pdo->prepare("DELETE FROM faturamento WHERE tenant_id = ? AND {$colMes} = ?");
+        $stmt->execute([$tenant_id, $input['mes']]);
         echo json_encode(['success' => true, 'deleted' => $stmt->rowCount(), 'message' => "Faturamento do mês {$input['mes']} apagado"]);
 
     } elseif (!empty($input['id'])) {
-        $stmt = $pdo->prepare("DELETE FROM faturamento WHERE id = ?");
-        $stmt->execute([(int)$input['id']]);
+        $stmt = $pdo->prepare("DELETE FROM faturamento WHERE tenant_id = ? AND id = ?");
+        $stmt->execute([$tenant_id, (int)$input['id']]);
         echo json_encode(['success' => true, 'deleted' => $stmt->rowCount(), 'message' => 'Registro apagado']);
 
     } else {

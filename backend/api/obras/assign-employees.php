@@ -2,6 +2,7 @@
 /**
  * API: Atribuir funcionários a uma obra
  * POST /api/obras/assign-employees.php
+ * MULTI-TENANT: Filtra por empresa_id
  */
 
 error_reporting(E_ALL);
@@ -38,6 +39,14 @@ if (!$payload || ($payload['tipo'] !== 'admin' && $payload['tipo'] !== 'encarreg
     exit;
 }
 
+// Suportar tanto empresa_id (antigo) quanto tenant_id (novo)
+$empresaId = $payload['empresa_id'] ?? $payload['tenant_id'] ?? null;
+if (!$empresaId) {
+    http_response_code(400);
+    echo json_encode(['error' => 'empresa_id/tenant_id ausente no token']);
+    exit;
+}
+
 try {
     $data = json_decode(file_get_contents('php://input'), true);
 
@@ -52,7 +61,34 @@ try {
 
     $pdo = getConnection();
 
-    // Remove todas as atribuições atuais
+    // Verificar se a obra pertence à empresa do usuário
+    $checkStmt = $pdo->prepare("SELECT id FROM obras WHERE id = ? AND tenant_id = ?");
+    $checkStmt->execute([$obraId, $empresaId]);
+    if (!$checkStmt->fetch()) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Obra não encontrada']);
+        exit;
+    }
+
+    // Verificar se todos os funcionários pertencem à mesma empresa
+    if (!empty($funcionarioIds)) {
+        $placeholders = implode(',', array_fill(0, count($funcionarioIds), '?'));
+        $checkFuncStmt = $pdo->prepare("
+            SELECT COUNT(*) as total
+            FROM usuarios
+            WHERE id IN ($placeholders) AND tenant_id = ?
+        ");
+        $checkFuncStmt->execute(array_merge($funcionarioIds, [$empresaId]));
+        $validCount = $checkFuncStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        if ($validCount !== count($funcionarioIds)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Um ou mais funcionários não pertencem à empresa']);
+            exit;
+        }
+    }
+
+    // Remove todas as atribuições atuais desta obra
     $stmt = $pdo->prepare("DELETE FROM funcionario_obra WHERE obra_id = ?");
     $stmt->execute([$obraId]);
 

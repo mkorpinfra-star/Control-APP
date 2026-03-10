@@ -2,6 +2,7 @@
 /**
  * API: Criar Cliente
  * POST /api/clientes/create.php
+ * Multi-tenant enabled
  */
 
 header('Content-Type: application/json');
@@ -15,26 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 require_once __DIR__ . '/../../includes/notificacao_helper.php';
 
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user || $user['tipo'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden']);
-    exit;
-}
+$auth = validateTenantAccess();
+requireAdmin($auth);
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -57,10 +43,10 @@ try {
     $pdo = getConnection();
 
     $stmt = $pdo->prepare("
-        INSERT INTO clientes (nome, documento, nif, email, telefone, email_financeiro, endereco, pessoa_contato, ativo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+        INSERT INTO clientes (tenant_id, nome, documento, nif, email, telefone, email_financeiro, endereco, pessoa_contato, ativo)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     ");
-    $stmt->execute([$nome, $documento, $nif, $email, $telefone, $email_financeiro, $endereco, $pessoa_contato]);
+    $stmt->execute([$auth['tenant_id'], $nome, $documento, $nif, $email, $telefone, $email_financeiro, $endereco, $pessoa_contato]);
 
     $id = $pdo->lastInsertId();
 
@@ -76,9 +62,9 @@ try {
             'url' => '/clients',
             'entidade_tipo' => 'cliente',
             'entidade_id' => $id,
-            'usuario_id' => $user['id'],
-            'usuario_nome' => $user['nome'] ?? 'Admin',
-            'usuario_tipo' => $user['tipo']
+            'usuario_id' => $auth['user_id'],
+            'usuario_nome' => $auth['nome'] ?? 'Admin',
+            'usuario_tipo' => $auth['tipo']
         ]
     );
 

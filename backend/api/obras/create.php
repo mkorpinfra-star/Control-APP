@@ -21,6 +21,7 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/jwt.php';
 require_once __DIR__ . '/../../includes/notificacao_helper.php';
 
+// Validar autenticação
 $headers = getallheaders();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
 
@@ -33,11 +34,22 @@ if (empty($authHeader)) {
 $token = str_replace('Bearer ', '', $authHeader);
 $payload = validateJWT($token);
 
-if (!$payload || $payload['tipo'] !== 'admin') {
+if (!$payload || ($payload['tipo'] !== 'admin' && $payload['tipo'] !== 'super_admin')) {
     http_response_code(403);
-    echo json_encode(['error' => 'Forbidden']);
+    echo json_encode(['error' => 'Forbidden - Admin access required']);
     exit;
 }
+
+// Suportar tanto empresa_id (antigo) quanto tenant_id (novo)
+$tenant_id = $payload['empresa_id'] ?? $payload['tenant_id'] ?? null;
+if (!$tenant_id) {
+    http_response_code(400);
+    echo json_encode(['error' => 'empresa_id/tenant_id ausente no token']);
+    exit;
+}
+
+$user_id = $payload['id'];
+$auth = $payload; // Para compatibilidade com notificações
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -50,9 +62,9 @@ try {
 
     $pdo = getConnection();
 
-    // Verificar duplicidade
-    $stmt = $pdo->prepare("SELECT id FROM obras WHERE numero = ?");
-    $stmt->execute([$data['numero']]);
+    // Verificar duplicidade (dentro do tenant)
+    $stmt = $pdo->prepare("SELECT id FROM obras WHERE numero = ? AND tenant_id = ?");
+    $stmt->execute([$data['numero'], $tenant_id]);
     if ($stmt->fetch()) {
         http_response_code(400);
         echo json_encode(['error' => 'Número de obra já existe']);
@@ -74,12 +86,13 @@ try {
     $colObras = $pdo->query("SHOW COLUMNS FROM obras")->fetchAll(PDO::FETCH_COLUMN);
 
     $insertCols = [
-        'numero','nome','endereco','email_financeiro','email_encarregado','data_inicio','data_fim','cliente_id','encarregado_id','dias_desativados',
+        'tenant_id','numero','nome','endereco','email_financeiro','email_encarregado','data_inicio','data_fim','cliente_id','encarregado_id','dias_desativados',
         // Novos campos: País, Faturamento, Impostos
         'pais','fatura_hora_normal','fatura_hora_extra','fatura_hora_noturna','multiplicador_extra','multiplicador_noturna',
         'imposto_igi','imposto_cas_funcionario','imposto_cas_empresa','imposto_irpc'
     ];
     $insertVals = [
+        $tenant_id, // TENANT_ID OBRIGATÓRIO
         strtoupper($data['numero']),
         $data['nome'],
         !empty($data['endereco'])          ? $data['endereco']          : null,
@@ -110,8 +123,8 @@ try {
     // Remover colunas que não existem na tabela
     $filteredCols = []; $filteredVals = [];
     foreach ($insertCols as $i => $col) {
-        // Colunas obrigatórias (numero, nome) sempre incluir; opcionais só se existirem
-        if (in_array($col, ['numero','nome']) || in_array($col, $colObras)) {
+        // Colunas obrigatórias (tenant_id, numero, nome) sempre incluir; opcionais só se existirem
+        if (in_array($col, ['tenant_id','numero','nome']) || in_array($col, $colObras)) {
             $filteredCols[] = $col;
             $filteredVals[] = $insertVals[$i];
         }
@@ -126,7 +139,7 @@ try {
 
     $id = $pdo->lastInsertId();
 
-    // Criar notificação
+    // Criar notificação (com tenant_id)
     $config = getNotificacaoConfig('obra_criada');
     criarNotificacao(
         'obra_criada',
@@ -138,9 +151,10 @@ try {
             'url' => '/projects',
             'entidade_tipo' => 'obra',
             'entidade_id' => $id,
-            'usuario_id' => $payload['id'],
-            'usuario_nome' => $payload['nome'] ?? 'Admin',
-            'usuario_tipo' => $payload['tipo']
+            'usuario_id' => $user_id,
+            'usuario_nome' => $auth['nome'] ?? 'Admin',
+            'usuario_tipo' => $auth['tipo'],
+            'tenant_id' => $tenant_id // IMPORTANTE: incluir tenant_id na notificação
         ]
     );
 

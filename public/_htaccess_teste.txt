@@ -1,0 +1,13 @@
+Options +FollowSymLinks
+RewriteEngine On
+RewriteBase /
+
+# Ignorar arquivos físicos
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/backend/
+
+# Redirecionar tudo para index.html
+RewriteRule ^(.*)$ /index.html [L,QSA]
+
+DirectoryIndex index.html

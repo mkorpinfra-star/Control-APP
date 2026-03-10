@@ -2,6 +2,7 @@
 /**
  * API: Listar Usuários
  * GET /api/usuarios/list.php?tipo=funcionario|encarregado|admin
+ * MULTI-TENANT: Isolado por tenant_id
  */
 
 error_reporting(E_ALL);
@@ -18,29 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Verificar autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$payload = validateJWT($token);
-
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Validar acesso multi-tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 // Apenas admin/encarregado pode listar todos os usuários
-if ($payload['tipo'] !== 'admin' && $payload['tipo'] !== 'encarregado') {
+if ($auth['tipo'] !== 'admin' && $auth['tipo'] !== 'encarregado') {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden']);
     exit;
@@ -81,8 +67,8 @@ try {
     }
 
     $sql = "SELECT id, passaporte, nome, email, telefone, foto_url, tipo, ativo{$optionalCols}
-            FROM usuarios WHERE ativo = 1";
-    $params = [];
+            FROM usuarios WHERE ativo = 1 AND tenant_id = ?";
+    $params = [$tenant_id];
 
     if ($tipo) {
         $sql .= " AND tipo = ?";

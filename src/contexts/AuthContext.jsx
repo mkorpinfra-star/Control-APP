@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -22,12 +22,16 @@ export function AuthProvider({ children }) {
 
     const login = async (passport, password) => {
         try {
-            const response = await fetch(`${API_URL}/auth/login.php`, {
+            // Login Centralizado - aceita passaporte OU email
+            const response = await fetch(`${API_URL}/auth/login-central.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ passport, password }),
+                body: JSON.stringify({
+                    email: passport, // Pode ser passaporte ou email
+                    password
+                }),
             });
 
             const data = await response.json();
@@ -36,14 +40,16 @@ export function AuthProvider({ children }) {
                 throw new Error(data.message || 'Error de autenticación');
             }
 
+            // Salvar dados
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('tenant', JSON.stringify(data.tenant));
             setToken(data.token);
             setUser(data.user);
 
-            return { success: true };
+            return { success: true, user: data.user, tenant: data.tenant };
         } catch (error) {
-            return { success: false, error: error.message };
+            return { success: false, message: error.message };
         }
     };
 

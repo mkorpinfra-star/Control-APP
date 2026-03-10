@@ -18,6 +18,7 @@ require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
 $user = authMiddleware(['admin']);
+$tenantId = $user['tenant_id'];
 
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
 
@@ -25,19 +26,20 @@ try {
     $pdo = getConnection();
 
     if (!empty($input['all'])) {
-        $stmt = $pdo->query("DELETE FROM folha_pagamento");
+        $stmt = $pdo->prepare("DELETE FROM folha_pagamento WHERE tenant_id = ?");
+        $stmt->execute([$tenantId]);
         echo json_encode(['success' => true, 'deleted' => $stmt->rowCount(), 'message' => 'Toda a folha foi apagada']);
 
     } elseif (!empty($input['mes'])) {
         $colFolha = $pdo->query("SHOW COLUMNS FROM folha_pagamento")->fetchAll(PDO::FETCH_COLUMN);
         $colMes = in_array('mes_referencia', $colFolha) ? 'mes_referencia' : 'mes';
-        $stmt = $pdo->prepare("DELETE FROM folha_pagamento WHERE {$colMes} = ?");
-        $stmt->execute([$input['mes']]);
+        $stmt = $pdo->prepare("DELETE FROM folha_pagamento WHERE {$colMes} = ? AND tenant_id = ?");
+        $stmt->execute([$input['mes'], $tenantId]);
         echo json_encode(['success' => true, 'deleted' => $stmt->rowCount(), 'message' => "Folha do mês {$input['mes']} apagada"]);
 
     } elseif (!empty($input['id'])) {
-        $stmt = $pdo->prepare("DELETE FROM folha_pagamento WHERE id = ?");
-        $stmt->execute([(int)$input['id']]);
+        $stmt = $pdo->prepare("DELETE FROM folha_pagamento WHERE id = ? AND tenant_id = ?");
+        $stmt->execute([(int)$input['id'], $tenantId]);
         echo json_encode(['success' => true, 'deleted' => $stmt->rowCount(), 'message' => 'Registro apagado']);
 
     } else {

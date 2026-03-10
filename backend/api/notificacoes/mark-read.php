@@ -9,12 +9,13 @@ try {
     $data = json_decode(file_get_contents('php://input'), true);
     $pdo = getConnection();
 
-    // Se receber IDs específicos, marca esses
+    // Se receber IDs específicos, marca esses (com filtro de tenant)
     if (!empty($data['ids']) && is_array($data['ids'])) {
         $placeholders = str_repeat('?,', count($data['ids']) - 1) . '?';
-        $sql = "UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE id IN ($placeholders)";
+        $sql = "UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE tenant_id = ? AND id IN ($placeholders)";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($data['ids']);
+        $params = array_merge([$user['tenant_id']], $data['ids']);
+        $stmt->execute($params);
 
         echo json_encode([
             'success' => true,
@@ -22,21 +23,25 @@ try {
             'affected' => $stmt->rowCount()
         ]);
     }
-    // Se receber ID único
+    // Se receber ID único (com filtro de tenant)
     elseif (!empty($data['id'])) {
-        $sql = "UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE id = :id";
+        $sql = "UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE tenant_id = :tenant_id AND id = :id";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute(['id' => $data['id']]);
+        $stmt->execute([
+            'tenant_id' => $user['tenant_id'],
+            'id' => $data['id']
+        ]);
 
         echo json_encode([
             'success' => true,
             'message' => 'Notificação marcada como lida'
         ]);
     }
-    // Se receber 'all', marca todas
+    // Se receber 'all', marca todas do tenant
     elseif (isset($data['all']) && $data['all'] === true) {
-        $sql = "UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE lida = 0";
-        $stmt = $pdo->query($sql);
+        $sql = "UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE tenant_id = :tenant_id AND lida = 0";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['tenant_id' => $user['tenant_id']]);
 
         echo json_encode([
             'success' => true,

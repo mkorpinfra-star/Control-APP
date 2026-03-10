@@ -35,7 +35,7 @@ export default function Employees() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
-    const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
 
     // Auto-refresh: refetch quando volta ao app ou reconecta
     useAutoRefresh(['employees', 'funcoes'], {

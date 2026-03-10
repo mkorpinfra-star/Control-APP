@@ -1,13 +1,23 @@
 <?php
 /**
- * DELETAR ENCARREGADO
+ * DELETAR ENCARREGADO - MULTI-TENANT
  */
 
 header('Content-Type: application/json; charset=utf-8');
-require_once '../../includes/auth.php';
-require_once '../../config/database.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-$user = authMiddleware(['admin']);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+require_once '../../config/database.php';
+require_once '../../includes/tenant_middleware.php';
+
+$auth = validateTenantAccess();
+requireAdmin($auth);
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -18,17 +28,24 @@ try {
 
     $pdo = getConnection();
 
-    // Verificar se tem obras vinculadas
-    $checkObras = $pdo->prepare("SELECT COUNT(*) as total FROM obras WHERE encarregado_id = ?");
-    $checkObras->execute([$data['id']]);
+    // Verificar se encarregado pertence ao tenant
+    $checkOwner = $pdo->prepare("SELECT id FROM encarregados WHERE id = ? AND tenant_id = ?");
+    $checkOwner->execute([$data['id'], $auth['tenant_id']]);
+    if (!$checkOwner->fetch()) {
+        throw new Exception('Encarregado não encontrado ou sem permissão');
+    }
+
+    // Verificar se tem obras vinculadas dentro do tenant
+    $checkObras = $pdo->prepare("SELECT COUNT(*) as total FROM obras WHERE encarregado_id = ? AND tenant_id = ?");
+    $checkObras->execute([$data['id'], $auth['tenant_id']]);
     $result = $checkObras->fetch(PDO::FETCH_ASSOC);
 
     if ($result['total'] > 0) {
         throw new Exception('Não é possível deletar. Encarregado vinculado a ' . $result['total'] . ' obra(s)');
     }
 
-    $stmt = $pdo->prepare("DELETE FROM encarregados WHERE id = ?");
-    $stmt->execute([$data['id']]);
+    $stmt = $pdo->prepare("DELETE FROM encarregados WHERE id = ? AND tenant_id = ?");
+    $stmt->execute([$data['id'], $auth['tenant_id']]);
 
     echo json_encode([
         'success' => true,

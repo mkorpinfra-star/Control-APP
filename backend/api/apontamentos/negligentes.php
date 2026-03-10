@@ -18,28 +18,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization']
-            : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
+// Autenticação e validação de tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user  = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
-
-if ($user['tipo'] !== 'admin' && $user['tipo'] !== 'encarregado') {
+if ($auth['tipo'] !== 'admin' && $auth['tipo'] !== 'encarregado') {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden']);
     exit;
@@ -56,10 +41,10 @@ try {
 
     // Montar cláusula de obra
     if ($todasObras) {
-        if ($user['tipo'] === 'encarregado') {
+        if ($auth['tipo'] === 'encarregado') {
             // Só obras que o encarregado gerencia
             $obraClause  = "AND o.encarregado_id = :enc_id";
-            $obraParams  = [':enc_id' => $user['id']];
+            $obraParams  = [':enc_id' => $auth['user_id']];
         } else {
             // Admin vê todas
             $obraClause = '';
@@ -93,12 +78,13 @@ try {
             a.id            AS apontamento_id,
             a.semana_inicio
         FROM funcionario_obra fo
-        INNER JOIN usuarios u ON u.id = fo.funcionario_id
-        INNER JOIN obras    o ON o.id = fo.obra_id
+        INNER JOIN usuarios u ON u.id = fo.funcionario_id AND u.tenant_id = :tenant_id
+        INNER JOIN obras    o ON o.id = fo.obra_id AND o.tenant_id = :tenant_id
         LEFT JOIN apontamentos a
                ON a.funcionario_id = fo.funcionario_id
               AND a.obra_id        = fo.obra_id
               AND a.semana_inicio  = :semana_inicio
+              AND a.tenant_id      = :tenant_id
         WHERE fo.ativo = 1
           AND u.ativo  = 1
           AND o.ativo  = 1
@@ -107,7 +93,7 @@ try {
         ORDER BY o.nome, u.nome
     ";
 
-    $params = array_merge([':semana_inicio' => $semanaInicio], $obraParams);
+    $params = array_merge([':semana_inicio' => $semanaInicio, ':tenant_id' => $tenant_id], $obraParams);
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

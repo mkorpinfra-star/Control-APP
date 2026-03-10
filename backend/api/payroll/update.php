@@ -10,6 +10,7 @@ require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
 $user = authMiddleware(['admin']);
+$tenantId = $user['tenant_id'];
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -49,7 +50,8 @@ try {
         exit;
     }
 
-    $sql = "UPDATE folha_pagamento SET " . implode(', ', $updates) . " WHERE id = :id";
+    $sql = "UPDATE folha_pagamento SET " . implode(', ', $updates) . " WHERE id = :id AND tenant_id = :tenant_id";
+    $params['tenant_id'] = $tenantId;
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
@@ -68,9 +70,9 @@ try {
             fp.liquido_a_pagar,
             fp.custo_total_empresa
         FROM folha_pagamento fp
-        WHERE fp.id = ?
+        WHERE fp.id = ? AND fp.tenant_id = ?
     ");
-    $selectStmt->execute([$data['id']]);
+    $selectStmt->execute([$data['id'], $tenantId]);
     $updated = $selectStmt->fetch(PDO::FETCH_ASSOC);
 
     echo json_encode([

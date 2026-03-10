@@ -9,6 +9,7 @@ require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
 $user = authMiddleware(['admin']);
+$tenantId = $user['tenant_id'];
 
 try {
     $mesReferencia = $_GET['mes'] ?? date('Y-m');
@@ -17,7 +18,8 @@ try {
     $pdo = getConnection();
 
     // Buscar config fiscal
-    $configStmt = $pdo->query("SELECT * FROM config_fiscal ORDER BY id DESC LIMIT 1");
+    $configStmt = $pdo->prepare("SELECT * FROM config_fiscal WHERE tenant_id = :tenant_id ORDER BY id DESC LIMIT 1");
+    $configStmt->execute(['tenant_id' => $tenantId]);
     $config = $configStmt->fetch(PDO::FETCH_ASSOC);
 
     $casDescFuncionario = $config['cas_desconto_funcionario'] ?? 6.50;
@@ -28,7 +30,7 @@ try {
     $mesFim = date('Y-m-t', strtotime($mesInicio));
 
     $whereObra = $obraId ? " AND a.obra_id = :obra_id" : "";
-    $params = ['mes_inicio' => $mesInicio, 'mes_fim' => $mesFim];
+    $params = ['mes_inicio' => $mesInicio, 'mes_fim' => $mesFim, 'tenant_id' => $tenantId];
     if ($obraId) $params['obra_id'] = $obraId;
 
     require_once __DIR__ . '/../../includes/horas_helper.php';
@@ -78,6 +80,9 @@ try {
         WHERE a.status IN ('aprovado', 'aprovado_encarregado')
         AND a.semana_inicio >= :mes_inicio
         AND a.semana_inicio <= :mes_fim
+        AND a.tenant_id = :tenant_id
+        AND u.tenant_id = :tenant_id
+        AND o.tenant_id = :tenant_id
         $whereObra
     ");
     $stmt->execute($params);
@@ -119,9 +124,9 @@ try {
         // Verificar se já existe
         $checkStmt = $pdo->prepare("
             SELECT id FROM folha_pagamento
-            WHERE funcionario_id = ? AND obra_id = ? AND mes_referencia = ?
+            WHERE funcionario_id = ? AND obra_id = ? AND mes_referencia = ? AND tenant_id = ?
         ");
-        $checkStmt->execute([$apt['funcionario_id'], $apt['obra_id'], $mesReferencia]);
+        $checkStmt->execute([$apt['funcionario_id'], $apt['obra_id'], $mesReferencia, $tenantId]);
         $existing = $checkStmt->fetch();
 
         // ── Valores do funcionário ──────────────────────────────────────────
@@ -225,7 +230,7 @@ try {
             // Criar novo - apenas colunas não-GENERATED
             $insertStmt = $pdo->prepare("
                 INSERT INTO folha_pagamento (
-                    funcionario_id, obra_id, mes_referencia,
+                    tenant_id, funcionario_id, obra_id, mes_referencia,
                     horas_normais, horas_extra, horas_noturna,
                     salario_base, salario_hora, salario_base_hora,
                     multiplicador_extra, multiplicador_noturna,
@@ -235,7 +240,7 @@ try {
                     cas_empresa_percentual, cas_empresa_valor,
                     cas_desconto_funcionario_percentual, cas_custo_empresa_percentual
                 ) VALUES (
-                    :funcionario_id, :obra_id, :mes_referencia,
+                    :tenant_id, :funcionario_id, :obra_id, :mes_referencia,
                     :horas_normais, :horas_extra, :horas_noturna,
                     :salario_base, :salario_hora, :salario_base_hora,
                     :multiplicador_extra, :multiplicador_noturna,
@@ -247,6 +252,7 @@ try {
                 )
             ");
             $insertStmt->execute([
+                'tenant_id'           => $tenantId,
                 'funcionario_id'      => $apt['funcionario_id'],
                 'obra_id'             => $apt['obra_id'],
                 'mes_referencia'      => $mesReferencia,

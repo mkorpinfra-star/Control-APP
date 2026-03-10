@@ -288,7 +288,15 @@ export default function Login() {
         const result = await login(savedCredentials.passport, savedCredentials.password);
 
         if (result.success) {
-            navigate('/');
+            // Redirecionar baseado no tipo de usuário
+            const userType = result.user?.tipo;
+            if (userType === 'admin' || userType === 'super_admin') {
+                navigate('/dashboard');
+            } else if (userType === 'encarregado') {
+                navigate('/approvals');
+            } else {
+                navigate('/bater-ponto');
+            }
         } else {
             setError(t('auth.loginError'));
             // Limpar credenciais inválidas
@@ -316,9 +324,18 @@ export default function Login() {
             } else {
                 localStorage.removeItem('savedCredentials');
             }
-            navigate('/');
+
+            // Redirecionar baseado no tipo de usuário
+            const userType = result.user?.tipo;
+            if (userType === 'admin' || userType === 'super_admin') {
+                navigate('/dashboard');
+            } else if (userType === 'encarregado') {
+                navigate('/approvals');
+            } else {
+                navigate('/bater-ponto');
+            }
         } else {
-            setError(t('auth.loginError'));
+            setError(result.message || t('auth.loginError'));
         }
 
         setLoading(false);

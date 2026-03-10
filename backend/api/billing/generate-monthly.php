@@ -6,10 +6,20 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
-require_once '../../includes/auth.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+require_once '../../includes/tenant_middleware.php';
 require_once '../../config/database.php';
 
-$user = authMiddleware(['admin']);
+$auth = validateTenantAccess(['admin']);
+$tenant_id = $auth['tenant_id'];
 
 try {
     $mesReferencia = $_GET['mes'] ?? date('Y-m');
@@ -57,13 +67,15 @@ try {
             o.nome as obra_nome,
             u.valor_hora_venda
         FROM apontamentos a
-        INNER JOIN obras o ON o.id = a.obra_id $obraAtivoFilter
-        INNER JOIN usuarios u ON u.id = a.funcionario_id $userAtivoFilter
-        WHERE a.status IN ('aprovado', 'aprovado_encarregado')
+        INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = :tenant_id $obraAtivoFilter
+        INNER JOIN usuarios u ON u.id = a.funcionario_id AND u.tenant_id = :tenant_id $userAtivoFilter
+        WHERE a.tenant_id = :tenant_id
+        AND a.status IN ('aprovado', 'aprovado_encarregado')
         AND a.semana_inicio >= :mes_inicio
         AND a.semana_inicio <= :mes_fim
         $whereObra
     ");
+    $params['tenant_id'] = $tenant_id;
     $stmt->execute($params);
     $rawApontamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -105,9 +117,9 @@ try {
         // Verificar se já existe
         $checkStmt = $pdo->prepare("
             SELECT id FROM faturamento
-            WHERE obra_id = ? AND mes_referencia = ?
+            WHERE tenant_id = ? AND obra_id = ? AND mes_referencia = ?
         ");
-        $checkStmt->execute([$apt['obra_id'], $mesReferencia]);
+        $checkStmt->execute([$tenant_id, $apt['obra_id'], $mesReferencia]);
         $existing = $checkStmt->fetch();
 
         // NOVO: Usar valor calculado com base nos valores individuais de cada funcionário
@@ -196,13 +208,13 @@ try {
             if ($hasTotalHorasColumn) {
                 $insertStmt = $pdo->prepare("
                     INSERT INTO faturamento (
-                        obra_id, mes_referencia,
+                        tenant_id, obra_id, mes_referencia,
                         horas_normais, horas_extra, horas_noturna,
                         valor_hora_normal, valor_hora_extra, valor_hora_noturna,
                         total_horas, valor_total_servicos, total_bruto,
                         igi_percentual, total_liquido
                     ) VALUES (
-                        :obra_id, :mes_referencia,
+                        :tenant_id, :obra_id, :mes_referencia,
                         :horas_normais, :horas_extra, :horas_noturna,
                         :valor_hora_normal, :valor_hora_extra, :valor_hora_noturna,
                         :total_horas, :valor_total_servicos, :total_bruto,
@@ -210,6 +222,7 @@ try {
                     )
                 ");
                 $insertStmt->execute([
+                    'tenant_id' => $tenant_id,
                     'obra_id' => $apt['obra_id'],
                     'mes_referencia' => $mesReferencia,
                     'horas_normais' => $apt['total_horas_normais'],
@@ -228,13 +241,13 @@ try {
                 // Sem coluna total_horas
                 $insertStmt = $pdo->prepare("
                     INSERT INTO faturamento (
-                        obra_id, mes_referencia,
+                        tenant_id, obra_id, mes_referencia,
                         horas_normais, horas_extra, horas_noturna,
                         valor_hora_normal, valor_hora_extra, valor_hora_noturna,
                         valor_total_servicos, total_bruto,
                         igi_percentual, total_liquido
                     ) VALUES (
-                        :obra_id, :mes_referencia,
+                        :tenant_id, :obra_id, :mes_referencia,
                         :horas_normais, :horas_extra, :horas_noturna,
                         :valor_hora_normal, :valor_hora_extra, :valor_hora_noturna,
                         :valor_total_servicos, :total_bruto,
@@ -242,6 +255,7 @@ try {
                     )
                 ");
                 $insertStmt->execute([
+                    'tenant_id' => $tenant_id,
                     'obra_id' => $apt['obra_id'],
                     'mes_referencia' => $mesReferencia,
                     'horas_normais' => $apt['total_horas_normais'],

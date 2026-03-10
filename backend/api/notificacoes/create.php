@@ -16,17 +16,18 @@ try {
     $pdo = getConnection();
 
     $sql = "INSERT INTO notificacoes (
-        tipo, titulo, mensagem, icone, cor,
+        tenant_id, tipo, titulo, mensagem, icone, cor,
         url, entidade_tipo, entidade_id,
         usuario_id, usuario_nome, usuario_tipo
     ) VALUES (
-        :tipo, :titulo, :mensagem, :icone, :cor,
+        :tenant_id, :tipo, :titulo, :mensagem, :icone, :cor,
         :url, :entidade_tipo, :entidade_id,
         :usuario_id, :usuario_nome, :usuario_tipo
     )";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
+        'tenant_id' => $user['tenant_id'],
         'tipo' => $data['tipo'],
         'titulo' => $data['titulo'],
         'mensagem' => $data['mensagem'],

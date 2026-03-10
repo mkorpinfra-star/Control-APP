@@ -16,6 +16,7 @@ require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
 $user = authMiddleware(['admin']);
+$tenantId = $user['tenant_id'];
 
 try {
     $obraId        = isset($_GET['obra_id']) ? (int)$_GET['obra_id'] : 0;
@@ -33,6 +34,7 @@ try {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS despesas_indiretas (
             id                  INT AUTO_INCREMENT PRIMARY KEY,
+            tenant_id           INT NOT NULL,
             obra_id             INT NOT NULL,
             mes_referencia      CHAR(7) NOT NULL,
             locacao_escritorio  DECIMAL(12,2) DEFAULT 0,
@@ -50,7 +52,8 @@ try {
             ) STORED,
             created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            UNIQUE KEY uq_obra_mes (obra_id, mes_referencia)
+            UNIQUE KEY uq_tenant_obra_mes (tenant_id, obra_id, mes_referencia),
+            INDEX idx_tenant (tenant_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
@@ -66,8 +69,9 @@ try {
         FROM obras o
         LEFT JOIN clientes c ON c.id = o.cliente_id
         WHERE o.id = :id
+        AND o.tenant_id = :tenant_id
     ");
-    $obraStmt->execute([':id' => $obraId]);
+    $obraStmt->execute([':id' => $obraId, ':tenant_id' => $tenantId]);
     $obra = $obraStmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$obra) {
@@ -102,9 +106,11 @@ try {
         INNER JOIN usuarios u ON u.id = fp.funcionario_id
         WHERE fp.obra_id = :obra_id
           AND fp.mes_referencia = :mes
+          AND fp.tenant_id = :tenant_id
+          AND u.tenant_id = :tenant_id
         ORDER BY u.nome
     ");
-    $folhaStmt->execute([':obra_id' => $obraId, ':mes' => $mesReferencia]);
+    $folhaStmt->execute([':obra_id' => $obraId, ':mes' => $mesReferencia, ':tenant_id' => $tenantId]);
     $funcionarios = $folhaStmt->fetchAll(PDO::FETCH_ASSOC);
 
     // ── 4. Totais da folha ───────────────────────────────────────────────────
@@ -151,9 +157,10 @@ try {
         FROM faturamento f
         WHERE f.obra_id = :obra_id
           AND f.mes_referencia = :mes
+          AND f.tenant_id = :tenant_id
         LIMIT 1
     ");
-    $fatStmt->execute([':obra_id' => $obraId, ':mes' => $mesReferencia]);
+    $fatStmt->execute([':obra_id' => $obraId, ':mes' => $mesReferencia, ':tenant_id' => $tenantId]);
     $faturamento = $fatStmt->fetch(PDO::FETCH_ASSOC);
 
     // Se não tem faturamento, criar objeto zero
@@ -175,10 +182,10 @@ try {
     // ── 6. Despesas Indiretas ────────────────────────────────────────────────
     $despStmt = $pdo->prepare("
         SELECT * FROM despesas_indiretas
-        WHERE obra_id = :obra_id AND mes_referencia = :mes
+        WHERE obra_id = :obra_id AND mes_referencia = :mes AND tenant_id = :tenant_id
         LIMIT 1
     ");
-    $despStmt->execute([':obra_id' => $obraId, ':mes' => $mesReferencia]);
+    $despStmt->execute([':obra_id' => $obraId, ':mes' => $mesReferencia, ':tenant_id' => $tenantId]);
     $despesas = $despStmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$despesas) {

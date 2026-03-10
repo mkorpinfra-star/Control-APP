@@ -5,10 +5,20 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
-require_once '../../includes/auth.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+require_once '../../includes/tenant_middleware.php';
 require_once '../../config/database.php';
 
-$user = authMiddleware(['admin']);
+$auth = validateTenantAccess(['admin']);
+$tenant_id = $auth['tenant_id'];
 
 try {
     $mesReferencia = $_GET['mes'] ?? date('Y-m');
@@ -48,15 +58,15 @@ try {
             COUNT(DISTINCT fp.funcionario_id) as total_funcionarios
 
         FROM obras o
-        LEFT JOIN clientes c ON c.id = o.cliente_id
-        LEFT JOIN faturamento f ON f.obra_id = o.id AND f.mes_referencia = :mes_referencia
-        LEFT JOIN folha_pagamento fp ON fp.obra_id = o.id AND fp.mes_referencia = :mes_referencia
-        WHERE o.ativa = 1
+        LEFT JOIN clientes c ON c.id = o.cliente_id AND c.tenant_id = :tenant_id
+        LEFT JOIN faturamento f ON f.obra_id = o.id AND f.mes_referencia = :mes_referencia AND f.tenant_id = :tenant_id
+        LEFT JOIN folha_pagamento fp ON fp.obra_id = o.id AND fp.mes_referencia = :mes_referencia AND fp.tenant_id = :tenant_id
+        WHERE o.ativa = 1 AND o.tenant_id = :tenant_id
         GROUP BY o.id, f.id
         HAVING receita_total > 0 OR custo_total > 0
         ORDER BY lucro DESC
     ");
-    $stmt->execute(['mes_referencia' => $mesReferencia]);
+    $stmt->execute(['mes_referencia' => $mesReferencia, 'tenant_id' => $tenant_id]);
     $obras = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Calcular totalizadores

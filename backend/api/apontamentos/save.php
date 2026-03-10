@@ -18,26 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Autenticação e validação de tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -56,10 +41,10 @@ try {
 
     // Verificar se já existe apontamento
     $stmt = $pdo->prepare("
-        SELECT id, status FROM apontamentos 
-        WHERE funcionario_id = ? AND obra_id = ? AND semana_inicio = ?
+        SELECT id, status FROM apontamentos
+        WHERE funcionario_id = ? AND obra_id = ? AND semana_inicio = ? AND tenant_id = ?
     ");
-    $stmt->execute([$user['id'], $obraId, $semanaInicio]);
+    $stmt->execute([$auth['user_id'], $obraId, $semanaInicio, $tenant_id]);
     $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Não permitir edição se já foi enviado/aprovado
@@ -98,17 +83,17 @@ try {
                 total_horas = ?,
                 status = 'rascunho',
                 observacao_rejeicao = NULL
-            WHERE id = ?
+            WHERE id = ? AND tenant_id = ?
         ");
-        $stmt->execute([$horasJson, $totalNormal, $totalExtra, $totalNoturna, $totalHoras, $existing['id']]);
+        $stmt->execute([$horasJson, $totalNormal, $totalExtra, $totalNoturna, $totalHoras, $existing['id'], $tenant_id]);
         $id = $existing['id'];
     } else {
         // Criar novo
         $stmt = $pdo->prepare("
-            INSERT INTO apontamentos (funcionario_id, obra_id, semana_inicio, horas_diarias, horas_normais, horas_extra, horas_noturna, total_horas, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'rascunho')
+            INSERT INTO apontamentos (funcionario_id, obra_id, semana_inicio, horas_diarias, horas_normais, horas_extra, horas_noturna, total_horas, status, tenant_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'rascunho', ?)
         ");
-        $stmt->execute([$user['id'], $obraId, $semanaInicio, $horasJson, $totalNormal, $totalExtra, $totalNoturna, $totalHoras]);
+        $stmt->execute([$auth['user_id'], $obraId, $semanaInicio, $horasJson, $totalNormal, $totalExtra, $totalNoturna, $totalHoras, $tenant_id]);
         $id = $pdo->lastInsertId();
     }
 
@@ -119,10 +104,10 @@ try {
             o.nome as obra_nome,
             o.numero as obra_numero
         FROM apontamentos a
-        INNER JOIN obras o ON o.id = a.obra_id
-        WHERE a.id = ?
+        INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
+        WHERE a.id = ? AND a.tenant_id = ?
     ");
-    $stmt->execute([$id]);
+    $stmt->execute([$tenant_id, $id, $tenant_id]);
     $apontamento = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Decodificar horas_diarias JSON

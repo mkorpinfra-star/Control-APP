@@ -39,7 +39,9 @@ if (!$user) {
 try {
     $pdo = getConnection();
 
-    $stmt = $pdo->query("SELECT * FROM funcoes WHERE ativo = 1 ORDER BY nome");
+    // Multi-tenant: filtrar por empresa_id do usuário autenticado
+    $stmt = $pdo->prepare("SELECT * FROM funcoes WHERE empresa_id = :empresa_id AND ativo = 1 ORDER BY nome");
+    $stmt->execute(['empresa_id' => $user['empresa_id']]);
     $funcoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([

@@ -18,27 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 require_once __DIR__ . '/../../includes/email.php';
 
-// Autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid token']);
-    exit;
-}
+// Autenticação e validação de tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 $input = json_decode(file_get_contents('php://input'), true);
 $apontamentoId = isset($input['id']) ? $input['id'] : null;
@@ -57,11 +42,11 @@ try {
         SELECT a.*, o.numero as obra_numero, o.nome as obra_nome,
                o.encarregado_id, e.email as encarregado_email, e.nome as encarregado_nome
         FROM apontamentos a
-        INNER JOIN obras o ON o.id = a.obra_id
+        INNER JOIN obras o ON o.id = a.obra_id AND o.tenant_id = ?
         LEFT JOIN encarregados e ON e.id = o.encarregado_id
-        WHERE a.id = ? AND a.funcionario_id = ?
+        WHERE a.id = ? AND a.funcionario_id = ? AND a.tenant_id = ?
     ");
-    $stmt->execute([$apontamentoId, $user['id']]);
+    $stmt->execute([$tenant_id, $apontamentoId, $auth['user_id'], $tenant_id]);
     $apontamento = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$apontamento) {
@@ -77,14 +62,14 @@ try {
     }
 
     // Atualizar status para enviado
-    $stmt = $pdo->prepare("UPDATE apontamentos SET status = 'enviado', enviado_em = NOW() WHERE id = ?");
-    $stmt->execute([$apontamentoId]);
+    $stmt = $pdo->prepare("UPDATE apontamentos SET status = 'enviado', enviado_em = NOW() WHERE id = ? AND tenant_id = ?");
+    $stmt->execute([$apontamentoId, $tenant_id]);
 
     // Enviar e-mail ao encarregado
     if (isset($apontamento['encarregado_email']) && $apontamento['encarregado_email']) {
         sendApprovalNotification(
             $apontamento['encarregado_email'],
-            $user['nome'],
+            $auth['nome'],
             $apontamento['obra_numero'],
             $apontamento['semana_inicio'],
             isset($apontamento['total_horas']) ? $apontamento['total_horas'] : 0

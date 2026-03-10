@@ -3,11 +3,11 @@
   "appName": "J2S Hores",
   "webDir": "dist",
   "server": {
-    "url": "https://j2s.ad/login",
+    "url": "https://puntoclicks.com/login",
     "cleartext": true,
     "allowNavigation": [
-      "j2s.ad",
-      "*.j2s.ad"
+      "puntoclicks.com",
+      "*.puntoclicks.com"
     ]
   },
   "plugins": {

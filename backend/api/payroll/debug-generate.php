@@ -12,6 +12,7 @@ require_once '../../config/database.php';
 
 try {
     $user = authMiddleware(['admin']);
+    $tenantId = $user['tenant_id'];
 
     $mesReferencia = $_GET['mes'] ?? '2026-03';
     $obraId = isset($_GET['obra_id']) && $_GET['obra_id'] !== 'all' ? (int)$_GET['obra_id'] : null;
@@ -19,7 +20,8 @@ try {
     $pdo = getConnection();
 
     // 1. Buscar config fiscal
-    $configStmt = $pdo->query("SELECT * FROM config_fiscal ORDER BY id DESC LIMIT 1");
+    $configStmt = $pdo->prepare("SELECT * FROM config_fiscal WHERE tenant_id = :tenant_id ORDER BY id DESC LIMIT 1");
+    $configStmt->execute(['tenant_id' => $tenantId]);
     $config = $configStmt->fetch(PDO::FETCH_ASSOC);
 
     $casDescFuncionario = $config['cas_desconto_funcionario'] ?? 6.50;
@@ -34,6 +36,8 @@ try {
     if ($obraId) $params['obra_id'] = $obraId;
 
     require_once __DIR__ . '/../../includes/horas_helper.php';
+
+    $params['tenant_id'] = $tenantId;
 
     $stmt = $pdo->prepare("
         SELECT
@@ -55,6 +59,9 @@ try {
         WHERE a.status IN ('aprovado', 'aprovado_encarregado')
         AND a.semana_inicio >= :mes_inicio
         AND a.semana_inicio <= :mes_fim
+        AND a.tenant_id = :tenant_id
+        AND u.tenant_id = :tenant_id
+        AND o.tenant_id = :tenant_id
         $whereObra
         LIMIT 5
     ");

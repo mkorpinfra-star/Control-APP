@@ -12,6 +12,7 @@ require_once '../../includes/auth.php';
 require_once '../../config/database.php';
 
 $user = authMiddleware(['admin']);
+$tenantId = $user['tenant_id'];
 
 try {
     $body = json_decode(file_get_contents('php://input'), true);
@@ -36,6 +37,7 @@ try {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS despesas_indiretas (
             id                  INT AUTO_INCREMENT PRIMARY KEY,
+            tenant_id           INT NOT NULL,
             obra_id             INT NOT NULL,
             mes_referencia      CHAR(7) NOT NULL,
             locacao_escritorio  DECIMAL(12,2) DEFAULT 0,
@@ -53,13 +55,14 @@ try {
             ) STORED,
             created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            UNIQUE KEY uq_obra_mes (obra_id, mes_referencia)
+            UNIQUE KEY uq_tenant_obra_mes (tenant_id, obra_id, mes_referencia),
+            INDEX idx_tenant (tenant_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
     // Verificar se já existe
-    $check = $pdo->prepare("SELECT id FROM despesas_indiretas WHERE obra_id = ? AND mes_referencia = ?");
-    $check->execute([$obraId, $mesReferencia]);
+    $check = $pdo->prepare("SELECT id FROM despesas_indiretas WHERE obra_id = ? AND mes_referencia = ? AND tenant_id = ?");
+    $check->execute([$obraId, $mesReferencia, $tenantId]);
     $existing = $check->fetch();
 
     $values = [];
@@ -69,21 +72,23 @@ try {
 
     if ($existing) {
         $sets = implode(', ', array_map(fn($c) => "$c = :$c", $campos));
-        $stmt = $pdo->prepare("UPDATE despesas_indiretas SET $sets WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE despesas_indiretas SET $sets WHERE id = :id AND tenant_id = :tenant_id");
         $values['id'] = $existing['id'];
+        $values['tenant_id'] = $tenantId;
         $stmt->execute($values);
     } else {
-        $cols = implode(', ', array_merge(['obra_id', 'mes_referencia'], $campos));
-        $placeholders = implode(', ', array_merge([':obra_id', ':mes_referencia'], array_map(fn($c) => ":$c", $campos)));
+        $cols = implode(', ', array_merge(['tenant_id', 'obra_id', 'mes_referencia'], $campos));
+        $placeholders = implode(', ', array_merge([':tenant_id', ':obra_id', ':mes_referencia'], array_map(fn($c) => ":$c", $campos)));
         $stmt = $pdo->prepare("INSERT INTO despesas_indiretas ($cols) VALUES ($placeholders)");
+        $values['tenant_id']      = $tenantId;
         $values['obra_id']        = $obraId;
         $values['mes_referencia'] = $mesReferencia;
         $stmt->execute($values);
     }
 
     // Retornar registro atualizado
-    $sel = $pdo->prepare("SELECT * FROM despesas_indiretas WHERE obra_id = ? AND mes_referencia = ?");
-    $sel->execute([$obraId, $mesReferencia]);
+    $sel = $pdo->prepare("SELECT * FROM despesas_indiretas WHERE obra_id = ? AND mes_referencia = ? AND tenant_id = ?");
+    $sel->execute([$obraId, $mesReferencia, $tenantId]);
     $row = $sel->fetch(PDO::FETCH_ASSOC);
 
     echo json_encode(['success' => true, 'despesas' => $row]);

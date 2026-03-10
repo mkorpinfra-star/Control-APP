@@ -2,6 +2,7 @@
 /**
  * API: Atualizar Obra
  * PUT /api/obras/update.php
+ * MULTI-TENANT: Filtra por empresa_id
  */
 
 error_reporting(E_ALL);
@@ -39,6 +40,14 @@ if (!$payload || $payload['tipo'] !== 'admin') {
     exit;
 }
 
+// Support both empresa_id and tenant_id
+$empresaId = $payload['empresa_id'] ?? $payload['tenant_id'] ?? null;
+if (!$empresaId) {
+    http_response_code(400);
+    echo json_encode(['error' => 'empresa_id/tenant_id ausente no token']);
+    exit;
+}
+
 try {
     $data = json_decode(file_get_contents('php://input'), true);
 
@@ -49,6 +58,15 @@ try {
     }
 
     $pdo = getConnection();
+
+    // Verificar se a obra pertence à empresa do usuário
+    $checkStmt = $pdo->prepare("SELECT id FROM obras WHERE id = ? AND tenant_id = ?");
+    $checkStmt->execute([$data['id'], $empresaId]);
+    if (!$checkStmt->fetch()) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Obra não encontrada']);
+        exit;
+    }
 
     $updates = [];
     $params = [];
@@ -149,15 +167,16 @@ try {
         exit;
     }
 
-    $sql = "UPDATE obras SET " . implode(', ', $updates) . " WHERE id = ?";
+    $sql = "UPDATE obras SET " . implode(', ', $updates) . " WHERE id = ? AND tenant_id = ?";
     $params[] = $data['id'];
+    $params[] = $empresaId;
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
     // Buscar obra para notificação
-    $stmtObra = $pdo->prepare("SELECT numero, nome FROM obras WHERE id = ?");
-    $stmtObra->execute([$data['id']]);
+    $stmtObra = $pdo->prepare("SELECT numero, nome FROM obras WHERE id = ? AND tenant_id = ?");
+    $stmtObra->execute([$data['id'], $empresaId]);
     $obra = $stmtObra->fetch(PDO::FETCH_ASSOC);
 
     if ($obra) {
@@ -174,7 +193,8 @@ try {
                 'entidade_id' => $data['id'],
                 'usuario_id' => $payload['id'],
                 'usuario_nome' => $payload['nome'] ?? 'Admin',
-                'usuario_tipo' => $payload['tipo']
+                'usuario_tipo' => $payload['tipo'],
+                'empresa_id' => $empresaId
             ]
         );
     }

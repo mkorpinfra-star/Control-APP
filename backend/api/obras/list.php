@@ -25,7 +25,7 @@ $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (is
 
 if (empty($authHeader)) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    echo json_encode(['error' => 'Unauthorized']);
     exit;
 }
 
@@ -34,7 +34,15 @@ $payload = validateJWT($token);
 
 if (!$payload) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Invalid token']);
+    echo json_encode(['error' => 'Invalid token']);
+    exit;
+}
+
+// Support both empresa_id and tenant_id
+$tenant_id = $payload['empresa_id'] ?? $payload['tenant_id'] ?? null;
+if (!$tenant_id) {
+    http_response_code(400);
+    echo json_encode(['error' => 'empresa_id/tenant_id ausente no token']);
     exit;
 }
 
@@ -55,13 +63,14 @@ try {
                e.nome as encarregado_nome,
                (SELECT COUNT(*) FROM funcionario_obra WHERE obra_id = o.id) as funcionarios_count
         FROM obras o
-        LEFT JOIN clientes c ON o.cliente_id = c.id
-        LEFT JOIN encarregados e ON o.encarregado_id = e.id
-        WHERE o.ativa = 1
+        LEFT JOIN clientes c ON o.cliente_id = c.id AND c.tenant_id = ?
+        LEFT JOIN encarregados e ON o.encarregado_id = e.id AND e.tenant_id = ?
+        WHERE o.ativa = 1 AND o.tenant_id = ?
         ORDER BY o.numero DESC
     ";
 
-    $stmt = $pdo->query($sql);
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$tenant_id, $tenant_id, $tenant_id]);
     $obras = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([

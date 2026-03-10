@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { IconCamera, IconLock, IconCircleCheck, IconAlertTriangle, IconLoader2 } from '@tabler/icons-react';
 import PhotoUpload from '../components/PhotoUpload';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
 
 export default function SetupObrigatorio() {
     const { user, updateUser } = useAuth();

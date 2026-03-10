@@ -1,13 +1,23 @@
 <?php
 /**
- * ATUALIZAR ENCARREGADO
+ * ATUALIZAR ENCARREGADO - MULTI-TENANT
  */
 
 header('Content-Type: application/json; charset=utf-8');
-require_once '../../includes/auth.php';
-require_once '../../config/database.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: PUT, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-$user = authMiddleware(['admin']);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+require_once '../../config/database.php';
+require_once '../../includes/tenant_middleware.php';
+
+$auth = validateTenantAccess();
+requireAdmin($auth);
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -22,10 +32,17 @@ try {
 
     $pdo = getConnection();
 
-    // Verificar email duplicado (exceto próprio registro)
+    // Verificar se encarregado pertence ao tenant
+    $checkOwner = $pdo->prepare("SELECT id FROM encarregados WHERE id = ? AND tenant_id = ?");
+    $checkOwner->execute([$data['id'], $auth['tenant_id']]);
+    if (!$checkOwner->fetch()) {
+        throw new Exception('Encarregado não encontrado ou sem permissão');
+    }
+
+    // Verificar email duplicado dentro do tenant (exceto próprio registro)
     if (!empty($data['email'])) {
-        $checkEmail = $pdo->prepare("SELECT id FROM encarregados WHERE email = ? AND id != ?");
-        $checkEmail->execute([$data['email'], $data['id']]);
+        $checkEmail = $pdo->prepare("SELECT id FROM encarregados WHERE email = ? AND id != ? AND tenant_id = ?");
+        $checkEmail->execute([$data['email'], $data['id'], $auth['tenant_id']]);
         if ($checkEmail->fetch()) {
             throw new Exception('Email já cadastrado');
         }
@@ -42,7 +59,7 @@ try {
                 passaporte = :passaporte,
                 senha = :senha,
                 ativo = :ativo
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tenant_id
         ");
         $stmt->execute([
             'nome' => $data['nome'],
@@ -51,7 +68,8 @@ try {
             'passaporte' => $data['passaporte'] ?? null,
             'senha' => $senhaHash,
             'ativo' => $data['ativo'] ?? 1,
-            'id' => $data['id']
+            'id' => $data['id'],
+            'tenant_id' => $auth['tenant_id']
         ]);
     } else {
         $stmt = $pdo->prepare("
@@ -61,7 +79,7 @@ try {
                 telefone = :telefone,
                 passaporte = :passaporte,
                 ativo = :ativo
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tenant_id
         ");
         $stmt->execute([
             'nome' => $data['nome'],
@@ -69,7 +87,8 @@ try {
             'telefone' => $data['telefone'] ?? null,
             'passaporte' => $data['passaporte'] ?? null,
             'ativo' => $data['ativo'] ?? 1,
-            'id' => $data['id']
+            'id' => $data['id'],
+            'tenant_id' => $auth['tenant_id']
         ]);
     }
 

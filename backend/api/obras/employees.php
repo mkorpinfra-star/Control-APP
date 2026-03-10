@@ -2,6 +2,7 @@
 /**
  * API: Listar funcionários de uma obra
  * GET /api/obras/employees.php?obra_id=1
+ * MULTI-TENANT: Filtra por empresa_id
  */
 
 error_reporting(E_ALL);
@@ -38,6 +39,14 @@ if (!$payload) {
     exit;
 }
 
+// Support both empresa_id and tenant_id
+$empresaId = $payload['empresa_id'] ?? $payload['tenant_id'] ?? null;
+if (!$empresaId) {
+    http_response_code(400);
+    echo json_encode(['error' => 'empresa_id/tenant_id ausente no token']);
+    exit;
+}
+
 $obraId = isset($_GET['obra_id']) ? $_GET['obra_id'] : null;
 
 if (!$obraId) {
@@ -49,16 +58,26 @@ if (!$obraId) {
 try {
     $pdo = getConnection();
 
+    // Verificar se a obra pertence à empresa do usuário
+    $checkStmt = $pdo->prepare("SELECT id FROM obras WHERE id = ? AND tenant_id = ?");
+    $checkStmt->execute([$obraId, $empresaId]);
+    if (!$checkStmt->fetch()) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Obra não encontrada']);
+        exit;
+    }
+
     $sql = "
         SELECT u.id, u.passaporte, u.nome, u.email, u.tipo, u.foto_url
         FROM usuarios u
         INNER JOIN funcionario_obra fo ON u.id = fo.funcionario_id
-        WHERE fo.obra_id = ? AND u.ativo = 1
+        INNER JOIN obras o ON o.id = fo.obra_id
+        WHERE fo.obra_id = ? AND u.ativo = 1 AND o.tenant_id = ? AND u.tenant_id = ?
         ORDER BY u.nome
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$obraId]);
+    $stmt->execute([$obraId, $empresaId, $empresaId]);
     $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode($funcionarios);

@@ -5,10 +5,20 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
-require_once '../../includes/auth.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: PUT, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+require_once '../../includes/tenant_middleware.php';
 require_once '../../config/database.php';
 
-$user = authMiddleware(['admin']);
+$auth = validateTenantAccess(['admin']);
+$tenant_id = $auth['tenant_id'];
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -40,7 +50,10 @@ try {
         exit;
     }
 
-    $sql = "UPDATE faturamento SET " . implode(', ', $updates) . " WHERE id = :id";
+    $updates[] = 'tenant_id = :tenant_id';
+    $params['tenant_id'] = $tenant_id;
+
+    $sql = "UPDATE faturamento SET " . implode(', ', $updates) . " WHERE id = :id AND tenant_id = :tenant_id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
@@ -51,9 +64,9 @@ try {
             f.igi_valor,
             f.valor_total_fatura
         FROM faturamento f
-        WHERE f.id = ?
+        WHERE f.id = ? AND f.tenant_id = ?
     ");
-    $selectStmt->execute([$data['id']]);
+    $selectStmt->execute([$data['id'], $tenant_id]);
     $updated = $selectStmt->fetch(PDO::FETCH_ASSOC);
 
     echo json_encode([

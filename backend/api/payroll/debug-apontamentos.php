@@ -13,9 +13,10 @@ require_once '../../config/database.php';
 try {
     $user = authMiddleware(['admin']);
     $pdo = getConnection();
+    $tenantId = $user['tenant_id'];
 
     // Ver apontamentos aprovados agrupados por mês e obra
-    $stmt = $pdo->query("
+    $stmt = $pdo->prepare("
         SELECT
             DATE_FORMAT(a.semana_inicio, '%Y-%m') as mes,
             a.obra_id,
@@ -27,19 +28,24 @@ try {
         FROM apontamentos a
         INNER JOIN obras o ON o.id = a.obra_id
         WHERE a.status IN ('aprovado', 'aprovado_encarregado')
+        AND a.tenant_id = :tenant_id
+        AND o.tenant_id = :tenant_id
         GROUP BY DATE_FORMAT(a.semana_inicio, '%Y-%m'), a.obra_id, o.nome, o.numero, a.status
         ORDER BY mes DESC, obra_nome
         LIMIT 20
     ");
+    $stmt->execute(['tenant_id' => $tenantId]);
     $apontamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Ver obras ativas
-    $obrasStmt = $pdo->query("
+    $obrasStmt = $pdo->prepare("
         SELECT id, numero, nome, ativa
         FROM obras
         WHERE ativa = 1
+        AND tenant_id = :tenant_id
         ORDER BY nome
     ");
+    $obrasStmt->execute(['tenant_id' => $tenantId]);
     $obras = $obrasStmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([

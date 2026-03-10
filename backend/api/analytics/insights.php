@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant.php';
 
 // Verificar autenticação
 $headers = getallheaders();
@@ -38,6 +39,7 @@ if (!$user) {
 
 try {
     $pdo = getConnection();
+    $tenantId = getTenantId($pdo, $user['user_id']);
 
     // Parâmetros de período
     $periodoAtual = $_GET['periodo'] ?? '30';
@@ -108,7 +110,8 @@ try {
             ROUND((COALESCE(SUM(a.horas_normais), 0) / NULLIF(COALESCE(SUM(a.total_horas), 1), 0)) * 100, 1) as percentual_normal
         FROM apontamentos a
         INNER JOIN usuarios u ON u.id = a.funcionario_id
-        WHERE a.semana_inicio >= ?
+        WHERE a.tenant_id = ?
+        AND a.semana_inicio >= ?
         AND a.semana_inicio <= ?
         AND a.status IN ('aprovado', 'aprovado_admin', 'aprovado_encarregado')
         AND u.tipo = 'funcionario'
@@ -117,7 +120,7 @@ try {
         ORDER BY total_horas DESC
         LIMIT 5
     ");
-    $topStmt->execute([$startDate, $endDate]);
+    $topStmt->execute([$tenantId, $startDate, $endDate]);
     $top5 = $topStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
     // BOTTOM 5 FADIGA
@@ -139,7 +142,8 @@ try {
             END as nivel_risco
         FROM apontamentos a
         INNER JOIN usuarios u ON u.id = a.funcionario_id
-        WHERE a.semana_inicio >= ?
+        WHERE a.tenant_id = ?
+        AND a.semana_inicio >= ?
         AND a.semana_inicio <= ?
         AND a.status IN ('aprovado', 'aprovado_admin', 'aprovado_encarregado')
         AND u.tipo = 'funcionario'
@@ -148,7 +152,7 @@ try {
         ORDER BY percentual_extra_noturna DESC
         LIMIT 5
     ");
-    $bottomStmt->execute([$startDate, $endDate]);
+    $bottomStmt->execute([$tenantId, $startDate, $endDate]);
     $bottom5 = $bottomStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
     // COMPARAÇÃO TEMPORAL
@@ -161,10 +165,11 @@ try {
             COUNT(DISTINCT funcionario_id) as funcionarios_ativos,
             COUNT(DISTINCT obra_id) as obras_ativas
         FROM apontamentos
-        WHERE semana_inicio >= ? AND semana_inicio <= ?
+        WHERE tenant_id = ?
+        AND semana_inicio >= ? AND semana_inicio <= ?
         AND status IN ('aprovado', 'aprovado_admin', 'aprovado_encarregado')
     ");
-    $compareAtualStmt->execute([$startDate, $endDate]);
+    $compareAtualStmt->execute([$tenantId, $startDate, $endDate]);
     $periodoAtualData = $compareAtualStmt->fetch(PDO::FETCH_ASSOC);
 
     $compareAnteriorStmt = $pdo->prepare("
@@ -176,10 +181,11 @@ try {
             COUNT(DISTINCT funcionario_id) as funcionarios_ativos,
             COUNT(DISTINCT obra_id) as obras_ativas
         FROM apontamentos
-        WHERE semana_inicio >= ? AND semana_inicio <= ?
+        WHERE tenant_id = ?
+        AND semana_inicio >= ? AND semana_inicio <= ?
         AND status IN ('aprovado', 'aprovado_admin', 'aprovado_encarregado')
     ");
-    $compareAnteriorStmt->execute([$compareStartDate, $compareEndDate]);
+    $compareAnteriorStmt->execute([$tenantId, $compareStartDate, $compareEndDate]);
     $periodoAnteriorData = $compareAnteriorStmt->fetch(PDO::FETCH_ASSOC);
 
     $calcularVariacao = function($atual, $anterior) {
@@ -211,12 +217,13 @@ try {
             COUNT(DISTINCT a.funcionario_id) as funcionarios
         FROM apontamentos a
         INNER JOIN obras o ON o.id = a.obra_id
-        WHERE a.semana_inicio >= ? AND a.semana_inicio <= ?
+        WHERE a.tenant_id = ?
+        AND a.semana_inicio >= ? AND a.semana_inicio <= ?
         AND a.status IN ('aprovado', 'aprovado_admin', 'aprovado_encarregado')
         GROUP BY o.id
         ORDER BY total_horas DESC
     ");
-    $obraStmt->execute([$startDate, $endDate]);
+    $obraStmt->execute([$tenantId, $startDate, $endDate]);
     $obrasDist = $obraStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
     // INSIGHTS AUTOMÁTICOS

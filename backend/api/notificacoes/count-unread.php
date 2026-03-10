@@ -8,7 +8,8 @@ $user = authMiddleware();
 try {
     $pdo = getConnection();
 
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM notificacoes WHERE lida = 0");
+    $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM notificacoes WHERE tenant_id = :tenant_id AND lida = 0");
+    $stmt->execute(['tenant_id' => $user['tenant_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     echo json_encode([

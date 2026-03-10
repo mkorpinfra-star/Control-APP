@@ -75,7 +75,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
 
     try {
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'https://j2s.ad/login/backend/api';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
 
       const response = await fetch(`${API_URL}/usuarios/change-password.php`, {
         method: 'POST',

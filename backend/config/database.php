@@ -6,9 +6,9 @@
 
 // Configurações do banco
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'u268549871_saas');
-define('DB_USER', 'u268549871_saas');
-define('DB_PASS', 'J2SInstaladora010203!@');
+define('DB_NAME', 'u268549871_saaas'); // Banco novo puntoclicks.com
+define('DB_USER', 'u268549871_saaas');
+define('DB_PASS', 'Legolego0304!@');
 define('DB_CHARSET', 'utf8mb4');
 
 // Conexão PDO

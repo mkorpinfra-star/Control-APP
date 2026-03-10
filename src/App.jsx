@@ -1,130 +1,58 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth, AuthProvider } from './contexts/AuthContext';
+import { TenantProvider, useTenant } from './contexts/TenantContext';
 import QueryProvider from './providers/QueryProvider';
 import './i18n';
 import './index.css';
 
-// Pages
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Timesheet from './pages/Timesheet';
-import BaterPonto from './pages/BaterPonto';
-import Approvals from './pages/Approvals';
-import Employees from './pages/Employees';
-import Encarregados from './pages/Encarregados';
-import Projects from './pages/Projects';
-import Clients from './pages/Clients';
-import Payroll from './pages/Payroll';
-import Billing from './pages/Billing';
-import Analytics from './pages/Analytics';
-import AnalyticsAdvanced from './pages/AnalyticsAdvanced';
-import FinancialDashboard from './pages/FinancialDashboard';
-import ApprovedFinancial from './pages/ApprovedFinancial';
-import Settings from './pages/Settings';
-import Reports from './pages/Reports';
-import ResumoObra from './pages/ResumoObra';
+// Routes
+import AdminRoutes from './routes/AdminRoutes';
+import TenantRoutes from './routes/TenantRoutes';
 
 // Components
-import Layout from './components/Layout';
-import BankingLayout from './components/BankingLayout';
 import AnimatedSplash from './components/AnimatedSplash';
-import DashboardBanking from './pages/DashboardBanking';
 
-// Protected Route Component
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+// Domain Detection Hook
+function useDomainDetection() {
+  const hostname = window.location.hostname;
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafafa' }}>
-        <div className="loading-spinner"></div>
-      </div>
-    );
+  console.log('🌐 Hostname:', hostname);
+
+  // Local development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    console.log('✅ Modo: APP (localhost)');
+    return { type: 'app' };
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+  // Super Admin (admin.puntoclicks.com)
+  if (hostname === 'admin.puntoclicks.com') {
+    console.log('✅ Modo: SUPER ADMIN');
+    return { type: 'admin' };
   }
 
-  return children;
+  // App Principal (puntoclicks.com) - TODOS os usuários entram aqui
+  if (hostname === 'puntoclicks.com' || hostname === 'www.puntoclicks.com') {
+    console.log('✅ Modo: APP PRINCIPAL');
+    return { type: 'app' };
+  }
+
+  // Default to app
+  console.log('⚠️ Modo: APP (default)');
+  return { type: 'app' };
 }
 
-// Home Router - redirects based on user type
-function HomeRouter() {
-  const { user, isAdmin, isSupervisor } = useAuth();
-
-  console.log('HomeRouter - user:', user);
-  console.log('HomeRouter - isAdmin:', isAdmin, 'isSupervisor:', isSupervisor);
-
-  // Admin vai para Dashboard Banking
-  if (isAdmin) {
-    return <DashboardBanking />;
-  }
-
-  // Supervisor vai para aprovações
-  if (isSupervisor) {
-    return <Approvals />;
-  }
-
-  // Funcionário vai para bater ponto
-  return <BaterPonto />;
-}
-
+// Main App Routes
 function AppRoutes() {
-  const { isAuthenticated, loading } = useAuth();
+  const domain = useDomainDetection();
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafafa' }}>
-        <div className="loading-spinner"></div>
-      </div>
-    );
+  // Super Admin Panel (admin.puntoclicks.com)
+  if (domain.type === 'admin') {
+    return <AdminRoutes />;
   }
 
-  return (
-    <Routes>
-      {/* Login na raiz quando não autenticado */}
-      <Route
-        path="/"
-        element={
-          isAuthenticated ? (
-            <ProtectedRoute>
-              <BankingLayout />
-            </ProtectedRoute>
-          ) : (
-            <Login />
-          )
-        }
-      >
-        {isAuthenticated && (
-          <>
-            <Route index element={<HomeRouter />} />
-            <Route path="dashboard" element={<DashboardBanking />} />
-            <Route path="timesheet" element={<Timesheet />} />
-            <Route path="bater-ponto" element={<BaterPonto />} />
-            <Route path="approvals" element={<Approvals />} />
-            <Route path="employees" element={<Employees />} />
-            <Route path="encarregados" element={<Encarregados />} />
-            <Route path="projects" element={<Projects />} />
-            <Route path="clients" element={<Clients />} />
-            <Route path="payroll" element={<Payroll />} />
-            <Route path="billing" element={<Billing />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="analytics-advanced" element={<AnalyticsAdvanced />} />
-            <Route path="financial" element={<FinancialDashboard />} />
-            <Route path="approved-financial" element={<ApprovedFinancial />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="resumo-obra" element={<ResumoObra />} />
-          </>
-        )}
-      </Route>
-
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+  // App Principal (puntoclicks.com) - Login único para todos
+  return <TenantRoutes />;
 }
 
 function App() {
@@ -144,14 +72,16 @@ function App() {
 
   return (
     <QueryProvider>
-      <BrowserRouter basename="/login">
-        <AuthProvider>
-          {showSplash ? (
-            <AnimatedSplash onComplete={() => setShowSplash(false)} />
-          ) : (
-            <AppRoutes />
-          )}
-        </AuthProvider>
+      <BrowserRouter>
+        <TenantProvider>
+          <AuthProvider>
+            {showSplash ? (
+              <AnimatedSplash onComplete={() => setShowSplash(false)} />
+            ) : (
+              <AppRoutes />
+            )}
+          </AuthProvider>
+        </TenantProvider>
       </BrowserRouter>
     </QueryProvider>
   );

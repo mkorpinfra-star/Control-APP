@@ -61,7 +61,7 @@ export default function BaterPonto() {
 
     async function loadObras() {
         try {
-            const res = await fetch('https://j2s.ad/login/backend/api/obras/by-employee.php', {
+            const res = await fetch('https://puntoclicks.com/backend/api/obras/by-employee.php', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             })
             const data = await res.json()
@@ -78,7 +78,7 @@ export default function BaterPonto() {
         setLoading(true)
         try {
             const res = await fetch(
-                `https://j2s.ad/login/backend/api/apontamentos/my-week.php?semana_inicio=${semanaInicio}&obra_id=${obraId}`,
+                `https://puntoclicks.com/backend/api/apontamentos/my-week.php?semana_inicio=${semanaInicio}&obra_id=${obraId}`,
                 { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
             )
             const data = await res.json()
@@ -140,7 +140,7 @@ export default function BaterPonto() {
                 horas_diarias: JSON.stringify(horas)
             }
 
-            const res = await fetch('https://j2s.ad/login/backend/api/apontamentos/save.php', {
+            const res = await fetch('https://puntoclicks.com/backend/api/apontamentos/save.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ export default function BaterPonto() {
         // Se já tem ID, vai direto pro submit
         if (apontamento?.id) {
             try {
-                const res = await fetch('https://j2s.ad/login/backend/api/apontamentos/submit.php', {
+                const res = await fetch('https://puntoclicks.com/backend/api/apontamentos/submit.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -210,7 +210,7 @@ export default function BaterPonto() {
             setApontamento(prev => {
                 if (prev?.id) {
                     // Enviar de forma assíncrona sem depender do state
-                    fetch('https://j2s.ad/login/backend/api/apontamentos/submit.php', {
+                    fetch('https://puntoclicks.com/backend/api/apontamentos/submit.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
