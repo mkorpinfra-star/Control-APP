@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, clientesService, encarregadosService } from '../services/api';
 import { PAISES_EUROPA, PAISES_FLAGS } from '../data/paises';
-import { IconPlus, IconSearch, IconEdit, IconTrash, IconUsers, IconMapPin, IconMail, IconBriefcase, IconBuildingFactory2, IconCalendar, IconEraser } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconEdit, IconTrash, IconUsers, IconMapPin, IconMail, IconBriefcase, IconBuildingFactory2, IconCalendar, IconEraser, IconCheck } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import { Modal, ModalBody, ModalFooter } from '../components/ui/Modal';
@@ -154,6 +154,8 @@ export default function Projects() {
     const [resetProject, setResetProject] = useState(null);
     const [resetFuncionarioId, setResetFuncionarioId] = useState('all');
     const [resetEmployeesList, setResetEmployeesList] = useState([]);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     // Auto-refresh: refetch quando volta ao app ou reconecta
     useAutoRefresh(['projects', 'employees', 'clients'], {
@@ -414,7 +416,8 @@ export default function Projects() {
             setShowResetModal(false);
             setResetProject(null);
             setResetFuncionarioId('all');
-            alert(`✅ ${data.message || 'Horas reseteadas correctamente'}`);
+            setSuccessMessage(data.message || 'Horas reseteadas correctamente');
+            setShowSuccessModal(true);
         } catch (error) {
             setError(error.message || 'Error al resetear horas');
         } finally {
@@ -510,7 +513,7 @@ export default function Projects() {
                                     </button>
                                     <button
                                         onClick={() => openResetModal(project)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-orange-600 hover:bg-orange-50 transition-colors"
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors"
                                         title="Resetear horas"
                                     >
                                         <IconEraser stroke={1} size={16} />
@@ -1001,8 +1004,8 @@ export default function Projects() {
                 <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                                <IconEraser stroke={1} size={24} className="text-orange-600" />
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <IconEraser stroke={1} size={24} className="text-red-600" />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900">Resetear Horas</h3>
@@ -1017,11 +1020,11 @@ export default function Projects() {
                         )}
 
                         <div className="mb-6">
-                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
-                                <p className="text-sm text-orange-900 font-medium mb-2">
-                                    ⚠️ Advertencia: Esta acción eliminará todas las horas registradas.
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                <p className="text-sm text-red-900 font-medium mb-2">
+                                    Advertencia: Esta acción eliminará todas las horas registradas.
                                 </p>
-                                <p className="text-sm text-orange-800">
+                                <p className="text-sm text-red-800">
                                     Todos los apontamentos (rascunho, enviado, aprobado) serán eliminados permanentemente.
                                 </p>
                             </div>
@@ -1032,12 +1035,12 @@ export default function Projects() {
                             <select
                                 value={resetFuncionarioId}
                                 onChange={(e) => setResetFuncionarioId(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                             >
-                                <option value="all">🔄 Todos los funcionarios de esta obra</option>
+                                <option value="all">Todos los funcionarios de esta obra</option>
                                 {resetEmployeesList.map(emp => (
                                     <option key={emp.id} value={emp.id}>
-                                        👤 {emp.nome} ({emp.passaporte})
+                                        {emp.nome} ({emp.passaporte})
                                     </option>
                                 ))}
                             </select>
@@ -1053,11 +1056,36 @@ export default function Projects() {
                             <button
                                 onClick={handleResetHoras}
                                 disabled={saving}
-                                className="flex-1 px-4 py-3 bg-orange-600 text-white font-medium rounded-xl hover:bg-orange-700 transition-colors disabled:opacity-50"
+                                className="flex-1 px-4 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50"
                             >
                                 {saving ? 'Reseteando...' : 'Resetear Horas'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Sucesso */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <IconCheck stroke={1} size={24} className="text-green-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Operación Exitosa</h3>
+                            </div>
+                        </div>
+
+                        <p className="text-gray-700 mb-6">{successMessage}</p>
+
+                        <button
+                            onClick={() => setShowSuccessModal(false)}
+                            className="w-full px-4 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors"
+                        >
+                            Entendido
+                        </button>
                     </div>
                 </div>
             )}
