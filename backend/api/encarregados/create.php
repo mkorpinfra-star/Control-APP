@@ -55,9 +55,9 @@ try {
     $stmt->execute([
         'tenant_id' => $auth['tenant_id'],
         'nome' => $data['nome'],
-        'email' => $data['email'] ?? null,
-        'telefone' => $data['telefone'] ?? null,
-        'passaporte' => $data['passaporte'] ?? null,
+        'email' => !empty($data['email']) ? $data['email'] : null,
+        'telefone' => !empty($data['telefone']) ? $data['telefone'] : null,
+        'passaporte' => !empty($data['passaporte']) ? $data['passaporte'] : null,
         'senha' => $senhaHash,
         'ativo' => $data['ativo'] ?? 1
     ]);

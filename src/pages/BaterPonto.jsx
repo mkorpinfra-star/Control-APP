@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { IconChevronLeft, IconChevronRight, IconSend, IconClock, IconMinus, IconPlus } from '@tabler/icons-react'
+import { IconChevronLeft, IconChevronRight, IconSend, IconClock, IconMinus, IconPlus, IconCheck } from '@tabler/icons-react'
 import CustomSelect from '../components/CustomSelect'
 
 const DIAS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
@@ -17,6 +17,7 @@ export default function BaterPonto() {
     const [autoSaving, setAutoSaving] = useState(false)
     const [saveError, setSaveError] = useState(null)
     const [apontamento, setApontamento] = useState(null)
+    const [justSaved, setJustSaved] = useState(false)
     const autoSaveTimer = useRef(null)
     const touchStartX = useRef(0)
 
@@ -134,6 +135,7 @@ export default function BaterPonto() {
 
         setAutoSaving(true)
         setSaveError(null)
+        setJustSaved(false)
         try {
             const payload = {
                 obra_id: obraId,
@@ -161,6 +163,11 @@ export default function BaterPonto() {
             }
 
             const data = await res.json()
+            if (data.success) {
+                // Mostrar feedback "Salvo" por 2 segundos
+                setJustSaved(true)
+                setTimeout(() => setJustSaved(false), 2000)
+            }
             return data.success === true
         } catch (err) {
             setAutoSaving(false)
@@ -291,6 +298,17 @@ export default function BaterPonto() {
         return sum + (parseFloat(horas[dia].normal) || 0) + (parseFloat(horas[dia].extra) || 0) + (parseFloat(horas[dia].noturna) || 0)
     }, 0)
 
+    // Validar se todos os dias da semana foram preenchidos
+    // Considera que funcionário trabalha TODOS os dias (seg-sáb)
+    // Se algum dia não tem horas, não pode enviar
+    const todosOsDiasPreenchidos = DIAS.every(dia => {
+        const h = horas[dia]
+        const total = (parseFloat(h.normal) || 0) + (parseFloat(h.extra) || 0) + (parseFloat(h.noturna) || 0)
+        return total > 0
+    })
+
+    const podeEnviar = !bloqueado && totalSemana > 0 && todosOsDiasPreenchidos
+
     const obraAtual = obras.find(o => o.id == obraId)
 
     return (
@@ -310,8 +328,14 @@ export default function BaterPonto() {
                         </div>
                         {autoSaving && (
                             <div className="flex items-center gap-2 text-gray-600 text-xs">
-                                <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
+                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
                                 Guardando...
+                            </div>
+                        )}
+                        {justSaved && !autoSaving && (
+                            <div className="flex items-center gap-2 text-green-600 text-xs font-semibold">
+                                <IconCheck className="w-4 h-4" />
+                                Guardado
                             </div>
                         )}
                     </div>
@@ -572,11 +596,11 @@ export default function BaterPonto() {
                 </div>
                 <button
                     onClick={handleSubmit}
-                    disabled={bloqueado || totalSemana === 0}
+                    disabled={!podeEnviar}
                     className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold text-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 flex items-center justify-center gap-2"
                 >
                     <IconSend stroke={1} className="w-4 h-4" />
-                    {bloqueado ? 'Ya enviado' : 'Enviar para aprobación'}
+                    {bloqueado ? 'Ya enviado' : !todosOsDiasPreenchidos ? 'Complete todos los días' : 'Enviar para aprobación'}
                 </button>
             </div>
 

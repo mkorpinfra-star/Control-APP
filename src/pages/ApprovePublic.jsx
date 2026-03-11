@@ -15,6 +15,9 @@ export default function ApprovePublic() {
     const [observacao, setObservacao] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const [success, setSuccess] = useState(false)
+    const [confirmado, setConfirmado] = useState(false)
+    const [showAlertModal, setShowAlertModal] = useState(false)
+    const [alertMessage, setAlertMessage] = useState('')
     const sigCanvas = useRef()
 
     useEffect(() => {
@@ -43,7 +46,14 @@ export default function ApprovePublic() {
 
     async function handleApprove() {
         if (!sigCanvas.current || sigCanvas.current.isEmpty()) {
-            alert('Por favor, firme antes de aprobar')
+            setAlertMessage('Por favor, firme antes de aprobar')
+            setShowAlertModal(true)
+            return
+        }
+
+        if (!confirmado) {
+            setAlertMessage('Por favor, confirme que revisó las horas antes de aprobar')
+            setShowAlertModal(true)
             return
         }
 
@@ -77,7 +87,8 @@ export default function ApprovePublic() {
 
     async function handleReject() {
         if (!observacao.trim()) {
-            alert('Por favor, indique el motivo del rechazo')
+            setAlertMessage('Por favor, indique el motivo del rechazo')
+            setShowAlertModal(true)
             return
         }
 
@@ -191,7 +202,7 @@ export default function ApprovePublic() {
                             <div>
                                 <p className="text-xs text-gray-500 mb-1">Semana</p>
                                 <p className="font-semibold text-gray-900">
-                                    {new Date(apontamento.semana_inicio).toLocaleDateString('es-ES')}
+                                    {new Date(apontamento.semana_inicio).toLocaleDateString('es-ES')} - {new Date(new Date(apontamento.semana_inicio).setDate(new Date(apontamento.semana_inicio).getDate() + 5)).toLocaleDateString('es-ES')}
                                 </p>
                             </div>
                         </div>
@@ -200,18 +211,34 @@ export default function ApprovePublic() {
                     {/* Horas por Dia */}
                     <div className="p-6 border-b border-gray-200">
                         <h3 className="font-bold text-gray-900 mb-4">Horas registradas</h3>
+
+                        {/* Cabeçalho da tabela */}
+                        <div className="flex justify-between items-center pb-2 border-b-2 border-gray-300 mb-2">
+                            <span className="font-semibold text-gray-700 w-16">Día</span>
+                            <div className="flex gap-6 text-sm font-semibold">
+                                <span className="text-gray-600 w-12 text-center">N:</span>
+                                <span className="text-orange-600 w-12 text-center">E:</span>
+                                <span className="text-blue-600 w-12 text-center">Nc:</span>
+                                <span className="text-gray-900 w-16 text-right">Total</span>
+                            </div>
+                        </div>
+
+                        {/* Linhas de dados */}
                         <div className="space-y-2">
                             {DIAS.map((dia, idx) => {
                                 const horasDia = apontamento.horas_diarias?.[dia]
                                 if (!horasDia || (horasDia.normal === 0 && horasDia.extra === 0 && horasDia.noturna === 0)) return null
 
+                                const totalDia = (horasDia.normal || 0) + (horasDia.extra || 0) + (horasDia.noturna || 0)
+
                                 return (
                                     <div key={dia} className="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span className="font-medium text-gray-700">{DIAS_NOME[idx]}</span>
-                                        <div className="flex gap-3 text-sm">
-                                            {horasDia.normal > 0 && <span className="text-gray-600">N: {horasDia.normal}h</span>}
-                                            {horasDia.extra > 0 && <span className="text-orange-600">E: {horasDia.extra}h</span>}
-                                            {horasDia.noturna > 0 && <span className="text-blue-600">Nc: {horasDia.noturna}h</span>}
+                                        <span className="font-medium text-gray-700 w-16">{DIAS_NOME[idx]}</span>
+                                        <div className="flex gap-6 text-sm items-center">
+                                            <span className="text-gray-600 w-12 text-center">{horasDia.normal > 0 ? `${horasDia.normal}h` : '-'}</span>
+                                            <span className="text-orange-600 w-12 text-center">{horasDia.extra > 0 ? `${horasDia.extra}h` : '-'}</span>
+                                            <span className="text-blue-600 w-12 text-center">{horasDia.noturna > 0 ? `${horasDia.noturna}h` : '-'}</span>
+                                            <span className="font-bold text-gray-900 w-16 text-right">{totalDia}h</span>
                                         </div>
                                     </div>
                                 )
@@ -241,6 +268,20 @@ export default function ApprovePublic() {
                             <IconRefresh className="w-4 h-4" />
                             Limpiar firma
                         </button>
+
+                        {/* Checkbox de Confirmação */}
+                        <div className="mt-4 flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <input
+                                type="checkbox"
+                                id="confirmCheckbox"
+                                checked={confirmado}
+                                onChange={(e) => setConfirmado(e.target.checked)}
+                                className="mt-1 w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                            />
+                            <label htmlFor="confirmCheckbox" className="text-sm text-gray-900 cursor-pointer">
+                                <span className="font-semibold">Confirmo que analicé las horas</span> y estoy plenamente de acuerdo con el registro presentado. Verifico que todos los datos son correctos antes de aprobar.
+                            </label>
+                        </div>
                     </div>
 
                     {/* Botões */}
@@ -297,6 +338,27 @@ export default function ApprovePublic() {
                                 {submitting ? 'Procesando...' : 'Confirmar rechazo'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Alerta */}
+            {showAlertModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <IconX className="w-6 h-6 text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900">Atención</h3>
+                        </div>
+                        <p className="text-gray-700 mb-6">{alertMessage}</p>
+                        <button
+                            onClick={() => setShowAlertModal(false)}
+                            className="w-full py-3 px-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700"
+                        >
+                            Entendido
+                        </button>
                     </div>
                 </div>
             )}

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, clientesService, encarregadosService } from '../services/api';
 import { PAISES_EUROPA, PAISES_FLAGS } from '../data/paises';
-import { IconPlus, IconSearch, IconEdit, IconTrash, IconUsers, IconMapPin, IconMail, IconBriefcase, IconBuildingFactory2, IconCalendar } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconEdit, IconTrash, IconUsers, IconMapPin, IconMail, IconBriefcase, IconBuildingFactory2, IconCalendar, IconEraser } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import { Modal, ModalBody, ModalFooter } from '../components/ui/Modal';
@@ -150,6 +150,10 @@ export default function Projects() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState(null); // {project, hasRecords, count}
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetProject, setResetProject] = useState(null);
+    const [resetFuncionarioId, setResetFuncionarioId] = useState('all');
+    const [resetEmployeesList, setResetEmployeesList] = useState([]);
 
     // Auto-refresh: refetch quando volta ao app ou reconecta
     useAutoRefresh(['projects', 'employees', 'clients'], {
@@ -373,6 +377,51 @@ export default function Projects() {
         }
     };
 
+    const openResetModal = async (project) => {
+        setResetProject(project);
+        setResetFuncionarioId('all');
+        setError('');
+        try {
+            const assigned = await api.getProjectEmployees(project.id);
+            setResetEmployeesList(assigned || []);
+        } catch {
+            setResetEmployeesList([]);
+        }
+        setShowResetModal(true);
+    };
+
+    const handleResetHoras = async () => {
+        if (!resetProject) return;
+        setSaving(true);
+        setError('');
+        try {
+            const payload = {
+                obra_id: resetProject.id,
+                funcionario_id: resetFuncionarioId === 'all' ? null : parseInt(resetFuncionarioId)
+            };
+            const res = await fetch('https://puntoclicks.com/backend/api/obras/reset-horas.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Error al resetear horas');
+            }
+            setShowResetModal(false);
+            setResetProject(null);
+            setResetFuncionarioId('all');
+            alert(`✅ ${data.message || 'Horas reseteadas correctamente'}`);
+        } catch (error) {
+            setError(error.message || 'Error al resetear horas');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const filteredProjects = projects.filter(p => {
         const matchSearch = (p.numero?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                            (p.nome?.toLowerCase() || '').includes(searchTerm.toLowerCase());
@@ -458,6 +507,13 @@ export default function Projects() {
                                         title="Asignar personal"
                                     >
                                         <IconUsers stroke={1} size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => openResetModal(project)}
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-orange-600 hover:bg-orange-50 transition-colors"
+                                        title="Resetear horas"
+                                    >
+                                        <IconEraser stroke={1} size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleEdit(project)}
@@ -934,6 +990,72 @@ export default function Projects() {
                                 }`}
                             >
                                 {deleteConfirm.hasRecords ? 'Eliminar de todas formas' : 'Eliminar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Resetear Horas */}
+            {showResetModal && resetProject && (
+                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                <IconEraser stroke={1} size={24} className="text-orange-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Resetear Horas</h3>
+                                <p className="text-sm text-gray-500">{resetProject.numero} - {resetProject.nome}</p>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="mb-6">
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                                <p className="text-sm text-orange-900 font-medium mb-2">
+                                    ⚠️ Advertencia: Esta acción eliminará todas las horas registradas.
+                                </p>
+                                <p className="text-sm text-orange-800">
+                                    Todos los apontamentos (rascunho, enviado, aprobado) serán eliminados permanentemente.
+                                </p>
+                            </div>
+
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Seleccione qué resetear:
+                            </label>
+                            <select
+                                value={resetFuncionarioId}
+                                onChange={(e) => setResetFuncionarioId(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            >
+                                <option value="all">🔄 Todos los funcionarios de esta obra</option>
+                                {resetEmployeesList.map(emp => (
+                                    <option key={emp.id} value={emp.id}>
+                                        👤 {emp.nome} ({emp.passaporte})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => { setShowResetModal(false); setResetProject(null); setError(''); }}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleResetHoras}
+                                disabled={saving}
+                                className="flex-1 px-4 py-3 bg-orange-600 text-white font-medium rounded-xl hover:bg-orange-700 transition-colors disabled:opacity-50"
+                            >
+                                {saving ? 'Reseteando...' : 'Resetear Horas'}
                             </button>
                         </div>
                     </div>

@@ -130,7 +130,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
               onClick={onClose}
               className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
             >
-              <X size={20} />
+              <IconX size={20} />
             </button>
           </div>
 
@@ -147,7 +147,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
               </div>
             ) : (
               <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
-                <User size={32} strokeWidth={2} className="text-white" />
+                <IconUser size={32} strokeWidth={2} className="text-white" />
               </div>
             )}
             <div>
@@ -165,7 +165,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-[#F5F5F5] transition-colors text-left"
           >
             <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
-              <Camera size={18} className="text-black" />
+              <IconCamera size={18} className="text-black" />
             </div>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 text-sm">Alterar foto</p>
@@ -179,7 +179,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-[#F5F5F5] transition-colors text-left"
           >
             <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
-              <Lock size={18} className="text-black" />
+              <IconLock size={18} className="text-black" />
             </div>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 text-sm">Alterar senha</p>
@@ -235,7 +235,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-[#F5F5F5] transition-colors text-left"
           >
             <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
-              <Globe size={18} className="text-black" />
+              <IconWorld size={18} className="text-black" />
             </div>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 text-sm">Idioma</p>
@@ -249,7 +249,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-[#F5F5F5] transition-colors text-left"
           >
             <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
-              <Info size={18} className="text-black" />
+              <IconInfoCircle size={18} className="text-black" />
             </div>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 text-sm">Sobre</p>
@@ -266,7 +266,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-red-50 transition-colors text-left"
           >
             <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-              <LogOut size={18} className="text-red-600" />
+              <IconLogout size={18} className="text-red-600" />
             </div>
             <div className="flex-1">
               <p className="font-semibold text-red-600 text-sm">Cerrar sesión</p>
