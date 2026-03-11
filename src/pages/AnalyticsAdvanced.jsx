@@ -4,7 +4,7 @@ import { IconTrendingUp, IconTrendingDown, IconAlertTriangle, IconAward, IconUse
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
 const COLORS = {
     critical: '#dc2626',

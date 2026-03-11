@@ -13,6 +13,7 @@ export default function BaterPonto() {
     const [semanaInicio, setSemanaInicio] = useState(getMonday(new Date()))
     const [obraId, setObraId] = useState('')
     const [obras, setObras] = useState([])
+    const [obraAtual, setObraAtual] = useState(null)
     const [loading, setLoading] = useState(false)
     const [autoSaving, setAutoSaving] = useState(false)
     const [saveError, setSaveError] = useState(null)
@@ -63,24 +64,33 @@ export default function BaterPonto() {
 
     async function loadObras() {
         try {
-            const res = await fetch('https://puntoclicks.com/backend/api/obras/by-employee.php', {
+            const res = await fetch('https://puntotouch.nextim.io/backend/api/obras/by-employee.php', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             })
             const data = await res.json()
             if (data.success && data.obras?.length > 0) {
                 setObras(data.obras)
                 setObraId(data.obras[0].id)
+                setObraAtual(data.obras[0])
             }
         } catch (err) {
             console.error(err)
         }
     }
 
+    // Atualizar obra atual quando obra ID mudar
+    useEffect(() => {
+        if (obraId && obras.length > 0) {
+            const obra = obras.find(o => o.id == obraId)
+            setObraAtual(obra || null)
+        }
+    }, [obraId, obras])
+
     async function loadApontamento() {
         setLoading(true)
         try {
             const res = await fetch(
-                `https://puntoclicks.com/backend/api/apontamentos/my-week.php?semana_inicio=${semanaInicio}&obra_id=${obraId}`,
+                `https://puntotouch.nextim.io/backend/api/apontamentos/my-week.php?semana_inicio=${semanaInicio}&obra_id=${obraId}`,
                 { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
             )
             const data = await res.json()
@@ -143,7 +153,7 @@ export default function BaterPonto() {
                 horas_diarias: JSON.stringify(horas)
             }
 
-            const res = await fetch('https://puntoclicks.com/backend/api/apontamentos/save.php', {
+            const res = await fetch('https://puntotouch.nextim.io/backend/api/apontamentos/save.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -185,7 +195,7 @@ export default function BaterPonto() {
         // Se já tem ID, vai direto pro submit
         if (apontamento?.id) {
             try {
-                const res = await fetch('https://puntoclicks.com/backend/api/apontamentos/submit.php', {
+                const res = await fetch('https://puntotouch.nextim.io/backend/api/apontamentos/submit.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -220,7 +230,7 @@ export default function BaterPonto() {
         setTimeout(async () => {
             setApontamento(prev => {
                 if (prev?.id) {
-                    fetch('https://puntoclicks.com/backend/api/apontamentos/submit.php', {
+                    fetch('https://puntotouch.nextim.io/backend/api/apontamentos/submit.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -308,8 +318,6 @@ export default function BaterPonto() {
     })
 
     const podeEnviar = !bloqueado && totalSemana > 0 && todosOsDiasPreenchidos
-
-    const obraAtual = obras.find(o => o.id == obraId)
 
     return (
         <div className="min-h-screen bg-white pb-32">
@@ -474,48 +482,51 @@ export default function BaterPonto() {
                         </div>
                     </div>
 
-                    {/* Extra */}
-                    <div className="bg-[#F5F5F5] rounded-xl p-3">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-bold text-gray-900">Extra</div>
-                                <div className="text-xs text-gray-600">17-22h</div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => updateHora('extra', Math.max(0, parseFloat(horasDia.extra || 0) - 0.5))}
-                                    disabled={bloqueado || horasDia.extra <= 0}
-                                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                >
-                                    <IconMinus stroke={1} size={16} />
-                                </button>
-                                <input
-                                    type="number"
-                                    inputMode="decimal"
-                                    step="0.5"
-                                    min="0"
-                                    max="24"
-                                    value={horasDia.extra}
-                                    onChange={(e) => updateHora('extra', e.target.value)}
-                                    disabled={bloqueado}
-                                    placeholder="0"
-                                    className="w-16 text-center text-xl font-black py-1.5 px-1 rounded-lg bg-white border-0 focus:outline-none focus:ring-2 focus:ring-orange-400 disabled:bg-gray-200 disabled:text-gray-500"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => updateHora('extra', Math.min(24, parseFloat(horasDia.extra || 0) + 0.5))}
-                                    disabled={bloqueado || horasDia.extra >= 24}
-                                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                >
-                                    <IconPlus stroke={1} size={16} />
-                                </button>
+                    {/* Extra - só se permitido */}
+                    {obraAtual?.permite_hora_extra && (
+                        <div className="bg-[#F5F5F5] rounded-xl p-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-bold text-gray-900">Extra</div>
+                                    <div className="text-xs text-gray-600">17-22h</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => updateHora('extra', Math.max(0, parseFloat(horasDia.extra || 0) - 0.5))}
+                                        disabled={bloqueado || horasDia.extra <= 0}
+                                        className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                                    >
+                                        <IconMinus stroke={1} size={16} />
+                                    </button>
+                                    <input
+                                        type="number"
+                                        inputMode="decimal"
+                                        step="0.5"
+                                        min="0"
+                                        max="24"
+                                        value={horasDia.extra}
+                                        onChange={(e) => updateHora('extra', e.target.value)}
+                                        disabled={bloqueado}
+                                        placeholder="0"
+                                        className="w-16 text-center text-xl font-black py-1.5 px-1 rounded-lg bg-white border-0 focus:outline-none focus:ring-2 focus:ring-orange-400 disabled:bg-gray-200 disabled:text-gray-500"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => updateHora('extra', Math.min(24, parseFloat(horasDia.extra || 0) + 0.5))}
+                                        disabled={bloqueado || horasDia.extra >= 24}
+                                        className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                                    >
+                                        <IconPlus stroke={1} size={16} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Noturna */}
-                    <div className="bg-[#F5F5F5] rounded-xl p-3">
+                    {/* Noturna - só se permitido */}
+                    {obraAtual?.permite_hora_noturna && (
+                        <div className="bg-[#F5F5F5] rounded-xl p-3">
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex-1 min-w-0">
                                 <div className="text-sm font-bold text-gray-900">Nocturna</div>
@@ -553,6 +564,7 @@ export default function BaterPonto() {
                             </div>
                         </div>
                     </div>
+                    )}
                 </div>
 
                 {/* Total do Dia */}

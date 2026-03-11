@@ -4,7 +4,7 @@ import { Card } from '../components/ui/Card';
 import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
 export default function ApprovedFinancial() {
     const [mesReferencia, setMesReferencia] = useState(() => {

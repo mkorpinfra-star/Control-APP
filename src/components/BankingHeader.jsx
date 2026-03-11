@@ -84,7 +84,7 @@ export default function BankingHeader() {
 
           {/* Account Info */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-            <p className="text-xs opacity-80 mb-1">J2S Hores by PuntoClicks.com</p>
+            <p className="text-xs opacity-80 mb-1">J2S Hores by PuntoTouch.com</p>
             <p className="text-lg font-bold tracking-tight">
               {getSystemTitle()}
             </p>

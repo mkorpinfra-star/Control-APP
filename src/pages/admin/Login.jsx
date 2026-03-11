@@ -114,7 +114,7 @@ export default function AdminLogin() {
           </div>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Apenas para administradores da plataforma PuntoClicks
+            Apenas para administradores da plataforma PuntoTouch
           </p>
         </div>
       </div>

@@ -133,6 +133,9 @@ export default function Projects() {
         cliente_id: '', encarregado_id: '', data_inicio: '', data_fim: '',
         // País
         pais: 'España',
+        // Habilitação de tipos de horas
+        permite_hora_extra: true,
+        permite_hora_noturna: true,
         // Faturamento (valores cobrados do cliente)
         fatura_hora_normal: 25.00,
         fatura_hora_extra: 37.50,
@@ -235,7 +238,16 @@ export default function Projects() {
                 data_fim: formData.data_fim || null,
                 email_financeiro: formData.email_financeiro || null,
                 email_encarregado: formData.email_encarregado || null,
-                dias_desativados: diasDesativados
+                dias_desativados: diasDesativados,
+                // Converter string vazia para 0
+                fatura_hora_normal: formData.fatura_hora_normal === '' ? 0 : formData.fatura_hora_normal,
+                fatura_hora_extra: formData.fatura_hora_extra === '' ? 0 : formData.fatura_hora_extra,
+                fatura_hora_noturna: formData.fatura_hora_noturna === '' ? 0 : formData.fatura_hora_noturna,
+                multiplicador_extra: formData.multiplicador_extra === '' ? 0 : formData.multiplicador_extra,
+                imposto_igi: formData.imposto_igi === '' ? 0 : formData.imposto_igi,
+                imposto_cas_funcionario: formData.imposto_cas_funcionario === '' ? 0 : formData.imposto_cas_funcionario,
+                imposto_cas_empresa: formData.imposto_cas_empresa === '' ? 0 : formData.imposto_cas_empresa,
+                imposto_irpc: formData.imposto_irpc === '' ? 0 : formData.imposto_irpc
             };
             let obraId;
             if (editingProject) {
@@ -270,6 +282,9 @@ export default function Projects() {
             data_fim: project.data_fim || '',
             // País
             pais: project.pais || 'España',
+            // Habilitação de tipos de horas
+            permite_hora_extra: project.permite_hora_extra !== undefined ? Boolean(project.permite_hora_extra) : true,
+            permite_hora_noturna: project.permite_hora_noturna !== undefined ? Boolean(project.permite_hora_noturna) : true,
             // Faturamento
             fatura_hora_normal: parseFloat(project.fatura_hora_normal) || 25.00,
             fatura_hora_extra: parseFloat(project.fatura_hora_extra) || 37.50,
@@ -401,7 +416,7 @@ export default function Projects() {
                 obra_id: resetProject.id,
                 funcionario_id: resetFuncionarioId === 'all' ? null : parseInt(resetFuncionarioId)
             };
-            const res = await fetch('https://puntoclicks.com/backend/api/obras/reset-horas.php', {
+            const res = await fetch('https://puntotouch.nextim.io/backend/api/obras/reset-horas.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -752,6 +767,29 @@ export default function Projects() {
                                 {/* Valores de Faturamento */}
                                 <div className="space-y-3">
                                     <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Facturación al Cliente (€/h)</h4>
+
+                                    {/* Toggles de Habilitação */}
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.permite_hora_extra}
+                                                onChange={(e) => setFormData({ ...formData, permite_hora_extra: e.target.checked })}
+                                                className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                                            />
+                                            <span className="text-xs font-medium text-gray-700">Permitir Horas Extras</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.permite_hora_noturna}
+                                                onChange={(e) => setFormData({ ...formData, permite_hora_noturna: e.target.checked })}
+                                                className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                                            />
+                                            <span className="text-xs font-medium text-gray-700">Permitir Horas Noturnas</span>
+                                        </label>
+                                    </div>
+
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500 mb-1">Normal</label>
@@ -760,8 +798,8 @@ export default function Projects() {
                                                 step="0.01"
                                                 min="0"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.fatura_hora_normal}
-                                                onChange={(e) => setFormData({ ...formData, fatura_hora_normal: parseFloat(e.target.value) || 0 })}
+                                                value={formData.fatura_hora_normal === '' ? '' : formData.fatura_hora_normal}
+                                                onChange={(e) => setFormData({ ...formData, fatura_hora_normal: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                         <div>
@@ -771,8 +809,8 @@ export default function Projects() {
                                                 step="0.01"
                                                 min="0"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.fatura_hora_extra}
-                                                onChange={(e) => setFormData({ ...formData, fatura_hora_extra: parseFloat(e.target.value) || 0 })}
+                                                value={formData.fatura_hora_extra === '' ? '' : formData.fatura_hora_extra}
+                                                onChange={(e) => setFormData({ ...formData, fatura_hora_extra: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                         <div>
@@ -782,8 +820,8 @@ export default function Projects() {
                                                 step="0.01"
                                                 min="0"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.fatura_hora_noturna}
-                                                onChange={(e) => setFormData({ ...formData, fatura_hora_noturna: parseFloat(e.target.value) || 0 })}
+                                                value={formData.fatura_hora_noturna === '' ? '' : formData.fatura_hora_noturna}
+                                                onChange={(e) => setFormData({ ...formData, fatura_hora_noturna: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                         <div>
@@ -793,8 +831,8 @@ export default function Projects() {
                                                 step="0.01"
                                                 min="0"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.multiplicador_extra}
-                                                onChange={(e) => setFormData({ ...formData, multiplicador_extra: parseFloat(e.target.value) || 0 })}
+                                                value={formData.multiplicador_extra === '' ? '' : formData.multiplicador_extra}
+                                                onChange={(e) => setFormData({ ...formData, multiplicador_extra: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                     </div>
@@ -812,8 +850,8 @@ export default function Projects() {
                                                 min="0"
                                                 max="100"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_igi}
-                                                onChange={(e) => setFormData({ ...formData, imposto_igi: parseFloat(e.target.value) || 0 })}
+                                                value={formData.imposto_igi === '' ? '' : formData.imposto_igi}
+                                                onChange={(e) => setFormData({ ...formData, imposto_igi: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                         <div>
@@ -824,8 +862,8 @@ export default function Projects() {
                                                 min="0"
                                                 max="100"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_cas_funcionario}
-                                                onChange={(e) => setFormData({ ...formData, imposto_cas_funcionario: parseFloat(e.target.value) || 0 })}
+                                                value={formData.imposto_cas_funcionario === '' ? '' : formData.imposto_cas_funcionario}
+                                                onChange={(e) => setFormData({ ...formData, imposto_cas_funcionario: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                         <div>
@@ -836,8 +874,8 @@ export default function Projects() {
                                                 min="0"
                                                 max="100"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_cas_empresa}
-                                                onChange={(e) => setFormData({ ...formData, imposto_cas_empresa: parseFloat(e.target.value) || 0 })}
+                                                value={formData.imposto_cas_empresa === '' ? '' : formData.imposto_cas_empresa}
+                                                onChange={(e) => setFormData({ ...formData, imposto_cas_empresa: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                         <div>
@@ -848,8 +886,8 @@ export default function Projects() {
                                                 min="0"
                                                 max="100"
                                                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_irpc}
-                                                onChange={(e) => setFormData({ ...formData, imposto_irpc: parseFloat(e.target.value) || 0 })}
+                                                value={formData.imposto_irpc === '' ? '' : formData.imposto_irpc}
+                                                onChange={(e) => setFormData({ ...formData, imposto_irpc: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                                             />
                                         </div>
                                     </div>

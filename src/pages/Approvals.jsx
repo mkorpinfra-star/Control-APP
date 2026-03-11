@@ -179,7 +179,7 @@ export default function Approvals() {
         setLoading(true);
         try {
             const token   = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+            const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
             // obras ativas
             const obrasRes = await fetch(`${API_URL}/obras/list.php`, {
@@ -207,7 +207,7 @@ export default function Approvals() {
         setLoadingSit(true);
         try {
             const token   = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+            const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
             const res     = await fetch(
                 `${API_URL}/apontamentos/negligentes.php?obra_id=${obraId}&semana_inicio=${semanaFiltro}`,
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -294,7 +294,7 @@ export default function Approvals() {
         if (!confirm('Tem certeza?')) return;
         try {
             const token   = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+            const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
             const res     = await fetch(`${API_URL}/apontamentos/delete.php`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -312,7 +312,7 @@ export default function Approvals() {
         setGeneratingReport(true);
         try {
             const token   = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+            const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
             const res     = await fetch(
                 `${API_URL}/relatorios/gerar-semanal.php?semana_inicio=${entry.semana_inicio}&obra_id=${entry.obra_id}`,
                 { headers: { Authorization: `Bearer ${token}` } }

@@ -8,7 +8,7 @@ import {
     IconActivity, IconAlertCircle, IconRefresh, IconChevronUp, IconChevronDown
 } from '@tabler/icons-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 const fmtEur = v => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v || 0);

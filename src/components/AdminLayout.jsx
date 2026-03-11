@@ -17,7 +17,7 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     logout();
-    window.location.href = 'https://puntoclicks.com/login';
+    window.location.href = 'https://puntotouch.nextim.io/login';
   };
 
   return (
@@ -28,7 +28,7 @@ export default function AdminLayout() {
           <div className="flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-[#CE0201] rounded-xl"></div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">PuntoClicks</h1>
+              <h1 className="text-lg font-bold text-gray-900">PuntoTouch</h1>
               <p className="text-xs text-gray-500">Admin Panel</p>
             </div>
           </div>

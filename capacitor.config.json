@@ -3,11 +3,11 @@
   "appName": "J2S Hores",
   "webDir": "dist",
   "server": {
-    "url": "https://puntoclicks.com/login",
+    "url": "https://puntotouch.nextim.io/login",
     "cleartext": true,
     "allowNavigation": [
-      "puntoclicks.com",
-      "*.puntoclicks.com"
+      "puntotouch.nextim.io",
+      "*.puntotouch.nextim.io"
     ]
   },
   "plugins": {

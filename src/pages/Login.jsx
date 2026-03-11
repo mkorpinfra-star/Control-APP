@@ -389,9 +389,9 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {/* by PuntoClicks.com - fora da logo */}
+                    {/* by PuntoTouch.com - fora da logo */}
                     <div className="text-sm text-white/80 font-medium tracking-wide">
-                        by <span className="font-bold text-white">PuntoClicks.com</span>
+                        by <span className="font-bold text-white">PuntoTouch.com</span>
                     </div>
                 </div>
 

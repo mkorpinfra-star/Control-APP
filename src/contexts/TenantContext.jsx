@@ -101,7 +101,7 @@ export function TenantProvider({ children }) {
     }
 
     // Aplicar título da página
-    document.title = `${tenantData.nome} - PuntoClicks`;
+    document.title = `${tenantData.nome} - PuntoTouch`;
 
     // Salvar no localStorage para uso offline
     localStorage.setItem('tenant_cache', JSON.stringify({

@@ -7,7 +7,7 @@ import { IconPlus, IconDownload, IconMail, IconTrash, IconCalendar } from '@tabl
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { SkeletonStatCard, SkeletonCard } from '../components/SkeletonLoader';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
 export default function Billing() {
     const [mesReferencia, setMesReferencia] = useState(() => {

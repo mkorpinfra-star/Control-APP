@@ -1,5 +1,5 @@
 // Build: 2026-02-02T15:59
-const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
 const getToken = () => localStorage.getItem('token');
 

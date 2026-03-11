@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import SignatureCanvas from 'react-signature-canvas'
 import { IconCheck, IconX, IconClock, IconRefresh } from '@tabler/icons-react'
 
-const API_URL = 'https://puntoclicks.com/backend/api'
+const API_URL = 'https://puntotouch.nextim.io/backend/api'
 
 export default function ApprovePublic() {
     const { token } = useParams()

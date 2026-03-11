@@ -75,7 +75,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
 
     try {
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
       const response = await fetch(`${API_URL}/usuarios/change-password.php`, {
         method: 'POST',
@@ -245,7 +245,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
 
           {/* Sobre */}
           <button
-            onClick={() => alert('J2S Hores v1.0.0\nDesarrollado por PuntoClicks.com\n\nSistema de gestión de horas y nóminas')}
+            onClick={() => alert('J2S Hores v1.0.0\nDesarrollado por PuntoTouch.com\n\nSistema de gestión de horas y nóminas')}
             className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-[#F5F5F5] transition-colors text-left"
           >
             <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
@@ -253,7 +253,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             </div>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 text-sm">Sobre</p>
-              <p className="text-xs text-gray-600">J2S Hores v1.0.0 by PuntoClicks.com</p>
+              <p className="text-xs text-gray-600">J2S Hores v1.0.0 by PuntoTouch.com</p>
             </div>
           </button>
 

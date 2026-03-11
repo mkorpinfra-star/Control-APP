@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { IconX, IconCamera, IconUpload } from '@tabler/icons-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://puntoclicks.com/backend/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
 
 export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = false }) {
     const [preview, setPreview] = useState(null);
