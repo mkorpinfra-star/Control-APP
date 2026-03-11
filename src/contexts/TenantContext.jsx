@@ -26,14 +26,14 @@ export function TenantProvider({ children }) {
         // Pode forçar tenant via localStorage para testes
         tenantSlug = localStorage.getItem('dev_tenant') || 'j2s';
       }
-      // Produção: puntoclicks.com
-      else if (parts.length === 2) {
-        // puntoclicks.com → landing page (sem tenant)
+      // Domínio principal sem tenant
+      else if (hostname === 'puntotouch.nextim.io' || hostname === 'www.puntotouch.nextim.io') {
+        // Domínio principal → sem tenant (login centralizado)
         tenantSlug = null;
       }
-      // Produção: j2s.puntoclicks.com
-      else if (parts.length >= 3) {
-        tenantSlug = parts[0]; // j2s, cliente2, etc
+      // Subdomínio com tenant: cliente.puntotouch.nextim.io
+      else if (parts.length >= 4) {
+        tenantSlug = parts[0]; // cliente, j2s, etc
       }
 
       // Se não tem tenant, é landing page

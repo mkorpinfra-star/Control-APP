@@ -25,14 +25,14 @@ function useDomainDetection() {
     return { type: 'app' };
   }
 
-  // Super Admin (admin.puntoclicks.com)
-  if (hostname === 'admin.puntoclicks.com') {
+  // Super Admin (admin.puntotouch.nextim.io)
+  if (hostname === 'admin.puntotouch.nextim.io') {
     console.log('✅ Modo: SUPER ADMIN');
     return { type: 'admin' };
   }
 
-  // App Principal (puntoclicks.com) - TODOS os usuários entram aqui
-  if (hostname === 'puntoclicks.com' || hostname === 'www.puntoclicks.com') {
+  // App Principal (puntotouch.nextim.io) - TODOS os usuários entram aqui
+  if (hostname === 'puntotouch.nextim.io' || hostname === 'www.puntotouch.nextim.io') {
     console.log('✅ Modo: APP PRINCIPAL');
     return { type: 'app' };
   }
