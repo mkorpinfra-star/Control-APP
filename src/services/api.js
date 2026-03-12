@@ -220,8 +220,8 @@ export const api = {
     updateEmployee: (id, data) => usuariosService.update(id, data),
     deleteEmployee: (id) => usuariosService.delete(id),
 
-    // Administradores (apenas administradores)
-    getAdministrators: () => usuariosService.getAll('administrador'),
+    // Administradores (apenas admins)
+    getAdministrators: () => usuariosService.getAll('admin'),
     createAdministrator: (data) => usuariosService.create(data),
     updateAdministrator: (id, data) => usuariosService.update(id, data),
     deleteAdministrator: (id) => usuariosService.delete(id),
