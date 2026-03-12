@@ -3,28 +3,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IconLogout, IconPlus, IconBuilding, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconUsers, IconFileText, IconCurrencyDollar, IconChartBar, IconSettings, IconUserCircle, IconReceipt, IconUserCog } from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
+import Avatar from './Avatar';
 
 export default function DynamicHeader() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [imageError, setImageError] = useState(false);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Bom dia';
     if (hour < 18) return 'Boa tarde';
     return 'Boa noite';
-  };
-
-  const getUserInitials = () => {
-    if (!user?.nome) return 'U';
-    const names = user.nome.split(' ');
-    if (names.length >= 2) {
-      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-    }
-    return user.nome.substring(0, 2).toUpperCase();
   };
 
   // Configuração de cada página
@@ -130,23 +121,9 @@ export default function DynamicHeader() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <button onClick={() => setShowProfileMenu(true)} className="relative group">
-                {user?.foto_url && user.foto_url.trim() !== '' && !imageError ? (
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all">
-                    <img
-                      src={`https://j2s.ad${user.foto_url}`}
-                      alt={user?.nome}
-                      className="w-full h-full object-cover"
-                      onError={() => setImageError(true)}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 group-hover:border-white/50 transition-all">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                  </div>
-                )}
+                <div className="border-2 border-white/30 group-hover:border-white/50 transition-all rounded-full">
+                  <Avatar user={user} size="md" className="!bg-white/20 !text-white" />
+                </div>
                 <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-white rounded-full border-2 border-[#CE0201]"></div>
               </button>
 

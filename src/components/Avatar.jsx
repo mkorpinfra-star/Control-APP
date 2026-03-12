@@ -35,25 +35,13 @@ export default function Avatar({ user, size = 'md', className = '' }) {
 
     const sizeClass = sizes[size] || sizes.md;
 
-    // DEBUG
-    console.log('🖼️ Avatar render:', {
-        hasFoto: !!user?.foto_url,
-        fotoUrl: user?.foto_url,
-        imageError,
-        fullUrl: user?.foto_url ? `${API_URL}${user.foto_url}` : null
-    });
-
     return user?.foto_url && user.foto_url.trim() !== '' && !imageError ? (
         <div className={`${sizeClass} rounded-full overflow-hidden shrink-0 ${className}`}>
             <img
                 src={`${API_URL}${user.foto_url}`}
                 alt={user?.nome}
                 className="w-full h-full object-cover"
-                onError={() => {
-                    console.log('❌ Erro ao carregar imagem:', `${API_URL}${user.foto_url}`);
-                    setImageError(true);
-                }}
-                onLoad={() => console.log('✅ Imagem carregada com sucesso')}
+                onError={() => setImageError(true)}
             />
         </div>
     ) : (
