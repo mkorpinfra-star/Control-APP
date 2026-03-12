@@ -6,6 +6,7 @@ import CustomSelect from '../components/CustomSelect';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import EmployeesTour from '../components/tours/EmployeesTour';
 import { SkeletonEmployeeCard } from '../components/SkeletonLoader';
+import Avatar from '../components/Avatar';
 
 const inputCls = "w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white";
 
@@ -176,7 +177,7 @@ export default function Employees() {
             {/* List - SCROLLÁVEL */}
             <div className="flex-1 overflow-y-auto pb-20" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
-                <div className="px-4 pt-4 space-y-3">
+                <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {[1,2,3,4,5,6].map(i => <SkeletonEmployeeCard key={i} />)}
                 </div>
             ) : filtered.length === 0 ? (
@@ -185,49 +186,52 @@ export default function Employees() {
                     <p className="text-gray-500">{searchTerm ? 'Sin resultados' : 'No hay usuarios. Añade el primero.'}</p>
                 </div>
             ) : (
-                <div className="px-4 pt-4 space-y-3">
+                <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filtered.map((emp, idx) => (
-                        <div key={emp.id} data-tour={idx === 0 ? "employee-card" : undefined} className="bg-[#F5F5F5] rounded-2xl p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white text-gray-900 font-bold text-lg shrink-0">
-                                    {emp.nome?.charAt(0)?.toUpperCase()}
-                                </div>
+                        <div key={emp.id} data-tour={idx === 0 ? "employee-card" : undefined} className="bg-[#F5F5F5] rounded-2xl p-4 flex flex-col">
+                            {/* Header */}
+                            <div className="flex items-start gap-3 mb-3">
+                                <Avatar user={emp} size="md" className="rounded-xl" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900 text-base">{emp.nome}</p>
-                                    <p className="text-sm text-gray-600">{emp.passaporte}</p>
-                                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${typeColor(emp.tipo)}`}>
+                                    <p className="font-bold text-gray-900 text-base leading-tight">{emp.nome}</p>
+                                    <p className="text-sm text-gray-600 mt-0.5">{emp.passaporte}</p>
+                                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${typeColor(emp.tipo)}`}>
                                         {typeLabel(emp.tipo)}
                                     </span>
                                 </div>
-                                <div className="flex gap-2 shrink-0">
-                                    <button onClick={() => handleEdit(emp)}
-                                        data-tour={idx === 0 ? "edit-employee-btn" : undefined}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors">
-                                        <IconEdit size={16} stroke={1} />
-                                    </button>
-                                    <button onClick={() => handleDelete(emp)}
-                                        data-tour={idx === 0 ? "delete-employee-btn" : undefined}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors">
-                                        <IconTrash size={16} stroke={1} />
-                                    </button>
-                                </div>
                             </div>
+
+                            {/* Valores */}
                             {(emp.salario_base > 0 || emp.salario_base_mensal > 0 || emp.salario_hora > 0 || emp.valor_hora_venda > 0) && (
-                                <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-500">
+                                <div className="flex-1 mb-4 grid grid-cols-2 gap-x-3 gap-y-2 text-xs text-gray-600">
                                     {(emp.salario_base > 0 || emp.salario_base_mensal > 0) && (
-                                        <span>Base CASS: <strong className="text-gray-700">{parseFloat(emp.salario_base || emp.salario_base_mensal).toLocaleString('de-DE', {minimumFractionDigits:2})} €</strong></span>
+                                        <span>Base: <strong className="text-gray-900">{parseFloat(emp.salario_base || emp.salario_base_mensal).toLocaleString('de-DE', {minimumFractionDigits:2})}€</strong></span>
                                     )}
                                     {emp.salario_hora > 0 && (
-                                        <span>Custo/h: <strong className="text-gray-700">{parseFloat(emp.salario_hora).toFixed(2)} €</strong></span>
+                                        <span>Custo/h: <strong className="text-gray-900">{parseFloat(emp.salario_hora).toFixed(2)}€</strong></span>
                                     )}
                                     {emp.valor_hora_venda > 0 && (
-                                        <span>Venda/h: <strong className="text-gray-700">{parseFloat(emp.valor_hora_venda).toFixed(2)} €</strong></span>
+                                        <span>Venda/h: <strong className="text-gray-900">{parseFloat(emp.valor_hora_venda).toFixed(2)}€</strong></span>
                                     )}
                                     {emp.vale_moradia > 0 && (
-                                        <span>Moradia: <strong className="text-gray-700">{parseFloat(emp.vale_moradia).toLocaleString('de-DE', {minimumFractionDigits:2})} €</strong></span>
+                                        <span>Moradia: <strong className="text-gray-900">{parseFloat(emp.vale_moradia).toLocaleString('de-DE', {minimumFractionDigits:2})}€</strong></span>
                                     )}
                                 </div>
                             )}
+
+                            {/* Ações */}
+                            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-300">
+                                <button onClick={() => handleEdit(emp)}
+                                    data-tour={idx === 0 ? "edit-employee-btn" : undefined}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-gray-600 hover:bg-gray-100 transition-colors">
+                                    <IconEdit size={16} stroke={1} />
+                                </button>
+                                <button onClick={() => handleDelete(emp)}
+                                    data-tour={idx === 0 ? "delete-employee-btn" : undefined}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-red-500 hover:bg-red-50 transition-colors">
+                                    <IconTrash size={16} stroke={1} />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

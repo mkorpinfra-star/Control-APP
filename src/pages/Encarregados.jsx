@@ -149,9 +149,9 @@ export default function Encarregados() {
             {/* Lista - SCROLLÁVEL */}
             <div className="flex-1 overflow-y-auto pb-20" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
-                <div className="px-4 pt-4 space-y-3">
-                    {[1,2,3].map(i => (
-                        <div key={i} className="skeleton h-24 rounded-2xl"></div>
+                <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[1,2,3,4,5,6].map(i => (
+                        <div key={i} className="skeleton h-32 rounded-2xl"></div>
                     ))}
                 </div>
             ) : filteredEncarregados.length === 0 ? (
@@ -164,55 +164,56 @@ export default function Encarregados() {
                     </div>
                 </div>
             ) : (
-                <div className="px-4 pt-4 space-y-3">
+                <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filteredEncarregados.map((enc) => (
-                        <div key={enc.id} className="bg-[#F5F5F5] rounded-2xl p-4">
-                            <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">{enc.nome}</h3>
-                                    {enc.email && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                                            <IconMail size={14} className="shrink-0" stroke={1} />
-                                            <span className="truncate">{enc.email}</span>
-                                        </div>
-                                    )}
-                                    {enc.telefone && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                                            <IconPhone size={14} className="shrink-0" stroke={1} />
-                                            <span>{enc.telefone}</span>
-                                        </div>
-                                    )}
-                                    {enc.passaporte && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <IconCreditCard size={14} className="shrink-0" stroke={1} />
-                                            <span>{enc.passaporte}</span>
-                                        </div>
-                                    )}
+                        <div key={enc.id} className="bg-[#F5F5F5] rounded-2xl p-4 flex flex-col">
+                            {/* Header */}
+                            <div className="flex items-start gap-3 mb-3">
+                                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white text-gray-900 font-bold text-lg shrink-0">
+                                    {enc.nome?.charAt(0)?.toUpperCase()}
                                 </div>
-                                <div className="flex gap-2 shrink-0 ml-4">
-                                    <button
-                                        onClick={() => handleEdit(enc)}
-                                        className="w-10 h-10 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
-                                    >
-                                        <IconEdit size={18} stroke={1} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(enc.id, enc.nome)}
-                                        className="w-10 h-10 flex items-center justify-center bg-white text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                    >
-                                        <IconTrash size={18} stroke={1} />
-                                    </button>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="text-base font-bold text-gray-900 leading-tight">{enc.nome}</h3>
                                 </div>
                             </div>
 
-                            {enc.total_obras > 0 && (
-                                <div className="flex items-center gap-2 pt-3 border-t border-gray-200">
-                                    <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                                    <span className="text-sm font-medium text-gray-700">
-                                        {enc.total_obras} {enc.total_obras === 1 ? 'obra' : 'obras'} activa{enc.total_obras !== 1 ? 's' : ''}
-                                    </span>
-                                </div>
-                            )}
+                            {/* Informações */}
+                            <div className="flex-1 space-y-2 mb-4">
+                                {enc.email && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <IconMail size={14} className="shrink-0 text-gray-500" stroke={1} />
+                                        <span className="truncate">{enc.email}</span>
+                                    </div>
+                                )}
+                                {enc.telefone && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <IconPhone size={14} className="shrink-0 text-gray-500" stroke={1} />
+                                        <span>{enc.telefone}</span>
+                                    </div>
+                                )}
+                                {enc.passaporte && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <IconCreditCard size={14} className="shrink-0 text-gray-500" stroke={1} />
+                                        <span>{enc.passaporte}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Ações */}
+                            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-300">
+                                <button
+                                    onClick={() => handleEdit(enc)}
+                                    className="h-9 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    <IconEdit size={16} stroke={1} />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(enc.id, enc.nome)}
+                                    className="h-9 flex items-center justify-center bg-white text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                    <IconTrash size={16} stroke={1} />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

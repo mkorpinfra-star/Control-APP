@@ -1,0 +1,3 @@
+# Pasta para fotos de perfil dos usuários
+# As fotos são salvas aqui pelo endpoint upload-foto.php
+# Formato: user_{id}_{timestamp}.webp

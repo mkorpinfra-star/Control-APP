@@ -116,16 +116,9 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
         }
     };
 
-    const handleOverlayClick = (e) => {
-        if (e.target === e.currentTarget && !uploading && !required && onClose) {
-            stopCamera();
-            onClose();
-        }
-    };
-
     return (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={handleOverlayClick}>
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <h2 className="text-xl font-bold text-gray-900">
@@ -139,7 +132,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                             }}
                             className="w-10 h-10 rounded-full bg-[#F5F5F5] hover:bg-gray-200 flex items-center justify-center transition-colors"
                         >
-                            <X size={20} className="text-gray-700" />
+                            <IconX size={20} className="text-gray-700" />
                         </button>
                     )}
                 </div>
@@ -174,7 +167,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                         ) : preview ? (
                             <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                         ) : (
-                            <Camera size={48} className="text-gray-400" />
+                            <IconCamera size={48} className="text-gray-400" />
                         )}
                     </div>
 
@@ -186,17 +179,27 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                     {!showCamera && !preview && (
                         <div className="flex gap-3">
                             <button
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    fileInputRef.current?.click();
+                                }}
+                                type="button"
                                 className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#F5F5F5] hover:bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm transition-colors"
                             >
-                                <Upload size={18} />
+                                <IconUpload size={18} />
                                 Galeria
                             </button>
                             <button
-                                onClick={startCamera}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    startCamera();
+                                }}
+                                type="button"
                                 className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#CE0201] hover:bg-[#A00101] text-white rounded-xl font-semibold text-sm transition-colors"
                             >
-                                <Camera size={18} />
+                                <IconCamera size={18} />
                                 Cámara
                             </button>
                         </div>
@@ -205,16 +208,26 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                     {showCamera && (
                         <div className="flex gap-3">
                             <button
-                                onClick={stopCamera}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    stopCamera();
+                                }}
+                                type="button"
                                 className="flex-1 py-3 px-4 bg-[#F5F5F5] hover:bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
-                                onClick={capturePhoto}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    capturePhoto();
+                                }}
+                                type="button"
                                 className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#CE0201] hover:bg-[#A00101] text-white rounded-xl font-semibold text-sm transition-colors"
                             >
-                                <Camera size={18} />
+                                <IconCamera size={18} />
                                 Capturar
                             </button>
                         </div>
@@ -223,14 +236,24 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                     {preview && !showCamera && (
                         <div className="flex gap-3">
                             <button
-                                onClick={() => setPreview(null)}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setPreview(null);
+                                }}
+                                type="button"
                                 className="flex-1 py-3 px-4 bg-[#F5F5F5] hover:bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm transition-colors"
                                 disabled={uploading}
                             >
                                 Otra foto
                             </button>
                             <button
-                                onClick={uploadPhoto}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    uploadPhoto();
+                                }}
+                                type="button"
                                 className="flex-1 py-3 px-4 bg-[#CE0201] hover:bg-[#A00101] text-white rounded-xl font-semibold text-sm transition-colors disabled:opacity-50"
                                 disabled={uploading}
                             >
@@ -243,6 +266,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
+                        capture="environment"
                         onChange={handleFileSelect}
                         className="hidden"
                     />

@@ -108,9 +108,9 @@ export default function Clients() {
             {/* Content - SCROLLÁVEL */}
             <div className="flex-1 overflow-y-auto pb-20" style={{ WebkitOverflowScrolling: 'touch' }}>
             {loading ? (
-                <div className="px-4 pt-4 space-y-3">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-2xl"></div>
+                <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                        <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-2xl"></div>
                     ))}
                 </div>
             ) : filteredClients.length === 0 ? (
@@ -122,47 +122,51 @@ export default function Clients() {
                     <p className="text-gray-500 text-sm">{searchTerm ? 'Intenta con otra búsqueda' : 'Añade tu primer cliente'}</p>
                 </div>
             ) : (
-                <div className="px-4 pt-4 space-y-3">
+                <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filteredClients.map((client) => (
-                        <div key={client.id} className="bg-[#F5F5F5] rounded-2xl p-4">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gray-900 shrink-0">
-                                    <IconBuildingStore size={24} stroke={1} />
+                        <div key={client.id} className="bg-[#F5F5F5] rounded-2xl p-4 flex flex-col">
+                            {/* Header */}
+                            <div className="flex items-start gap-3 mb-3">
+                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-gray-900 shrink-0">
+                                    <IconBuildingStore size={22} stroke={1} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-gray-900 text-base">{client.nome}</h3>
-                                </div>
-                                <div className="flex gap-2 shrink-0">
-                                    <button onClick={() => handleEdit(client)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors">
-                                        <IconEdit size={16} />
-                                    </button>
-                                    <button onClick={() => handleDelete(client)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors">
-                                        <IconTrash size={16} />
-                                    </button>
+                                    <h3 className="font-bold text-gray-900 text-base leading-tight">{client.nome}</h3>
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
+                            {/* Informações */}
+                            <div className="flex-1 space-y-2 mb-4">
                                 {client.email && (
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <IconMail size={14} className="shrink-0" />
+                                        <IconMail size={14} className="shrink-0 text-gray-500" />
                                         <span className="truncate">{client.email}</span>
                                     </div>
                                 )}
                                 {client.telefone && (
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <IconPhone size={14} className="shrink-0" />
+                                        <IconPhone size={14} className="shrink-0 text-gray-500" />
                                         <span>{client.telefone}</span>
                                     </div>
                                 )}
                                 {client.endereco && (
                                     <div className="flex items-start gap-2 text-sm text-gray-600">
-                                        <IconMapPin size={14} className="shrink-0 mt-0.5" />
-                                        <span className="line-clamp-1">{client.endereco}</span>
+                                        <IconMapPin size={14} className="shrink-0 mt-0.5 text-gray-500" />
+                                        <span className="line-clamp-2">{client.endereco}</span>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Ações */}
+                            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-300">
+                                <button onClick={() => handleEdit(client)}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-gray-600 hover:bg-gray-100 transition-colors">
+                                    <IconEdit size={16} />
+                                </button>
+                                <button onClick={() => handleDelete(client)}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-red-500 hover:bg-red-50 transition-colors">
+                                    <IconTrash size={16} />
+                                </button>
                             </div>
                         </div>
                     ))}

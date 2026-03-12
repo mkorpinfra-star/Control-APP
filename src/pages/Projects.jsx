@@ -503,85 +503,77 @@ export default function Projects() {
                         <p className="text-gray-600">Verifica tu búsqueda o crea una nueva obra.</p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filteredProjects.map((project) => (
-                        <div key={project.id} className="bg-[#F5F5F5] rounded-2xl p-4">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gray-900 shrink-0">
-                                    <IconBriefcase stroke={1} size={24} />
+                        <div key={project.id} className="bg-[#F5F5F5] rounded-2xl p-4 flex flex-col">
+                            {/* Header */}
+                            <div className="flex items-start gap-3 mb-3">
+                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-gray-900 shrink-0">
+                                    <IconBriefcase stroke={1} size={22} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="inline-block px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
-                                            {project.numero}
-                                        </span>
-                                    </div>
-                                    <h3 className="font-semibold text-gray-900 text-base truncate">{project.nome}</h3>
-                                </div>
-                                <div className="flex gap-2 shrink-0">
-                                    <button
-                                        onClick={() => openAssignModal(project)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors"
-                                        title="Asignar personal"
-                                    >
-                                        <IconUsers stroke={1} size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => openResetModal(project)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors"
-                                        title="Resetear horas"
-                                    >
-                                        <IconEraser stroke={1} size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleEdit(project)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-gray-100 transition-colors"
-                                        title="Editar"
-                                    >
-                                        <IconEdit stroke={1} size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(project)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-50 transition-colors"
-                                        title="Eliminar"
-                                    >
-                                        <IconTrash stroke={1} size={16} />
-                                    </button>
+                                    <span className="inline-block px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-bold mb-2">
+                                        {project.numero}
+                                    </span>
+                                    <h3 className="font-bold text-gray-900 text-base leading-tight">
+                                        {project.nome}
+                                    </h3>
                                 </div>
                             </div>
 
-                            {/* Details */}
-                            <div className="space-y-1.5">
-                                {project.cliente_nome && (
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <IconBuildingFactory2 stroke={1} size={14} className="shrink-0" />
-                                        <span className="truncate">{project.cliente_nome}</span>
-                                    </div>
-                                )}
-                                {project.encarregado_nome && (
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <div className="w-5 h-5 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">
-                                            {project.encarregado_nome.charAt(0)}
+                            {/* Localização */}
+                            <div className="flex-1 mb-4">
+                                <div className="flex items-start gap-2 text-sm text-gray-600">
+                                    <IconMapPin stroke={1} size={16} className="mt-0.5 shrink-0 text-gray-500" />
+                                    <div className="flex-1">
+                                        {project.endereco && (
+                                            <div className="font-medium text-gray-700 mb-0.5">
+                                                {project.endereco.split(',')[0]}
+                                            </div>
+                                        )}
+                                        <div className="text-sm text-gray-500">
+                                            {PAISES_FLAGS[project.pais] || '🏳️'} {project.pais || 'País no definido'}
                                         </div>
-                                        <span className="truncate">{project.encarregado_nome}</span>
                                     </div>
-                                )}
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <IconUsers stroke={1} size={14} className="shrink-0" />
-                                    <span>{project.funcionarios_count || 0} asignados</span>
                                 </div>
-                                {project.endereco && (
-                                    <div className="flex items-start gap-2 text-sm text-gray-600">
-                                        <IconMapPin stroke={1} size={14} className="mt-0.5 shrink-0" />
-                                        <span className="line-clamp-1">{project.endereco}</span>
-                                    </div>
-                                )}
-                                {project.email_financeiro && (
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <IconMail stroke={1} size={14} className="shrink-0" />
-                                        <span className="truncate">{project.email_financeiro}</span>
-                                    </div>
-                                )}
+                            </div>
+
+                            {/* Funcionários */}
+                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4 pb-4 border-b border-gray-300">
+                                <IconUsers stroke={1} size={16} className="shrink-0 text-gray-500" />
+                                <span className="font-medium">{project.funcionarios_count || 0} asignados</span>
+                            </div>
+
+                            {/* Ações */}
+                            <div className="grid grid-cols-4 gap-2">
+                                <button
+                                    onClick={() => openAssignModal(project)}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-gray-600 hover:bg-gray-100 transition-colors"
+                                    title="Asignar personal"
+                                >
+                                    <IconUsers stroke={1} size={16} />
+                                </button>
+                                <button
+                                    onClick={() => openResetModal(project)}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-gray-600 hover:bg-gray-100 transition-colors"
+                                    title="Resetear horas"
+                                >
+                                    <IconEraser stroke={1} size={16} />
+                                </button>
+                                <button
+                                    onClick={() => handleEdit(project)}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-gray-600 hover:bg-gray-100 transition-colors"
+                                    title="Editar"
+                                >
+                                    <IconEdit stroke={1} size={16} />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(project)}
+                                    className="h-9 flex items-center justify-center rounded-lg bg-white text-red-500 hover:bg-red-50 transition-colors"
+                                    title="Eliminar"
+                                >
+                                    <IconTrash stroke={1} size={16} />
+                                </button>
                             </div>
                         </div>
                     ))}

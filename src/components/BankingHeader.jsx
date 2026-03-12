@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { IconLogout } from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
+import Avatar from './Avatar';
 
 export default function BankingHeader() {
   const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [imageError, setImageError] = useState(false);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -42,23 +42,9 @@ export default function BankingHeader() {
                 onClick={() => setShowProfileMenu(true)}
                 className="relative group"
               >
-                {user?.foto_url && user.foto_url.trim() !== '' && !imageError ? (
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all">
-                    <img
-                      src={`https://j2s.ad${user.foto_url}`}
-                      alt={user?.nome}
-                      className="w-full h-full object-cover"
-                      onError={() => setImageError(true)}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 group-hover:border-white/50 transition-all">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                  </div>
-                )}
+                <div className="border-2 border-white/30 group-hover:border-white/50 transition-all rounded-full">
+                  <Avatar user={user} size="md" className="!bg-white/20 !text-white" />
+                </div>
                 {/* Bolinha de notificação branca */}
                 <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-white rounded-full border-2 border-[#CE0201]"></div>
               </button>

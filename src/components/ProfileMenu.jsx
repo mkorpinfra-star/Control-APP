@@ -4,7 +4,7 @@ import { IconUser, IconLock, IconCamera, IconWorld, IconInfoCircle, IconLogout, 
 import PhotoUpload from './PhotoUpload';
 
 export default function ProfileMenu({ isOpen, onClose }) {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const menuRef = useRef(null);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -19,6 +19,9 @@ export default function ProfileMenu({ isOpen, onClose }) {
   // Fechar ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Não fechar se o PhotoUpload modal estiver aberto
+      if (showPhotoUpload) return;
+
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         onClose();
       }
@@ -28,11 +31,14 @@ export default function ProfileMenu({ isOpen, onClose }) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, showPhotoUpload]);
 
   // Fechar ao pressionar ESC
   useEffect(() => {
     const handleEsc = (event) => {
+      // Não fechar se o PhotoUpload modal estiver aberto
+      if (showPhotoUpload) return;
+
       if (event.key === 'Escape') onClose();
     };
 
@@ -40,7 +46,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
       document.addEventListener('keydown', handleEsc);
       return () => document.removeEventListener('keydown', handleEsc);
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, showPhotoUpload]);
 
   const getUserInitials = () => {
     if (!user?.nome) return 'U';
@@ -139,7 +145,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             {user?.foto_url && user.foto_url.trim() !== '' && !imageError ? (
               <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/30">
                 <img
-                  src={`https://j2s.ad${user.foto_url}`}
+                  src={`https://puntotouch.nextim.io${user.foto_url}`}
                   alt={user?.nome}
                   onError={() => setImageError(true)}
                   className="w-full h-full object-cover"
@@ -295,9 +301,9 @@ export default function ProfileMenu({ isOpen, onClose }) {
         <PhotoUpload
           user={user}
           onPhotoUpdated={(url) => {
+            updateUser({ foto_url: url });
             setShowPhotoUpload(false);
-            // Atualizar foto no estado local se necessário
-            window.location.reload(); // Recarrega para mostrar nova foto
+            setImageError(false);
           }}
           onClose={() => setShowPhotoUpload(false)}
           required={false}

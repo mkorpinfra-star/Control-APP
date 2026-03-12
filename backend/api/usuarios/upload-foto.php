@@ -119,7 +119,7 @@ try {
     imagedestroy($thumb);
 
     // URL para acesso
-    $fotoUrl = '/login/backend/uploads/fotos/' . $filename;
+    $fotoUrl = '/backend/uploads/fotos/' . $filename;
 
     // Atualizar no banco (com filtro de tenant)
     $stmt = $pdo->prepare("UPDATE usuarios SET foto_url = ? WHERE id = ? AND tenant_id = ?");

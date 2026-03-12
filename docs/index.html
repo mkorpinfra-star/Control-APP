@@ -32,6 +32,19 @@
             position: fixed;
             height: 100vh;
             overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        /* Mobile: sidebar escondida por padrão */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
         }
 
         .logo {
@@ -96,6 +109,54 @@
             max-width: 1200px;
         }
 
+        /* Mobile: content ocupa tela toda */
+        @media (max-width: 768px) {
+            .content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+        }
+
+        /* Botão hamburguer mobile */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: #CE0201;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* Overlay mobile */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-overlay.active {
+                display: block;
+            }
+        }
+
         .section {
             display: none;
             animation: fadeIn 0.3s;
@@ -117,6 +178,12 @@
             margin-bottom: 1rem;
         }
 
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+
         h3 {
             font-size: 1.5rem;
             font-weight: 700;
@@ -127,12 +194,25 @@
             border-bottom: 2px solid #e5e7eb;
         }
 
+        @media (max-width: 768px) {
+            h3 {
+                font-size: 1.25rem;
+                margin-top: 1.5rem;
+            }
+        }
+
         h4 {
             font-size: 1.125rem;
             font-weight: 600;
             color: #374151;
             margin-top: 1.5rem;
             margin-bottom: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            h4 {
+                font-size: 1rem;
+            }
         }
 
         p {
@@ -225,12 +305,26 @@
             border-collapse: collapse;
             margin-bottom: 1.5rem;
             background: white;
+            display: block;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                font-size: 0.875rem;
+            }
         }
 
         th, td {
             padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            th, td {
+                padding: 0.5rem;
+            }
         }
 
         th {
@@ -266,9 +360,19 @@
     </style>
 </head>
 <body>
+    <!-- Botão Menu Mobile -->
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+    </button>
+
+    <!-- Overlay Mobile -->
+    <div class="mobile-overlay" onclick="closeMobileMenu()"></div>
+
     <div class="container">
         <!-- Sidebar -->
-        <nav class="sidebar">
+        <nav class="sidebar" id="sidebar">
             <div class="logo">
                 <h1>PuntoTouch</h1>
                 <p>Documentação Técnica</p>
@@ -1376,6 +1480,25 @@ https://puntotouch.nextim.io/approve/abc123def456...
 
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Fechar menu mobile ao clicar em item
+            if (window.innerWidth <= 768) {
+                closeMobileMenu();
+            }
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
         }
     </script>
 </body>

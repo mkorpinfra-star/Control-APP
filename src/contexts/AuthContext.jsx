@@ -60,12 +60,19 @@ export function AuthProvider({ children }) {
         setUser(null);
     };
 
+    const updateUser = (updates) => {
+        const updatedUser = { ...user, ...updates };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+    };
+
     const value = {
         user,
         token,
         loading,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!token,
         isEmployee: user?.tipo === 'funcionario',
         isSupervisor: user?.tipo === 'encarregado',

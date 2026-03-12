@@ -109,7 +109,9 @@
       "Bash(npx cap sync)",
       "Bash(powershell -Command \"(Get-Content Encarregados.jsx).Count\")",
       "Bash(powershell -Command \"(Get-Content login-central.php).Count\")",
-      "Bash(powershell -Command \"Select-String -Path Encarregados.jsx -Pattern ''Gestión|header|return'' -Context 0,3 | Select-Object -First 20\")"
+      "Bash(powershell -Command \"Select-String -Path Encarregados.jsx -Pattern ''Gestión|header|return'' -Context 0,3 | Select-Object -First 20\")",
+      "Bash(cp -r docs dist/)",
+      "Bash(cat .env.production)"
     ],
     "deny": [],
     "ask": []
