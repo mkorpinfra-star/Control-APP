@@ -85,22 +85,38 @@ try {
         exit;
     }
 
+    // Buscar obra do funcionário
+    $stmt = $pdo->prepare("
+        SELECT o.nome as obra_nome, o.numero as obra_numero
+        FROM funcionario_obra fo
+        INNER JOIN obras o ON o.id = fo.obra_id AND o.tenant_id = ?
+        WHERE fo.funcionario_id = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$tenant_id, $funcionario_id]);
+    $obra = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $obraInfo = '';
+    if ($obra) {
+        $obraInfo = ' de la obra *' . $obra['obra_numero'] . ' - ' . $obra['obra_nome'] . '*';
+    }
+
     // Definir mensagens baseado no tipo
     $mensagens = [
         'pendente' => [
             'titulo' => 'Registro de Horas Pendiente',
-            'corpo' => 'No has registrado tus horas hoy. Por favor, marca tu punto.',
-            'whatsapp' => 'Hola ' . $funcionario['nome'] . ', no has registrado tus horas hoy. Por favor, marca tu punto en la aplicación.'
+            'corpo' => 'No has registrado tus horas hoy' . str_replace('*', '', $obraInfo) . '.',
+            'whatsapp' => "🕒 *Control de Horas - Registro Pendiente*\n\nHola *" . $funcionario['nome'] . "*,\n\nNo has registrado tus horas de trabajo hoy" . $obraInfo . ".\n\nPor favor, accede a la aplicación y marca tu punto lo antes posible.\n\n_Mensaje automático del sistema de control de horas._"
         ],
         'incompleto' => [
             'titulo' => 'Registro Incompleto',
-            'corpo' => 'Tu registro de horas está incompleto. Por favor, completa y envía.',
-            'whatsapp' => 'Hola ' . $funcionario['nome'] . ', tu registro de horas está incompleto. Por favor, completa y envía para aprobación.'
+            'corpo' => 'Tu registro de horas' . str_replace('*', '', $obraInfo) . ' está incompleto.',
+            'whatsapp' => "⚠️ *Control de Horas - Registro Incompleto*\n\nHola *" . $funcionario['nome'] . "*,\n\nTu registro de horas" . $obraInfo . " está incompleto.\n\nPor favor, completa todos los campos y envía para aprobación.\n\n_Mensaje automático del sistema de control de horas._"
         ],
         'rejeitado' => [
             'titulo' => 'Registro Rechazado',
-            'corpo' => 'Tu registro de horas fue rechazado. Revisa y corrige.',
-            'whatsapp' => 'Hola ' . $funcionario['nome'] . ', tu registro de horas fue rechazado. Por favor, revisa las observaciones y corrige.'
+            'corpo' => 'Tu registro de horas' . str_replace('*', '', $obraInfo) . ' fue rechazado.',
+            'whatsapp' => "❌ *Control de Horas - Registro Rechazado*\n\nHola *" . $funcionario['nome'] . "*,\n\nTu registro de horas" . $obraInfo . " fue rechazado.\n\nPor favor, revisa las observaciones del encargado y corrige la información.\n\n_Mensaje automático del sistema de control de horas._"
         ]
     ];
 

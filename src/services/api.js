@@ -215,7 +215,7 @@ export const configService = {
 // Objeto simplificado para uso nas páginas de gestão
 export const api = {
     // Employees (todos os tipos de usuário)
-    getEmployees: () => usuariosService.getAll(),
+    getEmployees: () => usuariosService.getAll('funcionario'),
     createEmployee: (data) => usuariosService.create(data),
     updateEmployee: (id, data) => usuariosService.update(id, data),
     deleteEmployee: (id) => usuariosService.delete(id),

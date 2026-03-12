@@ -55,39 +55,33 @@ try {
     $tableExists = $stmt->rowCount() > 0;
 
     if (!$tableExists) {
-        // Tabela não existe ainda - retornar array vazio
-        echo json_encode([
-            'success' => true,
-            'notificacoes' => [],
-            'info' => 'Tabela notificacoes ainda não foi criada. Execute database/create_notificacoes_table.sql'
-        ]);
+        echo json_encode(['success' => true, 'notificacoes' => []]);
         exit;
     }
 
-    // Verificar se a coluna lida_em existe
+    // Verificar quais colunas existem
     $stmt = $pdo->query("SHOW COLUMNS FROM notificacoes LIKE 'lida_em'");
-    $columnExists = $stmt->rowCount() > 0;
+    $lidaEmExists = $stmt->rowCount() > 0;
 
-    // Montar query baseado nas colunas disponíveis
-    if ($columnExists) {
-        $sql = "SELECT id, tipo, titulo, mensagem, lida, lida_em, criado_em FROM notificacoes WHERE usuario_id = ? AND tenant_id = ? ORDER BY criado_em DESC LIMIT 50";
-    } else {
-        $sql = "SELECT id, tipo, titulo, mensagem, lida, criado_em FROM notificacoes WHERE usuario_id = ? AND tenant_id = ? ORDER BY criado_em DESC LIMIT 50";
-    }
+    $stmt = $pdo->query("SHOW COLUMNS FROM notificacoes LIKE 'criado_em'");
+    $criadoEmExists = $stmt->rowCount() > 0;
+
+    // Montar query
+    $selectFields = "id, tipo, titulo, mensagem, lida";
+    if ($lidaEmExists) $selectFields .= ", lida_em";
+    if ($criadoEmExists) $selectFields .= ", criado_em";
+
+    $orderBy = $criadoEmExists ? "ORDER BY criado_em DESC" : "ORDER BY id DESC";
+
+    $sql = "SELECT {$selectFields} FROM notificacoes WHERE usuario_id = ? AND tenant_id = ? {$orderBy} LIMIT 50";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$user_id, $tenant_id]);
     $notificacoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode([
-        'success' => true,
-        'notificacoes' => $notificacoes
-    ]);
+    echo json_encode(['success' => true, 'notificacoes' => $notificacoes]);
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Server error: ' . $e->getMessage()
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
 }

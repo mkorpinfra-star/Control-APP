@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { IconClock, IconAlertCircle, IconCheck, IconSend, IconBrandWhatsapp, IconBell, IconRefresh } from '@tabler/icons-react';
+import { IconClock, IconAlertCircle, IconCheck, IconSend, IconBrandWhatsapp, IconBell, IconRefresh, IconSpeakerphone } from '@tabler/icons-react';
 
 export default function Monitoramento() {
     const [apontamentos, setApontamentos] = useState([]);
@@ -7,6 +7,8 @@ export default function Monitoramento() {
     const [loading, setLoading] = useState(true);
     const [autoRefresh, setAutoRefresh] = useState(true);
     const [notifying, setNotifying] = useState(null);
+    const [broadcastMessage, setBroadcastMessage] = useState('');
+    const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
     useEffect(() => {
         loadMonitoramento();
@@ -50,7 +52,7 @@ export default function Monitoramento() {
                 },
                 body: JSON.stringify({
                     funcionario_id: funcionarioId,
-                    tipo: tipo // 'pendente', 'incompleto', 'erro'
+                    tipo: tipo
                 })
             });
 
@@ -67,6 +69,39 @@ export default function Monitoramento() {
             alert('Erro ao enviar notificações');
         } finally {
             setNotifying(null);
+        }
+    };
+
+    const enviarBroadcast = async () => {
+        if (!broadcastMessage.trim()) {
+            alert('Digite uma mensagem antes de enviar');
+            return;
+        }
+        if (!confirm('Enviar notificação para TODOS os usuários (Admins, Encargados e Empleados)?')) {
+            return;
+        }
+        try {
+            setSendingBroadcast(true);
+            const res = await fetch('https://puntotouch.nextim.io/backend/api/monitoramento/broadcast.php', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mensagem: broadcastMessage })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`Notificação enviada com sucesso para ${data.total_enviados} usuários!`);
+                setBroadcastMessage('');
+            } else {
+                alert('Erro ao enviar broadcast: ' + (data.message || 'Erro desconhecido'));
+            }
+        } catch (err) {
+            console.error('Erro ao enviar broadcast:', err);
+            alert('Erro ao enviar broadcast');
+        } finally {
+            setSendingBroadcast(false);
         }
     };
 
@@ -270,6 +305,52 @@ export default function Monitoramento() {
                         </div>
                     </div>
                 )}
+
+                {/* BROADCAST - Enviar notificação para todos */}
+                <div className="mt-8 pt-6 border-t-2 border-gray-300">
+                    <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                                <IconSpeakerphone size={24} className="text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">Enviar Aviso General</h2>
+                                <p className="text-sm text-gray-600">Notificación para todos (Admins, Encargados y Empleados)</p>
+                            </div>
+                        </div>
+
+                        <textarea
+                            value={broadcastMessage}
+                            onChange={(e) => setBroadcastMessage(e.target.value)}
+                            placeholder="Escriba el mensaje que desea enviar a todos los usuarios..."
+                            className="w-full h-24 px-4 py-3 border-2 border-gray-300 rounded-lg resize-none focus:outline-none focus:border-red-500 text-sm"
+                            disabled={sendingBroadcast}
+                        />
+
+                        <div className="mt-4 flex items-center justify-between">
+                            <p className="text-xs text-gray-600">
+                                <strong>Importante:</strong> Este mensaje será enviado como notificación push a todos los usuarios activos.
+                            </p>
+                            <button
+                                onClick={enviarBroadcast}
+                                disabled={sendingBroadcast || !broadcastMessage.trim()}
+                                className="h-11 px-6 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+                            >
+                                {sendingBroadcast ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Enviando...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <IconSend size={18} />
+                                        <span>Enviar a Todos</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
