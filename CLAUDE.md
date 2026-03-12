@@ -11,6 +11,22 @@ Se houver dúvida → perguntar antes de agir.
 
 ---
 
+
+🛠️ Soluções que realmente funcionam
+1️⃣ Usar caminhos relativos
+
+Esse é um dos fixes mais citados.
+
+❌ errado
+
+C:\Users\guilherme\project\file.js
+
+✅ certo
+
+project/file.js
+
+Ou seja: rodar tudo dentro da pasta do projeto.
+
 ## 🚨 REGRA DE CONFORMIDADE TOTAL (LEITURA OBRIGATÓRIA)
 
 Antes de iniciar QUALQUER tarefa, a IA deve:

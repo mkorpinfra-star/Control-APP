@@ -5,6 +5,9 @@ import './TourGuide.css';
 
 export default function TourGuide() {
   useEffect(() => {
+    // TOUR DESATIVADO TEMPORARIAMENTE
+    return;
+
     // Tour aparece SEMPRE (removido localStorage)
     // Delay para garantir que elementos estão renderizados
     const timeout = setTimeout(() => {

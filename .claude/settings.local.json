@@ -1,14 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(powershell -Command \"Get-Content src/pages/Monitoramento.jsx | Select-Object -First 15\")",
-      "Bash(del srcpagesMonitoramento_temp.jsx)",
       "Bash(npm run build)",
-      "Bash(npm install --save-dev puppeteer)",
-      "Bash(node scripts/capture-screenshots.js)",
       "Bash(node scripts/capture-screenshots.cjs)"
-    ],
-    "deny": [],
-    "ask": []
+    ]
+  },
+  "diffEditor.maxComputationTime": 0,
+  "diffEditor.largeDiffThreshold": 0,
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {},
+  "[javascript][jsx]": {
+    "editor.formatOnSave": false
   }
 }

@@ -214,11 +214,17 @@ export const configService = {
 // ==================== API UNIFICADA ====================
 // Objeto simplificado para uso nas páginas de gestão
 export const api = {
-    // Employees (todos os tipos de usuário)
+    // Employees (apenas funcionários)
     getEmployees: () => usuariosService.getAll('funcionario'),
     createEmployee: (data) => usuariosService.create(data),
     updateEmployee: (id, data) => usuariosService.update(id, data),
     deleteEmployee: (id) => usuariosService.delete(id),
+
+    // Administradores (apenas administradores)
+    getAdministrators: () => usuariosService.getAll('administrador'),
+    createAdministrator: (data) => usuariosService.create(data),
+    updateAdministrator: (id, data) => usuariosService.update(id, data),
+    deleteAdministrator: (id) => usuariosService.delete(id),
 
     // Projects
     getProjects: () => obrasService.getAll(),

@@ -22,7 +22,7 @@ export default function Administradores() {
     const [editingAdmin, setEditingAdmin] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [formData, setFormData] = useState({
-        nome: '', email: '', telefone: '', passaporte: '', senha: '', tipo: 'admin'
+        nome: '', email: '', telefone: '', passaporte: '', senha: '', tipo: 'administrador'
     });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -52,7 +52,7 @@ export default function Administradores() {
     const loadAdministradores = async () => {
         try {
             setLoading(true);
-            const response = await usuariosService.getAll('admin');
+            const response = await usuariosService.getAll('administrador');
             setAdministradores(response.usuarios || []);
         } catch (err) {
             console.error('Error loading administradores:', err);
@@ -64,7 +64,7 @@ export default function Administradores() {
 
     const handleAdd = () => {
         setEditingAdmin(null);
-        setFormData({ nome: '', email: '', telefone: '', passaporte: '', senha: '', tipo: 'admin' });
+        setFormData({ nome: '', email: '', telefone: '', passaporte: '', senha: '', tipo: 'administrador' });
         setError('');
         setShowModal(true);
     };
@@ -77,7 +77,7 @@ export default function Administradores() {
             telefone: admin.telefone || '',
             passaporte: admin.passaporte || '',
             senha: '', // nunca preencher senha no edit
-            tipo: 'admin'
+            tipo: 'administrador'
         });
         setError('');
         setShowModal(true);
@@ -101,8 +101,8 @@ export default function Administradores() {
 
             setSaving(true);
 
-            // Garantir que tipo seja sempre 'admin'
-            const dataToSend = { ...formData, tipo: 'admin' };
+            // Garantir que tipo seja sempre 'administrador'
+            const dataToSend = { ...formData, tipo: 'administrador' };
 
             if (editingAdmin) {
                 await usuariosService.update(editingAdmin.id, dataToSend);

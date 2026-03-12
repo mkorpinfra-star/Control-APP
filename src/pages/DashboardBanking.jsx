@@ -213,7 +213,9 @@ export default function DashboardBanking() {
   };
 
   const formatTimeAgo = (created_at) => {
+    if (!created_at) return '—';
     const date = new Date(created_at);
+    if (isNaN(date.getTime())) return '—';
     const now = new Date();
     const diffMs = now - date;
     const diffMins = Math.floor(diffMs / 60000);
@@ -341,7 +343,7 @@ export default function DashboardBanking() {
                           {notif.titulo}
                         </p>
                         <span className="text-xs text-gray-500 shrink-0">
-                          {formatTimeAgo(notif.created_at)}
+                          {formatTimeAgo(notif.criado_em)}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 line-clamp-2">

@@ -66,14 +66,46 @@ try {
     $stmt = $pdo->query("SHOW COLUMNS FROM notificacoes LIKE 'criado_em'");
     $criadoEmExists = $stmt->rowCount() > 0;
 
+    $stmt = $pdo->query("SHOW COLUMNS FROM notificacoes LIKE 'created_at'");
+    $createdAtExists = $stmt->rowCount() > 0;
+
+    // Auto-delete: manter apenas as 6 mais recentes por usuário
+    if ($criadoEmExists) {
+        $pdo->exec("
+            DELETE FROM notificacoes
+            WHERE id NOT IN (
+                SELECT id FROM (
+                    SELECT id FROM notificacoes
+                    WHERE usuario_id = {$user_id} AND tenant_id = {$tenant_id}
+                    ORDER BY criado_em DESC
+                    LIMIT 6
+                ) as keep_recent
+            ) AND usuario_id = {$user_id} AND tenant_id = {$tenant_id}
+        ");
+    } elseif ($createdAtExists) {
+        $pdo->exec("
+            DELETE FROM notificacoes
+            WHERE id NOT IN (
+                SELECT id FROM (
+                    SELECT id FROM notificacoes
+                    WHERE usuario_id = {$user_id} AND tenant_id = {$tenant_id}
+                    ORDER BY created_at DESC
+                    LIMIT 6
+                ) as keep_recent
+            ) AND usuario_id = {$user_id} AND tenant_id = {$tenant_id}
+        ");
+    }
+
     // Montar query
     $selectFields = "id, tipo, titulo, mensagem, lida";
     if ($lidaEmExists) $selectFields .= ", lida_em";
     if ($criadoEmExists) $selectFields .= ", criado_em";
+    elseif ($createdAtExists) $selectFields .= ", created_at as criado_em";
 
-    $orderBy = $criadoEmExists ? "ORDER BY criado_em DESC" : "ORDER BY id DESC";
+    $orderBy = $criadoEmExists ? "ORDER BY criado_em DESC" :
+               ($createdAtExists ? "ORDER BY created_at DESC" : "ORDER BY id DESC");
 
-    $sql = "SELECT {$selectFields} FROM notificacoes WHERE usuario_id = ? AND tenant_id = ? {$orderBy} LIMIT 50";
+    $sql = "SELECT {$selectFields} FROM notificacoes WHERE usuario_id = ? AND tenant_id = ? {$orderBy} LIMIT 6";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$user_id, $tenant_id]);
