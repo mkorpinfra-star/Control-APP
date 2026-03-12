@@ -53,7 +53,8 @@ export default function Administradores() {
         try {
             setLoading(true);
             const response = await usuariosService.getAll('admin');
-            setAdministradores(response.usuarios || []);
+            // Backend retorna array direto, não objeto com .usuarios
+            setAdministradores(Array.isArray(response) ? response : []);
         } catch (err) {
             console.error('Error loading administradores:', err);
             setAdministradores([]);

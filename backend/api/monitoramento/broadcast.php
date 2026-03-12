@@ -79,8 +79,8 @@ try {
     foreach ($usuarios as $usuario) {
         // 1. Criar notificação in-app
         $stmt = $pdo->prepare("
-            INSERT INTO notificacoes (usuario_id, tenant_id, tipo, titulo, mensagem, lida, criado_em)
-            VALUES (?, ?, 'broadcast', ?, ?, 0, NOW())
+            INSERT INTO notificacoes (usuario_id, tenant_id, tipo, titulo, mensagem, lida)
+            VALUES (?, ?, 'geral', ?, ?, 0)
         ");
         $stmt->execute([
             $usuario['id'],

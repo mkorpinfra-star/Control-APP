@@ -124,8 +124,8 @@ try {
 
     // 1. CRIAR NOTIFICAÇÃO IN-APP
     $stmt = $pdo->prepare("
-        INSERT INTO notificacoes (usuario_id, tenant_id, tipo, titulo, mensagem, lida, criado_em)
-        VALUES (?, ?, ?, ?, ?, 0, NOW())
+        INSERT INTO notificacoes (usuario_id, tenant_id, tipo, titulo, mensagem, lida)
+        VALUES (?, ?, ?, ?, ?, 0)
     ");
     $stmt->execute([
         $funcionario_id,

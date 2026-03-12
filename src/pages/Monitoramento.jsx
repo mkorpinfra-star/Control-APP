@@ -9,6 +9,8 @@ export default function Monitoramento() {
     const [notifying, setNotifying] = useState(null);
     const [broadcastMessage, setBroadcastMessage] = useState('');
     const [sendingBroadcast, setSendingBroadcast] = useState(false);
+    const [notificationModal, setNotificationModal] = useState(null);
+    const [confirmBroadcast, setConfirmBroadcast] = useState(false);
 
     useEffect(() => {
         loadMonitoramento();
@@ -59,27 +61,42 @@ export default function Monitoramento() {
             const data = await res.json();
 
             if (data.success) {
-                alert('Notificações enviadas com sucesso! (Push, In-App e WhatsApp)');
+                setNotificationModal({
+                    success: true,
+                    funcionario: data.funcionario?.nome || 'Funcionário',
+                    notificacoes: data.notificacoes
+                });
                 loadMonitoramento();
             } else {
-                alert('Erro ao enviar notificações: ' + (data.message || 'Erro desconhecido'));
+                setNotificationModal({
+                    success: false,
+                    error: data.message || 'Erro desconhecido'
+                });
             }
         } catch (err) {
             console.error('Erro ao notificar:', err);
-            alert('Erro ao enviar notificações');
+            setNotificationModal({
+                success: false,
+                error: err.message || 'Erro ao enviar notificações'
+            });
         } finally {
             setNotifying(null);
         }
     };
 
-    const enviarBroadcast = async () => {
+    const handleBroadcastClick = () => {
         if (!broadcastMessage.trim()) {
-            alert('Digite uma mensagem antes de enviar');
+            setNotificationModal({
+                success: false,
+                error: 'Digite uma mensagem antes de enviar'
+            });
             return;
         }
-        if (!confirm('Enviar notificação para TODOS os usuários (Admins, Encargados e Empleados)?')) {
-            return;
-        }
+        setConfirmBroadcast(true);
+    };
+
+    const enviarBroadcast = async () => {
+        setConfirmBroadcast(false);
         try {
             setSendingBroadcast(true);
             const res = await fetch('https://puntotouch.nextim.io/backend/api/monitoramento/broadcast.php', {
@@ -92,14 +109,24 @@ export default function Monitoramento() {
             });
             const data = await res.json();
             if (data.success) {
-                alert(`Notificação enviada com sucesso para ${data.total_enviados} usuários!`);
+                setNotificationModal({
+                    success: true,
+                    broadcast: true,
+                    total: data.total_enviados
+                });
                 setBroadcastMessage('');
             } else {
-                alert('Erro ao enviar broadcast: ' + (data.message || 'Erro desconhecido'));
+                setNotificationModal({
+                    success: false,
+                    error: data.message || 'Erro desconhecido'
+                });
             }
         } catch (err) {
             console.error('Erro ao enviar broadcast:', err);
-            alert('Erro ao enviar broadcast');
+            setNotificationModal({
+                success: false,
+                error: err.message || 'Erro ao enviar broadcast'
+            });
         } finally {
             setSendingBroadcast(false);
         }
@@ -327,14 +354,14 @@ export default function Monitoramento() {
                             disabled={sendingBroadcast}
                         />
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <p className="text-xs text-gray-600">
-                                <strong>Importante:</strong> Este mensaje será enviado como notificación push a todos los usuarios activos.
-                            </p>
+                        <p className="mt-3 text-xs text-gray-600">
+                            <strong>Importante:</strong> Este mensaje será enviado como notificación push a todos los usuarios activos.
+                        </p>
+                        <div className="mt-3 flex justify-end">
                             <button
-                                onClick={enviarBroadcast}
+                                onClick={handleBroadcastClick}
                                 disabled={sendingBroadcast || !broadcastMessage.trim()}
-                                className="h-11 px-6 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+                                className="h-11 px-6 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold whitespace-nowrap"
                             >
                                 {sendingBroadcast ? (
                                     <>
@@ -352,6 +379,88 @@ export default function Monitoramento() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de Confirmação de Broadcast */}
+            {confirmBroadcast && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                        <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <IconAlertCircle size={32} className="text-orange-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+                            Confirmar Envio
+                        </h3>
+                        <p className="text-center text-gray-600 mb-6">
+                            Deseja enviar esta notificação para <strong>TODOS os usuários</strong> (Admins, Encargados e Empleados)?
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setConfirmBroadcast(false)}
+                                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={enviarBroadcast}
+                                className="flex-1 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                            >
+                                Enviar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Resultado de Notificações */}
+            {notificationModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setNotificationModal(null)}>
+                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        {notificationModal.success ? (
+                            <>
+                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <IconCheck size={32} className="text-green-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+                                    {notificationModal.broadcast ? 'Broadcast Enviado!' : 'Notificações Enviadas!'}
+                                </h3>
+                                {notificationModal.broadcast ? (
+                                    <p className="text-center text-gray-600 mb-6">
+                                        Notificação enviada para <strong>{notificationModal.total} usuários</strong>
+                                    </p>
+                                ) : (
+                                    <p className="text-center text-gray-600 mb-6">
+                                        Notificación enviada a <strong>{notificationModal.funcionario}</strong>
+                                    </p>
+                                )}
+                                <button
+                                    onClick={() => setNotificationModal(null)}
+                                    className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                                >
+                                    Entendi
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <IconAlertCircle size={32} className="text-red-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+                                    Erro ao Enviar
+                                </h3>
+                                <p className="text-center text-gray-600 mb-6">
+                                    {notificationModal.error}
+                                </p>
+                                <button
+                                    onClick={() => setNotificationModal(null)}
+                                    className="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                                >
+                                    Fechar
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
