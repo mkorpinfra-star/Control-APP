@@ -56,6 +56,7 @@ try {
                o.cliente_id, o.encarregado_id,
                o.ativa,
                o.pais,
+               o.permite_hora_extra, o.permite_hora_noturna,
                o.fatura_hora_normal, o.fatura_hora_extra, o.fatura_hora_noturna,
                o.multiplicador_extra, o.multiplicador_noturna,
                o.imposto_igi, o.imposto_cas_funcionario, o.imposto_cas_empresa, o.imposto_irpc,

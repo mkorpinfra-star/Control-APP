@@ -50,6 +50,7 @@ if (!$checkStmt->fetch()) {
 try {
     $stmt = $pdo->prepare("
         SELECT o.id, o.numero, o.nome, o.endereco, o.ativa, o.data_inicio, o.data_fim,
+               o.permite_hora_extra, o.permite_hora_noturna,
                c.nome as cliente_nome,
                e.nome as encarregado_nome
         FROM obras o

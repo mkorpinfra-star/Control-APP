@@ -17,6 +17,8 @@ import Projects from '../pages/Projects';
 import Clients from '../pages/Clients';
 import Employees from '../pages/Employees';
 import Encarregados from '../pages/Encarregados';
+import Administradores from '../pages/Administradores';
+import Monitoramento from '../pages/Monitoramento';
 import Payroll from '../pages/Payroll';
 import Billing from '../pages/Billing';
 import Analytics from '../pages/Analytics';
@@ -97,6 +99,8 @@ export default function TenantRoutes() {
         <Route path="/approvals" element={<Approvals />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/encarregados" element={<Encarregados />} />
+        <Route path="/administradores" element={<Administradores />} />
+        <Route path="/monitoramento" element={<Monitoramento />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/payroll" element={<Payroll />} />

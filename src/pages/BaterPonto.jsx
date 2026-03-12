@@ -40,7 +40,9 @@ export default function BaterPonto() {
     }
 
     function formatDate(offset) {
-        const d = new Date(semanaInicio)
+        // Criar data local (não UTC) para evitar problemas de timezone
+        const [year, month, day] = semanaInicio.split('-').map(Number)
+        const d = new Date(year, month - 1, day) // mês é 0-indexed
         d.setDate(d.getDate() + offset)
         return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
     }
@@ -308,10 +310,22 @@ export default function BaterPonto() {
         return sum + (parseFloat(horas[dia].normal) || 0) + (parseFloat(horas[dia].extra) || 0) + (parseFloat(horas[dia].noturna) || 0)
     }, 0)
 
-    // Validar se todos os dias da semana foram preenchidos
-    // Considera que funcionário trabalha TODOS os dias (seg-sáb)
-    // Se algum dia não tem horas, não pode enviar
-    const todosOsDiasPreenchidos = DIAS.every(dia => {
+    // Validar se todos os dias ATÉ HOJE foram preenchidos
+    // Não permitir marcar dias futuros, mas exigir que dias passados estejam preenchidos
+    const hoje = new Date()
+    const [year, month, day] = semanaInicio.split('-').map(Number)
+    const segundaFeira = new Date(year, month - 1, day)
+
+    const todosOsDiasPreenchidos = DIAS.every((dia, idx) => {
+        const diaData = new Date(segundaFeira)
+        diaData.setDate(diaData.getDate() + idx)
+
+        // Se o dia é FUTURO, não exigir preenchimento
+        if (diaData > hoje) {
+            return true
+        }
+
+        // Se o dia é HOJE ou PASSADO, exigir que tenha horas
         const h = horas[dia]
         const total = (parseFloat(h.normal) || 0) + (parseFloat(h.extra) || 0) + (parseFloat(h.noturna) || 0)
         return total > 0
@@ -612,7 +626,7 @@ export default function BaterPonto() {
                     className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold text-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 flex items-center justify-center gap-2"
                 >
                     <IconSend stroke={1} className="w-4 h-4" />
-                    {bloqueado ? 'Ya enviado' : !todosOsDiasPreenchidos ? 'Complete todos los días' : 'Enviar para aprobación'}
+                    {bloqueado ? 'Ya enviado' : !todosOsDiasPreenchidos ? 'Complete los días trabajados' : 'Enviar para aprobación'}
                 </button>
             </div>
 

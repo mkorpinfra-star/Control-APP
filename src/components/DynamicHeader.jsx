@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IconLogout, IconPlus, IconBuilding, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconUsers, IconFileText, IconCurrencyDollar, IconChartBar, IconSettings, IconUserCircle, IconReceipt, IconUserCog } from '@tabler/icons-react';
+import { IconLogout, IconPlus, IconBuilding, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconUserShield, IconUsers, IconFileText, IconCurrencyDollar, IconChartBar, IconSettings, IconUserCircle, IconReceipt, IconUserCog, IconClock } from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
 import Avatar from './Avatar';
 
@@ -53,6 +53,19 @@ export default function DynamicHeader() {
         icon: IconShieldPlus,
         addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'encarregados' } }))
       },
+      '/administradores': {
+        type: 'list',
+        title: 'Administradores',
+        subtitle: 'Gestión de administradores',
+        icon: IconUserShield,
+        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'administradores' } }))
+      },
+      '/monitoramento': {
+        type: 'page',
+        title: 'Monitoreo',
+        subtitle: 'Control en tiempo real',
+        icon: IconClock
+      },
       '/employees': {
         type: 'list',
         title: 'Empleados',
@@ -101,15 +114,17 @@ export default function DynamicHeader() {
 
   const config = getPageConfig();
 
-  // TODOS os QuickActions (8 itens) - Folha ao lado DIREITO de Informes
+  // TODOS os QuickActions (10 itens) - Grid 5x2
   const quickActions = [
+    { label: 'Monitoreo', icon: IconClock, path: '/monitoramento', tourId: 'monitoreo-btn' },
     { label: 'Obras', icon: IconBuilding, path: '/projects', tourId: 'obras-btn' },
     { label: 'Clientes', icon: IconUsers, path: '/clients', tourId: 'clientes-btn' },
     { label: 'Encargados', icon: IconUserCog, path: '/encarregados', tourId: 'encargados-btn' },
+    { label: 'Admins', icon: IconUserShield, path: '/administradores', tourId: 'admins-btn' },
     { label: 'Empleados', icon: IconUserCircle, path: '/employees', tourId: 'empleados-btn' },
+    { label: 'Informes', icon: IconFileText, path: '/approvals', tourId: 'informes-btn' },
     { label: 'Faturamento', icon: IconReceipt, path: '/billing', tourId: 'faturamento-btn' },
     { label: 'Análisis', icon: IconChartBar, path: '/analytics', tourId: 'analisis-btn' },
-    { label: 'Informes', icon: IconFileText, path: '/reports', tourId: 'informes-btn' },
     { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' }
   ];
 

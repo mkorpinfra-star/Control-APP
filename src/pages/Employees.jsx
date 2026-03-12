@@ -168,8 +168,7 @@ export default function Employees() {
                     onChange={setFilterType}
                     options={[
                         { value: 'all', label: 'Todos' },
-                        { value: 'funcionario', label: 'Empleados' },
-                        { value: 'admin', label: 'Admins' }
+                        { value: 'funcionario', label: 'Empleados' }
                     ]}
                 />
             </div>
@@ -273,13 +272,9 @@ export default function Employees() {
                                         <input className={inputCls} value={formData.passaporte}
                                             onChange={e => setFormData({ ...formData, passaporte: e.target.value.toUpperCase() })} required />
                                     </Field>
-                                    <Field label="Tipo" required>
-                                        <select className={inputCls} value={formData.tipo}
-                                            onChange={e => setFormData({ ...formData, tipo: e.target.value })} required>
-                                            <option value="funcionario">Empleado</option>
-                                            <option value="admin">Admin</option>
-                                        </select>
-                                    </Field>
+                                    {/* Campo Tipo removido - Employees sempre são "funcionario"
+                                        Administradores são criados em seção separada */}
+                                    <input type="hidden" name="tipo" value="funcionario" />
                                 </div>
 
                                 <Field label="Función / Cargo">

@@ -239,6 +239,9 @@ export default function Projects() {
                 email_financeiro: formData.email_financeiro || null,
                 email_encarregado: formData.email_encarregado || null,
                 dias_desativados: diasDesativados,
+                // Switches boolean - garantir que sejam enviados
+                permite_hora_extra: Boolean(formData.permite_hora_extra),
+                permite_hora_noturna: Boolean(formData.permite_hora_noturna),
                 // Converter string vazia para 0
                 fatura_hora_normal: formData.fatura_hora_normal === '' ? 0 : formData.fatura_hora_normal,
                 fatura_hora_extra: formData.fatura_hora_extra === '' ? 0 : formData.fatura_hora_extra,
@@ -249,6 +252,14 @@ export default function Projects() {
                 imposto_cas_empresa: formData.imposto_cas_empresa === '' ? 0 : formData.imposto_cas_empresa,
                 imposto_irpc: formData.imposto_irpc === '' ? 0 : formData.imposto_irpc
             };
+
+            // DEBUG: Verificar o que está sendo enviado
+            console.log('🔍 Dados sendo enviados:', {
+                permite_hora_extra: dataToSend.permite_hora_extra,
+                permite_hora_noturna: dataToSend.permite_hora_noturna,
+                tipo: typeof dataToSend.permite_hora_extra
+            });
+
             let obraId;
             if (editingProject) {
                 await api.updateProject(editingProject.id, dataToSend);
@@ -269,6 +280,14 @@ export default function Projects() {
     };
 
     const handleEdit = async (project) => {
+        // DEBUG: Ver o que vem do banco
+        console.log('🔍 Dados recebidos do banco:', {
+            permite_hora_extra: project.permite_hora_extra,
+            permite_hora_noturna: project.permite_hora_noturna,
+            tipo_extra: typeof project.permite_hora_extra,
+            tipo_noturna: typeof project.permite_hora_noturna
+        });
+
         setEditingProject(project);
         setFormData({
             numero: project.numero || '',
@@ -282,9 +301,9 @@ export default function Projects() {
             data_fim: project.data_fim || '',
             // País
             pais: project.pais || 'España',
-            // Habilitação de tipos de horas
-            permite_hora_extra: project.permite_hora_extra !== undefined ? Boolean(project.permite_hora_extra) : true,
-            permite_hora_noturna: project.permite_hora_noturna !== undefined ? Boolean(project.permite_hora_noturna) : true,
+            // Habilitação de tipos de horas - converter 0/1 ou "0"/"1" para boolean
+            permite_hora_extra: project.permite_hora_extra == 1,
+            permite_hora_noturna: project.permite_hora_noturna == 1,
             // Faturamento
             fatura_hora_normal: parseFloat(project.fatura_hora_normal) || 25.00,
             fatura_hora_extra: parseFloat(project.fatura_hora_extra) || 37.50,
@@ -760,25 +779,39 @@ export default function Projects() {
                                 <div className="space-y-3">
                                     <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Facturación al Cliente (€/h)</h4>
 
-                                    {/* Toggles de Habilitação */}
-                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.permite_hora_extra}
-                                                onChange={(e) => setFormData({ ...formData, permite_hora_extra: e.target.checked })}
-                                                className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                                            />
+                                    {/* Toggles de Habilitação - Apple Style */}
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-3">
+                                        <label className="flex items-center justify-between cursor-pointer">
                                             <span className="text-xs font-medium text-gray-700">Permitir Horas Extras</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, permite_hora_extra: !formData.permite_hora_extra })}
+                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                                    formData.permite_hora_extra ? 'bg-green-500' : 'bg-gray-300'
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                                        formData.permite_hora_extra ? 'translate-x-6' : 'translate-x-1'
+                                                    }`}
+                                                />
+                                            </button>
                                         </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.permite_hora_noturna}
-                                                onChange={(e) => setFormData({ ...formData, permite_hora_noturna: e.target.checked })}
-                                                className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                                            />
+                                        <label className="flex items-center justify-between cursor-pointer">
                                             <span className="text-xs font-medium text-gray-700">Permitir Horas Noturnas</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, permite_hora_noturna: !formData.permite_hora_noturna })}
+                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                                    formData.permite_hora_noturna ? 'bg-green-500' : 'bg-gray-300'
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                                        formData.permite_hora_noturna ? 'translate-x-6' : 'translate-x-1'
+                                                    }`}
+                                                />
+                                            </button>
                                         </label>
                                     </div>
 
@@ -835,52 +868,64 @@ export default function Projects() {
                                     <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Impuestos (%)</h4>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1">IGI</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                max="100"
-                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_igi === '' ? '' : formData.imposto_igi}
-                                                onChange={(e) => setFormData({ ...formData, imposto_igi: e.target.value === '' ? '' : parseFloat(e.target.value) })}
-                                            />
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">IGI / IVA</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    max="100"
+                                                    className="w-full px-2 py-1.5 pr-7 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    value={formData.imposto_igi === '' ? '' : formData.imposto_igi}
+                                                    onChange={(e) => setFormData({ ...formData, imposto_igi: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                                                />
+                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">%</span>
+                                            </div>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1">CAS Func.</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                max="100"
-                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_cas_funcionario === '' ? '' : formData.imposto_cas_funcionario}
-                                                onChange={(e) => setFormData({ ...formData, imposto_cas_funcionario: e.target.value === '' ? '' : parseFloat(e.target.value) })}
-                                            />
+                                            <label className="block text-xs font-medium text-gray-500 mb-1 whitespace-nowrap">CASS/SEG.SOC. retenção</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    max="100"
+                                                    className="w-full px-2 py-1.5 pr-7 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    value={formData.imposto_cas_funcionario === '' ? '' : formData.imposto_cas_funcionario}
+                                                    onChange={(e) => setFormData({ ...formData, imposto_cas_funcionario: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                                                />
+                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">%</span>
+                                            </div>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1">CAS Emp.</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                max="100"
-                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_cas_empresa === '' ? '' : formData.imposto_cas_empresa}
-                                                onChange={(e) => setFormData({ ...formData, imposto_cas_empresa: e.target.value === '' ? '' : parseFloat(e.target.value) })}
-                                            />
+                                            <label className="block text-xs font-medium text-gray-500 mb-1 whitespace-nowrap">CASS/SEG.SOC. Empresa</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    max="100"
+                                                    className="w-full px-2 py-1.5 pr-7 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    value={formData.imposto_cas_empresa === '' ? '' : formData.imposto_cas_empresa}
+                                                    onChange={(e) => setFormData({ ...formData, imposto_cas_empresa: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                                                />
+                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">%</span>
+                                            </div>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500 mb-1">IRPC</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                max="100"
-                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={formData.imposto_irpc === '' ? '' : formData.imposto_irpc}
-                                                onChange={(e) => setFormData({ ...formData, imposto_irpc: e.target.value === '' ? '' : parseFloat(e.target.value) })}
-                                            />
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    max="100"
+                                                    className="w-full px-2 py-1.5 pr-7 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    value={formData.imposto_irpc === '' ? '' : formData.imposto_irpc}
+                                                    onChange={(e) => setFormData({ ...formData, imposto_irpc: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                                                />
+                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">%</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

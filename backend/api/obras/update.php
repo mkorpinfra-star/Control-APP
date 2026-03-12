@@ -124,6 +124,18 @@ try {
         $updates[] = "pais = ?";
         $params[] = $data['pais'] ?: 'España';
     }
+    if (array_key_exists('permite_hora_extra', $data)) {
+        $valor = $data['permite_hora_extra'] ? 1 : 0;
+        error_log("🔍 DEBUG permite_hora_extra: recebido=" . json_encode($data['permite_hora_extra']) . " convertido=" . $valor);
+        $updates[] = "permite_hora_extra = ?";
+        $params[] = $valor;
+    }
+    if (array_key_exists('permite_hora_noturna', $data)) {
+        $valor = $data['permite_hora_noturna'] ? 1 : 0;
+        error_log("🔍 DEBUG permite_hora_noturna: recebido=" . json_encode($data['permite_hora_noturna']) . " convertido=" . $valor);
+        $updates[] = "permite_hora_noturna = ?";
+        $params[] = $valor;
+    }
     if (array_key_exists('fatura_hora_normal', $data)) {
         $updates[] = "fatura_hora_normal = ?";
         $params[] = floatval($data['fatura_hora_normal']);

@@ -87,8 +87,9 @@ try {
 
     $insertCols = [
         'tenant_id','numero','nome','endereco','email_financeiro','email_encarregado','data_inicio','data_fim','cliente_id','encarregado_id','dias_desativados',
-        // Novos campos: País, Faturamento, Impostos
-        'pais','fatura_hora_normal','fatura_hora_extra','fatura_hora_noturna','multiplicador_extra','multiplicador_noturna',
+        // Novos campos: País, Permissões, Faturamento, Impostos
+        'pais','permite_hora_extra','permite_hora_noturna',
+        'fatura_hora_normal','fatura_hora_extra','fatura_hora_noturna','multiplicador_extra','multiplicador_noturna',
         'imposto_igi','imposto_cas_funcionario','imposto_cas_empresa','imposto_irpc'
     ];
     $insertVals = [
@@ -105,6 +106,8 @@ try {
         $diasDesativados,
         // Novos campos com valores padrão
         !empty($data['pais']) ? $data['pais'] : 'España',
+        isset($data['permite_hora_extra']) ? ($data['permite_hora_extra'] ? 1 : 0) : 1,
+        isset($data['permite_hora_noturna']) ? ($data['permite_hora_noturna'] ? 1 : 0) : 1,
         isset($data['fatura_hora_normal']) ? floatval($data['fatura_hora_normal']) : 25.00,
         isset($data['fatura_hora_extra']) ? floatval($data['fatura_hora_extra']) : 37.50,
         isset($data['fatura_hora_noturna']) ? floatval($data['fatura_hora_noturna']) : 50.00,

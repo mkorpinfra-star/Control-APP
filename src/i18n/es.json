@@ -9,7 +9,7 @@
         "password": "Contraseña",
         "loginButton": "Entrar",
         "loginError": "Pasaporte o contraseña incorrectos",
-        "welcome": "Bienvenido al Sistema de Control Horario",
+        "welcome": "Sistema de control de horas trabajadas",
         "logout": "Salir",
         "rememberMe": "Recordar mis datos",
         "quickLogin": "Acceso rápido",

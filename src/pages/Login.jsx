@@ -519,7 +519,7 @@ export default function Login() {
                     {/* Divider */}
                     <div className="mt-8 pt-6 border-t border-gray-200">
                         <p className="text-center text-gray-600 text-xs">
-                            Sistema de Control Horario
+                            Sistema de control d'hores treballades
                         </p>
                     </div>
                 </div>

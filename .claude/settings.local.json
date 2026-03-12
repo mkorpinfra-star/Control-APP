@@ -111,7 +111,10 @@
       "Bash(powershell -Command \"(Get-Content login-central.php).Count\")",
       "Bash(powershell -Command \"Select-String -Path Encarregados.jsx -Pattern ''Gestión|header|return'' -Context 0,3 | Select-Object -First 20\")",
       "Bash(cp -r docs dist/)",
-      "Bash(cat .env.production)"
+      "Bash(cat .env.production)",
+      "Bash(cat \"c:/Users/Guilherme/Desktop/app-cassio/src/main.jsx\")",
+      "Bash(npm install firebase)",
+      "Bash(cat \"c:/Users/Guilherme/Desktop/app-cassio/backend/api/monitoramento/notify.php\")"
     ],
     "deny": [],
     "ask": []
