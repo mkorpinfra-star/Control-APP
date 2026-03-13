@@ -280,20 +280,6 @@ export default function ProfileMenu({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
-          <p className="text-xs text-gray-500 text-center">
-            Desenvolvido por{' '}
-            <a
-              href="https://www.guilhermesites.com.br"
-              target="_blank"
-              rel="noopener follow"
-              className="text-[#CE0201] font-semibold"
-            >
-              Guilherme Sites
-            </a>
-          </p>
-        </div>
       </div>
 
       {/* Modal de Upload de Foto */}

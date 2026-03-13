@@ -137,11 +137,11 @@ export default function Projects() {
         permite_hora_extra: true,
         permite_hora_noturna: true,
         // Faturamento (valores cobrados do cliente)
-        fatura_hora_normal: 25.00,
-        fatura_hora_extra: 37.50,
-        fatura_hora_noturna: 50.00,
-        multiplicador_extra: 1.50,
-        multiplicador_noturna: 2.00,
+        fatura_hora_normal: 0,
+        fatura_hora_extra: 0,
+        fatura_hora_noturna: 0,
+        multiplicador_extra: 0,
+        multiplicador_noturna: 0,
         // Impostos/Tributações
         imposto_igi: 0.00,
         imposto_cas_funcionario: 4.70,
@@ -247,6 +247,7 @@ export default function Projects() {
                 fatura_hora_extra: formData.fatura_hora_extra === '' ? 0 : formData.fatura_hora_extra,
                 fatura_hora_noturna: formData.fatura_hora_noturna === '' ? 0 : formData.fatura_hora_noturna,
                 multiplicador_extra: formData.multiplicador_extra === '' ? 0 : formData.multiplicador_extra,
+                multiplicador_noturna: formData.multiplicador_noturna === '' ? 0 : formData.multiplicador_noturna,
                 imposto_igi: formData.imposto_igi === '' ? 0 : formData.imposto_igi,
                 imposto_cas_funcionario: formData.imposto_cas_funcionario === '' ? 0 : formData.imposto_cas_funcionario,
                 imposto_cas_empresa: formData.imposto_cas_empresa === '' ? 0 : formData.imposto_cas_empresa,
@@ -305,11 +306,11 @@ export default function Projects() {
             permite_hora_extra: project.permite_hora_extra == 1,
             permite_hora_noturna: project.permite_hora_noturna == 1,
             // Faturamento
-            fatura_hora_normal: parseFloat(project.fatura_hora_normal) || 25.00,
-            fatura_hora_extra: parseFloat(project.fatura_hora_extra) || 37.50,
-            fatura_hora_noturna: parseFloat(project.fatura_hora_noturna) || 50.00,
-            multiplicador_extra: parseFloat(project.multiplicador_extra) || 1.50,
-            multiplicador_noturna: parseFloat(project.multiplicador_noturna) || 2.00,
+            fatura_hora_normal: parseFloat(project.fatura_hora_normal) || 0,
+            fatura_hora_extra: parseFloat(project.fatura_hora_extra) || 0,
+            fatura_hora_noturna: parseFloat(project.fatura_hora_noturna) || 0,
+            multiplicador_extra: parseFloat(project.multiplicador_extra) || 0,
+            multiplicador_noturna: parseFloat(project.multiplicador_noturna) || 0,
             // Impostos
             imposto_igi: parseFloat(project.imposto_igi) || 0.00,
             imposto_cas_funcionario: parseFloat(project.imposto_cas_funcionario) || 4.70,
@@ -374,8 +375,8 @@ export default function Projects() {
             numero: '', nome: '', endereco: '', email_financeiro: '', email_encarregado: '',
             cliente_id: '', encarregado_id: '', data_inicio: '', data_fim: '',
             pais: 'España',
-            fatura_hora_normal: 25.00, fatura_hora_extra: 37.50, fatura_hora_noturna: 50.00,
-            multiplicador_extra: 1.50, multiplicador_noturna: 2.00,
+            fatura_hora_normal: 0, fatura_hora_extra: 0, fatura_hora_noturna: 0,
+            multiplicador_extra: 0, multiplicador_noturna: 0,
             imposto_igi: 0.00, imposto_cas_funcionario: 4.70, imposto_cas_empresa: 23.60, imposto_irpc: 0.00
         });
         setSelectedEmployees([]);

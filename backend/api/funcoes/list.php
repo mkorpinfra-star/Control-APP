@@ -15,33 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/jwt.php';
+require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Verificar autenticação
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '');
-
-if (empty($authHeader)) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Não autorizado']);
-    exit;
-}
-
-$token = str_replace('Bearer ', '', $authHeader);
-$user = validateJWT($token);
-
-if (!$user) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Token inválido']);
-    exit;
-}
+// Validar acesso multi-tenant
+$auth = validateTenantAccess();
+$tenant_id = $auth['tenant_id'];
 
 try {
     $pdo = getConnection();
 
-    // Multi-tenant: filtrar por empresa_id do usuário autenticado
-    $stmt = $pdo->prepare("SELECT * FROM funcoes WHERE empresa_id = :empresa_id AND ativo = 1 ORDER BY nome");
-    $stmt->execute(['empresa_id' => $user['empresa_id']]);
+    // Multi-tenant: filtrar por tenant_id
+    $stmt = $pdo->prepare("SELECT * FROM funcoes WHERE tenant_id = :tenant_id AND ativo = 1 ORDER BY nome");
+    $stmt->execute(['tenant_id' => $tenant_id]);
     $funcoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([

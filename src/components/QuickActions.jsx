@@ -1,10 +1,17 @@
-import { IconBriefcase, IconUsers, IconUserCircle, IconChartBar, IconFileText, IconSettings, IconCurrencyDollar, IconReceipt, IconUserCog } from '@tabler/icons-react';
+import { IconBriefcase, IconUsers, IconUserCircle, IconChartBar, IconFileText, IconSettings, IconCurrencyDollar, IconReceipt, IconUserCog, IconActivity, IconShieldPlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function QuickActions() {
   const navigate = useNavigate();
 
   const actions = [
+    {
+      id: 'clients',
+      label: 'Clientes',
+      icon: IconUsers,
+      path: '/clients',
+      color: 'bg-[#F5F5F5] text-black'
+    },
     {
       id: 'projects',
       label: 'Obras',
@@ -13,10 +20,10 @@ export default function QuickActions() {
       color: 'bg-[#F5F5F5] text-black'
     },
     {
-      id: 'clients',
-      label: 'Clientes',
-      icon: IconUsers,
-      path: '/clients',
+      id: 'employees',
+      label: 'Empleados',
+      icon: IconUserCircle,
+      path: '/employees',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
@@ -27,10 +34,10 @@ export default function QuickActions() {
       color: 'bg-[#F5F5F5] text-black'
     },
     {
-      id: 'employees',
-      label: 'Empleados',
-      icon: IconUserCircle,
-      path: '/employees',
+      id: 'admins',
+      label: 'Admins',
+      icon: IconShieldPlus,
+      path: '/administradores',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
@@ -48,10 +55,10 @@ export default function QuickActions() {
       color: 'bg-[#F5F5F5] text-black'
     },
     {
-      id: 'analytics',
-      label: 'Análisis',
-      icon: IconChartBar,
-      path: '/analytics',
+      id: 'monitoreo',
+      label: 'Monitoreo',
+      icon: IconActivity,
+      path: '/monitoramento',
       color: 'bg-[#F5F5F5] text-black'
     },
     {
@@ -62,10 +69,10 @@ export default function QuickActions() {
       color: 'bg-[#F5F5F5] text-black'
     },
     {
-      id: 'settings',
-      label: 'Ajustes',
-      icon: IconSettings,
-      path: '/settings',
+      id: 'analytics',
+      label: 'Análisis',
+      icon: IconChartBar,
+      path: '/analytics',
       color: 'bg-[#F5F5F5] text-black'
     }
   ];

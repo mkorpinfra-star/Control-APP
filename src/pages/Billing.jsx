@@ -349,7 +349,7 @@ export default function Billing() {
                             <div className="text-2xl font-bold text-gray-900">{formatCurrency(totais.total_servicos)}</div>
                         </div>
                         <div className="bg-[#F5F5F5] rounded-2xl p-4">
-                            <div className="text-sm text-gray-600 mb-1">IGI (4.5%)</div>
+                            <div className="text-sm text-gray-600 mb-1">IGI/IVA</div>
                             <div className="text-2xl font-bold text-gray-900">{formatCurrency(totais.total_igi)}</div>
                         </div>
                         <div className="bg-[#F5F5F5] rounded-2xl p-4">
@@ -458,7 +458,7 @@ export default function Billing() {
                         <li>Los valores de <strong>faturamento</strong> son diferentes de los valores de <strong>folha</strong></li>
                         <li>Faturamento = Lo que cobramos al cliente (con markup/ganancia)</li>
                         <li>Folha = Lo que pagamos al empleado (costo)</li>
-                        <li>IGI (4.5%) se calcula automáticamente sobre el total de servicios</li>
+                        <li>IGI/IVA</li>
                         <li>Configure los valores de faturamento en: <strong>Configuración → Valores de Faturamento</strong></li>
                     </ul>
                 </div>

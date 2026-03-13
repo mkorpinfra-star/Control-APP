@@ -29,21 +29,32 @@ requireAdmin($auth);
 try {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (empty($data['passaporte']) || empty($data['nome']) || empty($data['senha'])) {
+    // Validação básica
+    if (empty($data['nome']) || empty($data['senha'])) {
         http_response_code(400);
-        echo json_encode(['error' => 'Passaporte, nome e senha são obrigatórios']);
+        echo json_encode(['error' => 'Nome e senha são obrigatórios']);
+        exit;
+    }
+
+    // Passaporte obrigatório apenas para funcionários e encarregados
+    $tipo = $data['tipo'] ?? 'funcionario';
+    if ($tipo !== 'admin' && empty($data['passaporte'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Passaporte é obrigatório para funcionários e encarregados']);
         exit;
     }
 
     $pdo = getConnection();
 
-    // Verificar se passaporte já existe no tenant
-    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE passaporte = ? AND tenant_id = ?");
-    $stmt->execute([strtoupper($data['passaporte']), $tenant_id]);
-    if ($stmt->fetch()) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Passaporte já cadastrado neste tenant']);
-        exit;
+    // Verificar se passaporte já existe no tenant (se fornecido)
+    if (!empty($data['passaporte'])) {
+        $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE passaporte = ? AND tenant_id = ?");
+        $stmt->execute([strtoupper($data['passaporte']), $tenant_id]);
+        if ($stmt->fetch()) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Passaporte já cadastrado neste tenant']);
+            exit;
+        }
     }
 
     $senhaHash = password_hash($data['senha'], PASSWORD_DEFAULT);
@@ -81,11 +92,13 @@ try {
     $hasBonificacaoColumn = in_array('bonificacao', $existingCols);
 
     // Construir SQL dinamicamente (incluindo tenant_id)
+    $passaporteValue = !empty($data['passaporte']) ? strtoupper($data['passaporte']) : null;
+
     $colsList = "tenant_id, passaporte, senha_hash, nome, email, telefone, funcao, funcao_id, tipo, ativo, salario_base, salario_hora, salario_base_mensal, valor_hora_venda, vale_moradia, ibf";
     $placeholders = "?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?";
     $params = [
         $tenant_id,
-        strtoupper($data['passaporte']), $senhaHash, $data['nome'],
+        $passaporteValue, $senhaHash, $data['nome'],
         $data['email'] ?? null, $data['telefone'] ?? null,
         $data['funcao'] ?? null, $data['funcao_id'] ?? null,
         $data['tipo'] ?? 'funcionario',

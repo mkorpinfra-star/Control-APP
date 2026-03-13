@@ -116,16 +116,16 @@ export default function DynamicHeader() {
 
   // TODOS os QuickActions (10 itens) - Grid 5x2
   const quickActions = [
-    { label: 'Monitoreo', icon: IconClock, path: '/monitoramento', tourId: 'monitoreo-btn' },
-    { label: 'Obras', icon: IconBuilding, path: '/projects', tourId: 'obras-btn' },
     { label: 'Clientes', icon: IconUsers, path: '/clients', tourId: 'clientes-btn' },
+    { label: 'Obras', icon: IconBuilding, path: '/projects', tourId: 'obras-btn' },
+    { label: 'Empleados', icon: IconUserCircle, path: '/employees', tourId: 'empleados-btn' },
     { label: 'Encargados', icon: IconUserCog, path: '/encarregados', tourId: 'encargados-btn' },
     { label: 'Admins', icon: IconUserShield, path: '/administradores', tourId: 'admins-btn' },
-    { label: 'Empleados', icon: IconUserCircle, path: '/employees', tourId: 'empleados-btn' },
-    { label: 'Informes', icon: IconFileText, path: '/approvals', tourId: 'informes-btn' },
+    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' },
     { label: 'Faturamento', icon: IconReceipt, path: '/billing', tourId: 'faturamento-btn' },
-    { label: 'Análisis', icon: IconChartBar, path: '/analytics', tourId: 'analisis-btn' },
-    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' }
+    { label: 'Monitoreo', icon: IconClock, path: '/monitoramento', tourId: 'monitoreo-btn' },
+    { label: 'Informes', icon: IconFileText, path: '/approvals', tourId: 'informes-btn' },
+    { label: 'Análisis', icon: IconChartBar, path: '/analytics', tourId: 'analisis-btn' }
   ];
 
   return (

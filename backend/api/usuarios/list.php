@@ -62,20 +62,23 @@ try {
     $optionalCols = '';
     foreach (['funcao','funcao_id','salario_base','salario_hora','salario_base_mensal','valor_hora_venda','vale_moradia','ibf','bonificacao','biometria'] as $col) {
         if (in_array($col, $existingCols)) {
-            $optionalCols .= ", {$col}";
+            $optionalCols .= ", u.{$col}";
         }
     }
 
-    $sql = "SELECT id, passaporte, nome, email, telefone, foto_url, tipo, ativo{$optionalCols}
-            FROM usuarios WHERE ativo = 1 AND tenant_id = ?";
+    $sql = "SELECT u.id, u.passaporte, u.nome, u.email, u.telefone, u.foto_url, u.tipo, u.ativo{$optionalCols},
+                   f.nome as funcao
+            FROM usuarios u
+            LEFT JOIN funcoes f ON u.funcao_id = f.id AND f.tenant_id = u.tenant_id
+            WHERE u.ativo = 1 AND u.tenant_id = ?";
     $params = [$tenant_id];
 
     if ($tipo) {
-        $sql .= " AND tipo = ?";
+        $sql .= " AND u.tipo = ?";
         $params[] = $tipo;
     }
 
-    $sql .= " ORDER BY nome ASC";
+    $sql .= " ORDER BY u.nome ASC";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

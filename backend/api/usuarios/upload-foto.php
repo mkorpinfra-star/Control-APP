@@ -75,6 +75,28 @@ if (!$sourceImage) {
 }
 
 try {
+    // Corrigir orientação EXIF (fotos tiradas com celular)
+    if ($base64) {
+        $imageData = base64_decode(preg_replace('#^data:image/\\w+;base64,#i', '', $input['foto']));
+        $exif = @exif_read_data('data://image/jpeg;base64,' . base64_encode($imageData));
+    } elseif (isset($_FILES['foto'])) {
+        $exif = @exif_read_data($_FILES['foto']['tmp_name']);
+    }
+
+    if (isset($exif['Orientation'])) {
+        switch ($exif['Orientation']) {
+            case 3:
+                $sourceImage = imagerotate($sourceImage, 180, 0);
+                break;
+            case 6:
+                $sourceImage = imagerotate($sourceImage, -90, 0);
+                break;
+            case 8:
+                $sourceImage = imagerotate($sourceImage, 90, 0);
+                break;
+        }
+    }
+
     $pdo = getConnection();
     $userId = $auth['user_id'];
 

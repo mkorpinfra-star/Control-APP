@@ -39,6 +39,11 @@ try {
         throw new Exception('Encarregado não encontrado ou sem permissão');
     }
 
+    // Normalizar campos vazios para null
+    $data['email'] = !empty($data['email']) ? $data['email'] : null;
+    $data['telefone'] = !empty($data['telefone']) ? $data['telefone'] : null;
+    $data['passaporte'] = !empty($data['passaporte']) ? $data['passaporte'] : null;
+
     // Verificar email duplicado dentro do tenant (exceto próprio registro)
     if (!empty($data['email'])) {
         $checkEmail = $pdo->prepare("SELECT id FROM encarregados WHERE email = ? AND id != ? AND tenant_id = ?");
@@ -63,9 +68,9 @@ try {
         ");
         $stmt->execute([
             'nome' => $data['nome'],
-            'email' => $data['email'] ?? null,
-            'telefone' => $data['telefone'] ?? null,
-            'passaporte' => $data['passaporte'] ?? null,
+            'email' => $data['email'],
+            'telefone' => $data['telefone'],
+            'passaporte' => $data['passaporte'],
             'senha' => $senhaHash,
             'ativo' => $data['ativo'] ?? 1,
             'id' => $data['id'],
@@ -83,9 +88,9 @@ try {
         ");
         $stmt->execute([
             'nome' => $data['nome'],
-            'email' => $data['email'] ?? null,
-            'telefone' => $data['telefone'] ?? null,
-            'passaporte' => $data['passaporte'] ?? null,
+            'email' => $data['email'],
+            'telefone' => $data['telefone'],
+            'passaporte' => $data['passaporte'],
             'ativo' => $data['ativo'] ?? 1,
             'id' => $data['id'],
             'tenant_id' => $auth['tenant_id']

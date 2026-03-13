@@ -196,6 +196,7 @@ export default function Employees() {
                                     <p className="text-sm text-gray-600 mt-0.5">{emp.passaporte}</p>
                                     <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${typeColor(emp.tipo)}`}>
                                         {typeLabel(emp.tipo)}
+                                        {emp.funcao && ` - ${emp.funcao}`}
                                     </span>
                                 </div>
                             </div>
