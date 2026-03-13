@@ -31,12 +31,6 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
 
     const startCamera = async () => {
         try {
-            // Verificar se o navegador suporta getUserMedia
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                setError('Tu navegador no soporta el acceso a la cámara. Usa la opción Galeria.');
-                return;
-            }
-
             const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'user', width: 640, height: 480 }
             });
@@ -49,15 +43,7 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
             }, 100);
         } catch (err) {
             console.error('Camera error:', err);
-            if (err.name === 'NotAllowedError') {
-                setError('Permiso de cámara denegado. Usa la opción Galeria.');
-            } else if (err.name === 'NotFoundError') {
-                setError('No se encontró ninguna cámara. Usa la opción Galeria.');
-            } else if (err.name === 'NotReadableError') {
-                setError('La cámara está en uso. Usa la opción Galeria.');
-            } else {
-                setError('Error al acceder a la cámara. Usa la opción Galeria.');
-            }
+            setError('No se pudo acceder a la cámara. Usa la opción Galeria.');
         }
     };
 

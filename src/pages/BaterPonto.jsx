@@ -34,9 +34,12 @@ export default function BaterPonto() {
 
     function getMonday(date) {
         const d = new Date(date)
-        const day = d.getDay()
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-        return new Date(d.setDate(diff)).toISOString().split('T')[0]
+        // Criar uma nova instância para não modificar a original
+        const result = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+        const day = result.getDay()
+        const diff = day === 0 ? -6 : 1 - day
+        result.setDate(result.getDate() + diff)
+        return result.toISOString().split('T')[0]
     }
 
     function formatDate(offset) {
@@ -282,13 +285,15 @@ export default function BaterPonto() {
     }
 
     function nextWeek() {
-        const d = new Date(semanaInicio)
+        const [year, month, day] = semanaInicio.split('-').map(Number)
+        const d = new Date(year, month - 1, day)
         d.setDate(d.getDate() + 7)
         setSemanaInicio(d.toISOString().split('T')[0])
     }
 
     function prevWeek() {
-        const d = new Date(semanaInicio)
+        const [year, month, day] = semanaInicio.split('-').map(Number)
+        const d = new Date(year, month - 1, day)
         d.setDate(d.getDate() - 7)
         setSemanaInicio(d.toISOString().split('T')[0])
     }

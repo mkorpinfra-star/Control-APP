@@ -101,25 +101,33 @@ if (!$sourceImage) {
 }
 
 try {
-    // Corrigir orientação EXIF (fotos tiradas com celular)
-    if ($base64) {
-        $imageData = base64_decode(preg_replace('#^data:image/\\w+;base64,#i', '', $input['foto']));
-        $exif = @exif_read_data('data://image/jpeg;base64,' . base64_encode($imageData));
-    } elseif (isset($_FILES['foto'])) {
-        $exif = @exif_read_data($_FILES['foto']['tmp_name']);
-    }
+    // Corrigir orientação EXIF (fotos tiradas com celular) - se EXIF disponível
+    if (function_exists('exif_read_data')) {
+        try {
+            $exif = null;
+            if ($base64) {
+                $imageData = base64_decode(preg_replace('#^data:image/\\w+;base64,#i', '', $input['foto']));
+                $exif = @exif_read_data('data://image/jpeg;base64,' . base64_encode($imageData));
+            } elseif (isset($_FILES['foto'])) {
+                $exif = @exif_read_data($_FILES['foto']['tmp_name']);
+            }
 
-    if (isset($exif['Orientation'])) {
-        switch ($exif['Orientation']) {
-            case 3:
-                $sourceImage = imagerotate($sourceImage, 180, 0);
-                break;
-            case 6:
-                $sourceImage = imagerotate($sourceImage, -90, 0);
-                break;
-            case 8:
-                $sourceImage = imagerotate($sourceImage, 90, 0);
-                break;
+            if (isset($exif['Orientation'])) {
+                switch ($exif['Orientation']) {
+                    case 3:
+                        $sourceImage = imagerotate($sourceImage, 180, 0);
+                        break;
+                    case 6:
+                        $sourceImage = imagerotate($sourceImage, -90, 0);
+                        break;
+                    case 8:
+                        $sourceImage = imagerotate($sourceImage, 90, 0);
+                        break;
+                }
+            }
+        } catch (Exception $exifError) {
+            // Ignorar erros de EXIF - não é crítico
+            error_log('EXIF warning: ' . $exifError->getMessage());
         }
     }
 
