@@ -171,6 +171,35 @@ export default function Timesheet() {
 
     const isReadOnly = apontamento && !['rascunho', 'rejeitado'].includes(apontamento.status);
 
+    // Detectar se pode enviar:
+    // - Semanas PASSADAS: sempre pode (regularização)
+    // - Semana ATUAL ou FUTURA: só sábado/domingo
+    const canSubmit = (() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const weekStartDate = new Date(weekStart);
+        weekStartDate.setHours(0, 0, 0, 0);
+
+        // Se a semana é passada (segunda-feira da semana é antes de hoje)
+        if (weekStartDate < today) {
+            console.log('✅ Semana passada - PODE ENVIAR a qualquer momento');
+            return true;
+        }
+
+        // Se é semana atual ou futura, só pode no fim de semana
+        const dayOfWeek = today.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+        console.log('🗓️ Hoje é:', today.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }));
+        console.log('📅 Dia da semana:', dayOfWeek, '(0=Domingo, 6=Sábado)');
+        console.log('📆 Semana início:', weekStart);
+        console.log('✅ É semana passada?', weekStartDate < today);
+        console.log('✅ É fim de semana?', isWeekend);
+
+        return isWeekend;
+    })();
+
     const prevWeek = () => {
         const newDate = new Date(weekStart);
         newDate.setDate(newDate.getDate() - 7);
@@ -494,10 +523,28 @@ export default function Timesheet() {
                         {/* Actions */}
                         {!isReadOnly && (
                             <div className="flex flex-col gap-3">
+                                {/* Botão de Enviar - Só clicável sábado/domingo */}
+                                {!canSubmit && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-1">
+                                        <div className="flex items-start gap-2">
+                                            <IconAlertCircle stroke={1} className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-amber-900">Solo envío en fin de semana</p>
+                                                <p className="text-xs text-amber-700 mt-0.5">Puedes registrar y guardar horas, pero solo enviar para aprobación los sábados y domingos.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <button
                                     onClick={handleSubmit}
-                                    disabled={submitting || saving || totals.total === 0}
-                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={!canSubmit || submitting || saving || totals.total === 0}
+                                    className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl transition-all font-semibold ${
+                                        canSubmit
+                                            ? 'bg-red-600 text-white hover:bg-red-700 hover:scale-105 active:scale-95'
+                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    } ${(submitting || saving || totals.total === 0) ? 'opacity-50' : ''}`}
+                                    title={!canSubmit ? 'Solo disponible sábado y domingo' : ''}
                                 >
                                     {submitting ? (
                                         <>
@@ -507,7 +554,7 @@ export default function Timesheet() {
                                     ) : (
                                         <>
                                             <IconSend stroke={1} className="w-5 h-5" />
-                                            {t('timesheet.submit')}
+                                            {canSubmit ? t('timesheet.submit') : '🔒 ' + t('timesheet.submit')}
                                         </>
                                     )}
                                 </button>

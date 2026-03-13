@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm run build)",
-      "Bash(node scripts/capture-screenshots.cjs)"
+      "Bash(node scripts/capture-screenshots.cjs)",
+      "Read(//c/Users/Guilherme/Downloads/**)"
     ]
   },
   "diffEditor.maxComputationTime": 0,

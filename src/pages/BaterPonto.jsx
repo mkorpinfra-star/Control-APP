@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { IconChevronLeft, IconChevronRight, IconSend, IconClock, IconMinus, IconPlus, IconCheck } from '@tabler/icons-react'
+import { IconChevronLeft, IconChevronRight, IconSend, IconClock, IconMinus, IconPlus, IconCheck, IconAlertCircle } from '@tabler/icons-react'
 import CustomSelect from '../components/CustomSelect'
 
 const DIAS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
@@ -336,7 +336,36 @@ export default function BaterPonto() {
         return total > 0
     })
 
-    const podeEnviar = !bloqueado && totalSemana > 0 && todosOsDiasPreenchidos
+    // Detectar se pode enviar:
+    // - Semanas PASSADAS: sempre pode (regularização)
+    // - Semana ATUAL ou FUTURA: só sábado/domingo
+    const canSubmit = (() => {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const weekStartDate = new Date(semanaInicio)
+        weekStartDate.setHours(0, 0, 0, 0)
+
+        // Se a semana é passada (segunda-feira da semana é antes de hoje)
+        if (weekStartDate < today) {
+            console.log('✅ BaterPonto - Semana passada - PODE ENVIAR a qualquer momento')
+            return true
+        }
+
+        // Se é semana atual ou futura, só pode no fim de semana
+        const dayOfWeek = today.getDay()
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+
+        console.log('🗓️ BaterPonto - Hoje é:', today.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }))
+        console.log('📅 BaterPonto - Dia da semana:', dayOfWeek, '(0=Domingo, 6=Sábado)')
+        console.log('📆 BaterPonto - Semana início:', semanaInicio)
+        console.log('✅ BaterPonto - É semana passada?', weekStartDate < today)
+        console.log('✅ BaterPonto - É fim de semana?', isWeekend)
+
+        return isWeekend
+    })()
+
+    const podeEnviar = !bloqueado && totalSemana > 0 && todosOsDiasPreenchidos && canSubmit
 
     return (
         <div className="min-h-screen bg-white pb-32">
@@ -625,13 +654,32 @@ export default function BaterPonto() {
                         <span className="text-xl font-black text-red-600">{totalSemana.toFixed(1)}h</span>
                     </div>
                 </div>
+
+                {/* Alerta - Só envio no fim de semana */}
+                {!bloqueado && !canSubmit && totalSemana > 0 && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-2">
+                        <p className="text-xs font-semibold text-amber-900">🔒 Solo envío en fin de semana</p>
+                        <p className="text-[10px] text-amber-700 mt-0.5">Puedes guardar horas, pero solo enviar sábado y domingo.</p>
+                    </div>
+                )}
+
                 <button
                     onClick={handleSubmit}
                     disabled={!podeEnviar}
-                    className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold text-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 flex items-center justify-center gap-2"
+                    className={`w-full py-3 rounded-xl font-semibold text-sm shadow-lg disabled:cursor-not-allowed active:scale-98 flex items-center justify-center gap-2 transition-all ${
+                        canSubmit && !bloqueado
+                            ? 'bg-red-600 text-white hover:bg-red-700'
+                            : 'bg-gray-200 text-gray-400'
+                    } ${!podeEnviar ? 'opacity-50' : ''}`}
                 >
                     <IconSend stroke={1} className="w-4 h-4" />
-                    {bloqueado ? 'Ya enviado' : !todosOsDiasPreenchidos ? 'Complete los días trabajados' : 'Enviar para aprobación'}
+                    {bloqueado
+                        ? 'Ya enviado'
+                        : !canSubmit
+                        ? '🔒 Enviar (solo fin de semana)'
+                        : !todosOsDiasPreenchidos
+                        ? 'Complete los días trabajados'
+                        : 'Enviar para aprobación'}
                 </button>
             </div>
 
