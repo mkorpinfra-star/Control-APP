@@ -135,6 +135,9 @@ export default function Employees() {
     };
 
     const filtered = employees.filter(emp => {
+        // Não mostrar admins na lista de Empleados
+        if (emp.tipo === 'admin') return false;
+
         const s = searchTerm.toLowerCase();
         const matchName = (emp.nome?.toLowerCase() || '').includes(s) || (emp.passaporte?.toLowerCase() || '').includes(s);
         const matchType = filterType === 'all' || emp.tipo === filterType;
@@ -193,11 +196,7 @@ export default function Employees() {
                                 <Avatar user={emp} size="md" className="rounded-xl" />
                                 <div className="flex-1 min-w-0">
                                     <p className="font-bold text-gray-900 text-base leading-tight">{emp.nome}</p>
-                                    <p className="text-sm text-gray-600 mt-0.5">{emp.passaporte}</p>
-                                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${typeColor(emp.tipo)}`}>
-                                        {typeLabel(emp.tipo)}
-                                        {emp.funcao && ` - ${emp.funcao}`}
-                                    </span>
+                                    <p className="text-sm text-gray-600 mt-0.5">{emp.funcao || 'Sin función'}</p>
                                 </div>
                             </div>
 
