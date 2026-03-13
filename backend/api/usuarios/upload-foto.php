@@ -9,6 +9,27 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
+// Garantir que sempre retorne JSON
+function sendJsonError($message, $code = 500) {
+    http_response_code($code);
+    echo json_encode(['error' => true, 'message' => $message]);
+    exit;
+}
+
+// Registrar handler de erro global
+set_exception_handler(function($e) {
+    error_log('Upload foto exception: ' . $e->getMessage());
+    sendJsonError('Error al procesar la foto: ' . $e->getMessage());
+});
+
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE])) {
+        error_log('Upload foto fatal: ' . $error['message']);
+        sendJsonError('Error fatal al procesar la foto');
+    }
+});
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -19,12 +40,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../includes/tenant_middleware.php';
+try {
+    require_once __DIR__ . '/../../config/database.php';
+    require_once __DIR__ . '/../../includes/tenant_middleware.php';
 
-// Validar acesso multi-tenant
-$auth = validateTenantAccess();
-$tenant_id = $auth['tenant_id'];
+    // Validar acesso multi-tenant
+    $auth = validateTenantAccess();
+    $tenant_id = $auth['tenant_id'];
+} catch (Exception $e) {
+    error_log('Upload foto auth error: ' . $e->getMessage());
+    sendJsonError('Error de autenticación: ' . $e->getMessage(), 401);
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -154,6 +180,11 @@ try {
     ]);
 
 } catch (Exception $e) {
+    error_log('Upload foto error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Server error', 'message' => $e->getMessage()]);
+    echo json_encode([
+        'error' => true,
+        'message' => 'Error al subir la foto: ' . $e->getMessage()
+    ]);
+    exit;
 }

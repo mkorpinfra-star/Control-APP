@@ -26,6 +26,11 @@ async function captureScreenshots() {
     const password = 'admin123';
 
     try {
+        // Desativar tutorial em todas as páginas
+        await page.evaluateOnNewDocument(() => {
+            localStorage.setItem('tutorialCompleted', 'true');
+        });
+
         // 1. LOGIN
         console.log('📸 Capturando: Login...');
         await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle0', timeout: 60000 });
@@ -46,6 +51,14 @@ async function captureScreenshots() {
         // 2. DASHBOARD
         console.log('📸 Capturando: Dashboard...');
         await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Fechar modal do tutorial se existir
+        await page.evaluate(() => {
+            const closeBtn = document.querySelector('.swal2-close, button[aria-label="Close"]');
+            if (closeBtn) closeBtn.click();
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         await page.screenshot({
             path: path.join(screenshotsDir, '02-dashboard.png'),
             fullPage: true
@@ -55,6 +68,11 @@ async function captureScreenshots() {
         console.log('📸 Capturando: Obras...');
         await page.goto(`${baseURL}/projects`, { waitUntil: 'networkidle0' });
         await new Promise(resolve => setTimeout(resolve, 1000));
+        await page.evaluate(() => {
+            const closeBtn = document.querySelector('.swal2-close, button[aria-label="Close"]');
+            if (closeBtn) closeBtn.click();
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
         await page.screenshot({
             path: path.join(screenshotsDir, '03-obras.png'),
             fullPage: true
@@ -64,6 +82,11 @@ async function captureScreenshots() {
         console.log('📸 Capturando: Clientes...');
         await page.goto(`${baseURL}/clients`, { waitUntil: 'networkidle0' });
         await new Promise(resolve => setTimeout(resolve, 1000));
+        await page.evaluate(() => {
+            const closeBtn = document.querySelector('.swal2-close, button[aria-label="Close"]');
+            if (closeBtn) closeBtn.click();
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
         await page.screenshot({
             path: path.join(screenshotsDir, '04-clientes.png'),
             fullPage: true
@@ -73,6 +96,11 @@ async function captureScreenshots() {
         console.log('📸 Capturando: Funcionários...');
         await page.goto(`${baseURL}/employees`, { waitUntil: 'networkidle0' });
         await new Promise(resolve => setTimeout(resolve, 1000));
+        await page.evaluate(() => {
+            const closeBtn = document.querySelector('.swal2-close, button[aria-label="Close"]');
+            if (closeBtn) closeBtn.click();
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
         await page.screenshot({
             path: path.join(screenshotsDir, '05-funcionarios.png'),
             fullPage: true
@@ -82,6 +110,11 @@ async function captureScreenshots() {
         console.log('📸 Capturando: Encarregados...');
         await page.goto(`${baseURL}/encarregados`, { waitUntil: 'networkidle0' });
         await new Promise(resolve => setTimeout(resolve, 1000));
+        await page.evaluate(() => {
+            const closeBtn = document.querySelector('.swal2-close, button[aria-label="Close"]');
+            if (closeBtn) closeBtn.click();
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
         await page.screenshot({
             path: path.join(screenshotsDir, '06-encarregados.png'),
             fullPage: true
@@ -169,7 +202,7 @@ async function captureScreenshots() {
             fullPage: true
         });
 
-        // 16. MOBILE - Apontamento
+        // 16. MOBILE - Apontamento (Admin view)
         console.log('📱 Capturando versão MOBILE: Apontamento...');
         await page.goto(`${baseURL}/timesheet`, { waitUntil: 'networkidle0' });
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -177,6 +210,37 @@ async function captureScreenshots() {
             path: path.join(screenshotsDir, '16-mobile-apontamento.png'),
             fullPage: true
         });
+
+        // 17. Funcionário - Tela de Apontamento (nova sessão)
+        console.log('📸 Capturando: Apontamento Funcionário...');
+        const page2 = await browser.newPage();
+        await page2.evaluateOnNewDocument(() => {
+            localStorage.setItem('tutorialCompleted', 'true');
+        });
+        await page2.setViewport({ width: 390, height: 844 });
+
+        // Login como funcionário
+        await page2.goto(`${baseURL}/login`, { waitUntil: 'networkidle0', timeout: 60000 });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            await page2.waitForSelector('#passport', { visible: true, timeout: 15000 });
+            await page2.type('#passport', 'GUILHERMEEE');
+            await page2.waitForSelector('#password', { visible: true });
+            await page2.type('#password', '010203');
+            await page2.waitForSelector('button[type="submit"]', { visible: true });
+            await page2.click('button[type="submit"]');
+            await page2.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 });
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await page2.screenshot({
+                path: path.join(screenshotsDir, '17-apontamento-funcionario.png'),
+                fullPage: true
+            });
+        } catch (error) {
+            console.log('⚠️ Não foi possível capturar tela de funcionário:', error.message);
+        }
+        await page2.close();
 
         console.log('✅ Todas as screenshots capturadas com sucesso!');
         console.log(`📁 Salvas em: ${screenshotsDir}`);

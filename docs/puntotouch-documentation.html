@@ -6,16 +6,31 @@
     <title>PuntoTouch - Documentação Técnica v2.0</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #667eea;
-            --primary-dark: #5568d3;
+            --red-primary: #b91c1c;
+            --red-secondary: #dc2626;
+            --red-light: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
             --sidebar-width: 280px;
         }
 
+        * {
+            box-shadow: none !important;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             overflow-x: hidden;
+            background: white;
+            color: var(--gray-900);
         }
 
         .sidebar {
@@ -24,20 +39,39 @@
             left: 0;
             bottom: 0;
             width: var(--sidebar-width);
-            background: #1a1d29;
+            background: var(--gray-900);
             color: white;
             overflow-y: auto;
             transition: transform 0.3s ease;
             z-index: 1000;
+            border-right: 1px solid var(--gray-200);
         }
 
         .sidebar-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, var(--red-primary), var(--red-secondary));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h1 {
+            color: white;
+        }
+
+        .sidebar-header p {
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .sidebar-nav {
             padding: 1rem 0;
+        }
+
+        .nav-section-title {
+            padding: 1rem 1.5rem 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .nav-link {
@@ -48,35 +82,42 @@
             gap: 0.75rem;
             transition: all 0.2s;
             border-left: 3px solid transparent;
+            text-decoration: none;
         }
 
         .nav-link:hover {
             color: white;
             background: rgba(255, 255, 255, 0.05);
-            border-left-color: var(--primary-color);
+            border-left-color: var(--red-primary);
         }
 
         .nav-link.active {
             color: white;
-            background: rgba(102, 126, 234, 0.15);
-            border-left-color: var(--primary-color);
+            background: rgba(220, 38, 38, 0.1);
+            border-left-color: var(--red-primary);
             font-weight: 600;
         }
 
         .main-content {
             margin-left: var(--sidebar-width);
-            padding: 2rem;
+            padding: 3rem;
+            max-width: 1400px;
         }
 
         .mobile-toggle {
             display: none;
             position: fixed;
-            bottom: 1.5rem;
+            top: 1.5rem;
             right: 1.5rem;
             z-index: 1001;
+            background: var(--red-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 968px) {
             .sidebar {
                 transform: translateX(-100%);
             }
@@ -87,11 +128,38 @@
 
             .main-content {
                 margin-left: 0;
-                padding: 1rem;
+                padding: 1.5rem;
+                padding-top: 5rem;
             }
 
             .mobile-toggle {
                 display: block;
+            }
+
+            .feature-row {
+                display: block !important;
+                position: static !important;
+            }
+
+            .feature-text {
+                max-width: 100% !important;
+            }
+
+            .feature-img {
+                position: static !important;
+                max-width: 100% !important;
+                margin-top: 2rem;
+            }
+
+            .screenshot-container {
+                box-shadow: none !important;
+            }
+
+            .screenshot-container img {
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                height: auto !important;
             }
         }
 
@@ -110,46 +178,163 @@
         }
 
         .hero-banner {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            background: linear-gradient(135deg, var(--red-primary), var(--red-secondary));
             color: white;
             padding: 3rem 2rem;
-            border-radius: 1rem;
-            margin-bottom: 2rem;
+            border-radius: 0;
+            margin-bottom: 3rem;
+            border: 1px solid var(--gray-200);
         }
 
-        .feature-card {
-            transition: transform 0.3s, box-shadow 0.3s;
+        .feature-row {
+            display: block;
+            position: relative;
+            margin-bottom: 4rem;
+            padding-bottom: 4rem;
+            border-bottom: 1px solid var(--gray-200);
         }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        .feature-row:last-child {
+            border-bottom: none;
+        }
+
+        .feature-text {
+            max-width: 55%;
+        }
+
+        .feature-img {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+            max-width: 40%;
         }
 
         .screenshot-container {
-            border-radius: 0.75rem;
+            border-radius: 1rem;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s;
+            border: 1px solid var(--gray-200);
+            background: transparent;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
-        .screenshot-container:hover {
-            transform: scale(1.02);
+        .screenshot-container img {
+            width: auto;
+            height: auto;
+            max-height: 650px;
+            display: block;
         }
 
         .api-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
+            border: 1px solid;
         }
 
-        .api-badge.get { background: #10b981; color: white; }
-        .api-badge.post { background: #3b82f6; color: white; }
-        .api-badge.put { background: #f59e0b; color: white; }
-        .api-badge.delete { background: #ef4444; color: white; }
+        .api-badge.get { background: #10b981; color: white; border-color: #059669; }
+        .api-badge.post { background: #3b82f6; color: white; border-color: #2563eb; }
+        .api-badge.put { background: #f59e0b; color: white; border-color: #d97706; }
+        .api-badge.delete { background: #ef4444; color: white; border-color: #dc2626; }
+
+        .card {
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            background: white;
+        }
+
+        .alert {
+            border-radius: 0.5rem;
+            border: 1px solid;
+        }
+
+        .alert-primary {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1e3a8a;
+        }
+
+        .alert-info {
+            background: #f0f9ff;
+            border-color: #0ea5e9;
+            color: #0c4a6e;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border-color: #10b981;
+            color: #065f46;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            color: #78350f;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        h2 {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--red-primary);
+        }
+
+        h3 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        code {
+            background: var(--gray-100);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: var(--red-primary);
+            border: 1px solid var(--gray-200);
+        }
+
+        .code-block {
+            background: var(--gray-900);
+            color: #e5e7eb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--gray-800);
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            background: transparent;
+            color: #e5e7eb;
+            border: none;
+        }
+
+        .badge {
+            border: 1px solid;
+        }
+
+        ul, ol {
+            line-height: 1.8;
+        }
+
+        .list-group-item {
+            border: 1px solid var(--gray-200);
+        }
     </style>
 </head>
 <body>
@@ -157,300 +342,850 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h4 class="mb-1">PuntoTouch</h4>
-            <small class="text-white-50">Documentação Técnica v2.0</small>
+            <h4 class="mb-1 text-white">PuntoTouch</h4>
+            <small class="text-white-50">Documentação v2.0</small>
         </div>
 
         <nav class="sidebar-nav">
+            <div class="nav-section-title">Visão Geral</div>
             <a href="#overview" class="nav-link active" onclick="showSection('overview', this)">
-                <i class="bi bi-house-door"></i> Visão Geral
-            </a>
-            <a href="#whats-new" class="nav-link" onclick="showSection('whats-new', this)">
-                <i class="bi bi-star"></i> Novidades v2.0
+                <i class="bi bi-house-door"></i> Início
             </a>
             <a href="#architecture" class="nav-link" onclick="showSection('architecture', this)">
                 <i class="bi bi-diagram-3"></i> Arquitetura
             </a>
-            <a href="#features" class="nav-link" onclick="showSection('features', this)">
-                <i class="bi bi-lightning"></i> Funcionalidades
+
+            <div class="nav-section-title">Funcionalidades</div>
+            <a href="#dashboard" class="nav-link" onclick="showSection('dashboard', this)">
+                <i class="bi bi-speedometer2"></i> Dashboard
             </a>
-            <a href="#monitoring" class="nav-link" onclick="showSection('monitoring', this)">
-                <i class="bi bi-broadcast"></i> Monitoramento Real-Time
+            <a href="#clientes" class="nav-link" onclick="showSection('clientes', this)">
+                <i class="bi bi-person-vcard"></i> Clientes
             </a>
+            <a href="#obras" class="nav-link" onclick="showSection('obras', this)">
+                <i class="bi bi-building"></i> Obras
+            </a>
+            <a href="#funcionarios" class="nav-link" onclick="showSection('funcionarios', this)">
+                <i class="bi bi-people"></i> Funcionários
+            </a>
+            <a href="#encarregados" class="nav-link" onclick="showSection('encarregados', this)">
+                <i class="bi bi-person-badge"></i> Encarregados
+            </a>
+            <a href="#administradores" class="nav-link" onclick="showSection('administradores', this)">
+                <i class="bi bi-shield-check"></i> Administradores
+            </a>
+            <a href="#apontamento" class="nav-link" onclick="showSection('apontamento', this)">
+                <i class="bi bi-clock-history"></i> Apontamento
+            </a>
+            <a href="#monitoramento" class="nav-link" onclick="showSection('monitoramento', this)">
+                <i class="bi bi-broadcast"></i> Monitoramento
+            </a>
+            <a href="#aprovacoes" class="nav-link" onclick="showSection('aprovacoes', this)">
+                <i class="bi bi-check2-square"></i> Aprovações
+            </a>
+            <a href="#faturamento" class="nav-link" onclick="showSection('faturamento', this)">
+                <i class="bi bi-receipt"></i> Faturamento
+            </a>
+            <a href="#folha" class="nav-link" onclick="showSection('folha', this)">
+                <i class="bi bi-cash-coin"></i> Folha
+            </a>
+            <a href="#analytics" class="nav-link" onclick="showSection('analytics', this)">
+                <i class="bi bi-graph-up"></i> Analytics
+            </a>
+
+            <div class="nav-section-title">Técnico</div>
             <a href="#notifications" class="nav-link" onclick="showSection('notifications', this)">
-                <i class="bi bi-bell"></i> Notificações Push
+                <i class="bi bi-bell"></i> Notificações
             </a>
             <a href="#firebase" class="nav-link" onclick="showSection('firebase', this)">
-                <i class="bi bi-cloud"></i> Firebase Integration
+                <i class="bi bi-cloud"></i> Firebase
             </a>
             <a href="#crud" class="nav-link" onclick="showSection('crud', this)">
-                <i class="bi bi-database"></i> Módulos CRUD
+                <i class="bi bi-database"></i> CRUD
             </a>
             <a href="#api" class="nav-link" onclick="showSection('api', this)">
-                <i class="bi bi-plug"></i> API Reference
-            </a>
-            <a href="#screenshots" class="nav-link" onclick="showSection('screenshots', this)">
-                <i class="bi bi-image"></i> Screenshots
+                <i class="bi bi-plug"></i> API
             </a>
             <a href="#security" class="nav-link" onclick="showSection('security', this)">
-                <i class="bi bi-shield-check"></i> Segurança
+                <i class="bi bi-shield-lock"></i> Segurança
             </a>
         </nav>
     </aside>
 
-    <!-- Mobile Toggle Button -->
-    <button class="btn btn-primary mobile-toggle" onclick="toggleSidebar()">
+    <!-- Mobile Toggle -->
+    <button class="mobile-toggle" onclick="toggleSidebar()">
         <i class="bi bi-list"></i>
     </button>
 
     <!-- Main Content -->
     <main class="main-content">
 
-        <!-- Overview Section -->
+        <!-- Overview -->
         <section id="overview" class="section active">
             <div class="hero-banner">
-                <h1 class="display-4 fw-bold mb-3">PuntoTouch</h1>
-                <p class="lead mb-4">Sistema Multi-Tenant de Gestão de Obras com Monitoramento Real-Time</p>
+                <h1 class="display-4 fw-bold mb-3 text-white">PuntoTouch</h1>
+                <p class="lead mb-4 text-white">Sistema Multi-Tenant de Gestão de Obras com Monitoramento Real-Time</p>
                 <div class="d-flex flex-wrap gap-2">
-                    <span class="badge bg-white text-primary">React + Vite</span>
-                    <span class="badge bg-white text-primary">PHP RESTful API</span>
-                    <span class="badge bg-white text-primary">Firebase Cloud Messaging</span>
-                    <span class="badge bg-white text-primary">JWT Authentication</span>
-                    <span class="badge bg-white text-primary">Multi-Tenant SaaS</span>
+                    <span class="badge bg-white text-dark">React 18 + Vite</span>
+                    <span class="badge bg-white text-dark">PHP 8.3 RESTful API</span>
+                    <span class="badge bg-white text-dark">Firebase Cloud Messaging V1</span>
+                    <span class="badge bg-white text-dark">JWT Multi-Tenant</span>
+                    <span class="badge bg-white text-dark">MySQL/MariaDB</span>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <h2 class="mb-4"><i class="bi bi-info-circle text-primary"></i> Sobre o Sistema</h2>
-                    <p class="lead">
-                        <strong>PuntoTouch</strong> é uma plataforma completa de gestão de obras com arquitetura <strong>multi-tenant</strong>,
-                        permitindo que múltiplas empresas utilizem o mesmo sistema com isolamento total de dados.
-                    </p>
-                    <p>
-                        O sistema oferece controle completo de obras, clientes, funcionários, encarregados, administradores,
-                        além de módulos financeiros (faturamento, folha de pagamento), apontamento de horas, aprovações e analytics.
-                    </p>
+            <h2><i class="bi bi-info-circle text-danger"></i> Sobre o Sistema</h2>
+            <p class="lead">
+                <strong>PuntoTouch</strong> é uma plataforma completa de gestão de obras com arquitetura <strong>multi-tenant</strong>,
+                permitindo que múltiplas empresas utilizem o mesmo sistema com isolamento total de dados.
+            </p>
+            <p>
+                O sistema oferece controle completo de obras, clientes, funcionários, encarregados e administradores,
+                além de módulos financeiros (faturamento, folha de pagamento), apontamento de horas, aprovações via WhatsApp e analytics.
+            </p>
+
+            <div class="row g-4 mt-4">
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h4 class="mb-3"><i class="bi bi-code-slash text-danger"></i> Frontend</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> React 18</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Vite</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Tailwind CSS + DaisyUI</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Recharts</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Tabler Icons</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h4 class="mb-3"><i class="bi bi-server text-danger"></i> Backend</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> PHP 8.3</li>
+                            <li><i class="bi bi-check-circle text-success"></i> MySQL/MariaDB</li>
+                            <li><i class="bi bi-check-circle text-success"></i> JWT Authentication</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Firebase Admin SDK</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Multi-Tenant Isolation</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- What's New Section -->
-        <section id="whats-new" class="section">
-            <h2 class="mb-4"><i class="bi bi-star-fill text-warning"></i> Novidades da Versão 2.0</h2>
-            <div class="alert alert-primary border-0 shadow-sm">
-                <h4 class="alert-heading"><i class="bi bi-rocket"></i> Recursos Recém-Implementados</h4>
-                <hr>
-                <ul class="list-unstyled mb-0">
-                    <li class="mb-3">
-                        <i class="bi bi-broadcast text-danger me-2"></i>
-                        <strong>Monitoramento Real-Time:</strong> Visualização ao vivo de funcionários que não marcaram ponto
-                    </li>
-                    <li class="mb-3">
-                        <i class="bi bi-bell-fill text-primary me-2"></i>
-                        <strong>Notificações Push via Firebase:</strong> Mensagens instantâneas no celular via FCM API V1
-                    </li>
-                    <li class="mb-3">
-                        <i class="bi bi-megaphone text-success me-2"></i>
-                        <strong>Broadcast de Avisos:</strong> Envio de notificações para TODOS os usuários
-                    </li>
-                    <li class="mb-3">
-                        <i class="bi bi-whatsapp text-success me-2"></i>
-                        <strong>Integração WhatsApp Aprimorada:</strong> Mensagens com informações da obra
-                    </li>
-                    <li class="mb-3">
-                        <i class="bi bi-arrow-repeat text-info me-2"></i>
-                        <strong>Sistema Dual de Notificações:</strong> Sistema separado para atividades e monitoramento
-                    </li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Architecture Section -->
+        <!-- Architecture -->
         <section id="architecture" class="section">
-            <h2 class="mb-4"><i class="bi bi-diagram-3 text-primary"></i> Arquitetura do Sistema</h2>
-            <div class="row g-4">
+            <h2><i class="bi bi-diagram-3 text-danger"></i> Arquitetura</h2>
+
+            <h3><i class="bi bi-shield-lock text-danger"></i> Multi-Tenant</h3>
+            <p>Todas as queries incluem filtro por <code>tenant_id</code> garantindo isolamento completo entre empresas.</p>
+            <div class="code-block mb-4">
+                <code>SELECT * FROM tabela WHERE tenant_id = ? AND ativo = 1</code>
+            </div>
+
+            <h3><i class="bi bi-key text-danger"></i> Autenticação</h3>
+            <p>JWT com expiração de 7 dias. Header obrigatório: <code>Authorization: Bearer TOKEN</code></p>
+
+            <h3><i class="bi bi-cloud text-danger"></i> Notificações</h3>
+            <p>Firebase Cloud Messaging API V1 para push notifications em tempo real.</p>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="section">
+            <h2><i class="bi bi-speedometer2 text-danger"></i> Dashboard</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3><i class="bi bi-grid-3x3-gap text-danger"></i> Grid de Navegação</h3>
+                    <p class="lead">O coração do sistema. Interface central com acesso rápido a todas as funcionalidades através de um grid de 10 ícones intuitivos.</p>
+
+                    <h4 class="mt-4">Ícones do Grid</h4>
+                    <ul>
+                        <li><strong>Clientes:</strong> Gerenciamento completo de clientes</li>
+                        <li><strong>Obras:</strong> Gestão de projetos com calendário</li>
+                        <li><strong>Empleados:</strong> Cadastro de funcionários</li>
+                        <li><strong>Encargados:</strong> Gestão de encarregados</li>
+                        <li><strong>Admins:</strong> Administradores do sistema</li>
+                        <li><strong>Folha:</strong> Folha de pagamento</li>
+                        <li><strong>Faturamento:</strong> Geração de faturas</li>
+                        <li><strong>Monitoreo:</strong> Real-time monitoring</li>
+                        <li><strong>Informes:</strong> Relatórios</li>
+                        <li><strong>Análisis:</strong> Analytics e gráficos</li>
+                    </ul>
+
+                    <h4 class="mt-4">Cards Informativos</h4>
+                    <ul>
+                        <li>Obras Ativas: contador de projetos em andamento</li>
+                        <li>Funcionários: total de colaboradores</li>
+                        <li>Horas Pendentes: apontamentos aguardando aprovação</li>
+                        <li>Alertas: notificações e pendências</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/02-dashboard.png" alt="Dashboard">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clientes -->
+        <section id="clientes" class="section">
+            <h2><i class="bi bi-person-vcard text-danger"></i> Clientes</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Gestão Completa</h3>
+                    <p class="lead">CRUD completo com busca em tempo real e vínculo com obras.</p>
+
+                    <h4 class="mt-4">Cadastro</h4>
+                    <ul>
+                        <li><strong>Nome:</strong> Nome completo (obrigatório)</li>
+                        <li><strong>Email:</strong> Endereço de e-mail</li>
+                        <li><strong>Telefone:</strong> Contato telefônico</li>
+                        <li><strong>Endereço:</strong> Localização</li>
+                    </ul>
+
+                    <h4 class="mt-4">Funcionalidades</h4>
+                    <ul>
+                        <li>Busca em tempo real por nome, email e telefone</li>
+                        <li>Edição inline de dados</li>
+                        <li>Exclusão lógica (soft delete)</li>
+                        <li>Vínculo com múltiplas obras</li>
+                        <li>Contador de obras por cliente</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/04-clientes.png" alt="Clientes">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Obras -->
+        <section id="obras" class="section">
+            <h2><i class="bi bi-building text-danger"></i> Obras</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Gestão de Projetos</h3>
+                    <p class="lead">Sistema completo com calendário, configuração financeira e controle de impostos.</p>
+
+                    <h4 class="mt-4">Configuração de Faturamento</h4>
+                    <ul>
+                        <li><strong>Hora Normal:</strong> Valor base (padrão: 0)</li>
+                        <li><strong>Hora Extra:</strong> Valor hora extra (padrão: 0)</li>
+                        <li><strong>Hora Noturna:</strong> Valor hora noturna (padrão: 0)</li>
+                        <li><strong>Multiplicador Extra:</strong> Fator multiplicador (padrão: 0)</li>
+                        <li><strong>Multiplicador Noturna:</strong> Fator multiplicador (padrão: 0)</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i> Todos os campos iniciam em 0 para configuração individual por obra.
+                    </div>
+
+                    <h4 class="mt-4">Impostos</h4>
+                    <ul>
+                        <li>IGI/IVA: calculado automaticamente</li>
+                        <li>IRP: imposto sobre rendimento</li>
+                        <li>Segurança Social: contribuição previdenciária</li>
+                    </ul>
+
+                    <h4 class="mt-4">Controles</h4>
+                    <ul>
+                        <li>Switch: Permitir Hora Extra</li>
+                        <li>Switch: Permitir Hora Noturna</li>
+                        <li>Switch: Obra Ativa</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/03-obras.png" alt="Obras">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Funcionários -->
+        <section id="funcionarios" class="section">
+            <h2><i class="bi bi-people text-danger"></i> Funcionários</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Gestão de Colaboradores</h3>
+                    <p class="lead">Cadastro completo com biometria, foto e função.</p>
+
+                    <h4 class="mt-4">Cadastro</h4>
+                    <ul>
+                        <li><strong>Passaporte:</strong> Documento de identificação (obrigatório)</li>
+                        <li><strong>Nome:</strong> Nome completo</li>
+                        <li><strong>Email:</strong> Endereço de e-mail (opcional)</li>
+                        <li><strong>Telefone:</strong> Contato (opcional)</li>
+                        <li><strong>Função:</strong> Cargo (Pedreiro, Eletricista, etc.)</li>
+                        <li><strong>Senha:</strong> Senha de acesso</li>
+                    </ul>
+
+                    <h4 class="mt-4">Biometria</h4>
+                    <p>Sistema de cadastro biométrico para marcação de ponto segura.</p>
+
+                    <h4 class="mt-4">Upload de Foto</h4>
+                    <ul>
+                        <li>Galeria: selecionar da galeria do dispositivo</li>
+                        <li>Câmera: tirar foto diretamente</li>
+                        <li>Conversão automática para WebP (200x200px)</li>
+                        <li>Correção EXIF automática (evita rotação)</li>
+                    </ul>
+
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-check-circle"></i> A função do funcionário aparece no card: <span class="badge bg-primary">Empleado - Pedreiro</span>
+                    </div>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/05-funcionarios.png" alt="Funcionários">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Encarregados -->
+        <section id="encarregados" class="section">
+            <h2><i class="bi bi-person-badge text-danger"></i> Encarregados</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Aprovação via WhatsApp</h3>
+                    <p class="lead">Sistema exclusivo de aprovação de apontamentos via WhatsApp com token de segurança.</p>
+
+                    <h4 class="mt-4">Fluxo Completo</h4>
+                    <ol>
+                        <li>Funcionário marca ponto no sistema</li>
+                        <li>Encarregado recebe notificação push</li>
+                        <li>Encarregado acessa link único via WhatsApp</li>
+                        <li>Sistema exibe detalhes (obra, funcionário, horas)</li>
+                        <li>Encarregado assina digitalmente</li>
+                        <li>Aprova ou rejeita</li>
+                        <li>Token de segurança valida autenticidade</li>
+                    </ol>
+
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> Encarregados NÃO precisam de passaporte no cadastro.
+                    </div>
+
+                    <h4 class="mt-4">Segurança</h4>
+                    <ul>
+                        <li>Token JWT único por aprovação</li>
+                        <li>Validade: 7 dias</li>
+                        <li>Registro de IP e timestamp</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/06-encarregados.png" alt="Encarregados">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Administradores -->
+        <section id="administradores" class="section">
+            <h2><i class="bi bi-shield-check text-danger"></i> Administradores</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Permissões Completas</h3>
+                    <p class="lead">Usuários com acesso total ao sistema.</p>
+
+                    <h4 class="mt-4">Cadastro</h4>
+                    <ul>
+                        <li><strong>Nome:</strong> Nome completo (obrigatório)</li>
+                        <li><strong>Senha:</strong> Senha de acesso (obrigatório)</li>
+                        <li><strong>Passaporte:</strong> OPCIONAL para admins</li>
+                        <li><strong>Email:</strong> Opcional</li>
+                        <li><strong>Telefone:</strong> Opcional</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i> Diferença: Admins NÃO precisam de passaporte (campo opcional).
+                    </div>
+
+                    <h4 class="mt-4">Acesso Total</h4>
+                    <ul>
+                        <li>Dashboard com todos os indicadores</li>
+                        <li>CRUD de Clientes, Obras, Funcionários, Encarregados</li>
+                        <li>Monitoramento Real-Time</li>
+                        <li>Faturamento e Folha de Pagamento</li>
+                        <li>Analytics e Relatórios</li>
+                        <li>Broadcast de Notificações</li>
+                        <li>Configurações do Sistema</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/07-administradores.png" alt="Administradores">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Apontamento -->
+        <section id="apontamento" class="section">
+            <h2><i class="bi bi-clock-history text-danger"></i> Apontamento de Horas</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Sistema Semanal</h3>
+                    <p class="lead">Marcação de ponto em grid semanal com validação automática e reenvio.</p>
+
+                    <h4 class="mt-4">Campos</h4>
+                    <ul>
+                        <li><strong>Obra:</strong> Seleção da obra</li>
+                        <li><strong>Horas Normais:</strong> Quantidade de horas regulares</li>
+                        <li><strong>Horas Extras:</strong> Se permitido na obra</li>
+                        <li><strong>Horas Noturnas:</strong> Se permitido na obra</li>
+                    </ul>
+
+                    <h4 class="mt-4">Validação Automática</h4>
+                    <ul>
+                        <li>Verifica se obra permite hora extra</li>
+                        <li>Verifica se obra permite hora noturna</li>
+                        <li>Total não pode exceder 24h/dia</li>
+                        <li>Obra deve estar ativa</li>
+                    </ul>
+
+                    <h4 class="mt-4">Funcionalidades</h4>
+                    <ul>
+                        <li>Auto-save a cada alteração</li>
+                        <li>Reenvio se rejeitado</li>
+                        <li>Status: pendente/aprovado/rejeitado</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/08-apontamento.png" alt="Apontamento">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Monitoramento -->
+        <section id="monitoramento" class="section">
+            <h2><i class="bi bi-broadcast text-danger"></i> Monitoramento Real-Time</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Visualização em Tempo Real</h3>
+                    <p class="lead">Funcionalidade exclusiva v2.0. Visualiza funcionários que não marcaram ponto.</p>
+
+                    <h4 class="mt-4">Status</h4>
+                    <ul>
+                        <li><strong class="text-danger">Pendente:</strong> Não enviou nenhum apontamento</li>
+                        <li><strong class="text-warning">Incompleto:</strong> Faltam dias na semana</li>
+                        <li><strong class="text-secondary">Rejeitado:</strong> Apontamento rejeitado</li>
+                    </ul>
+
+                    <h4 class="mt-4">Notificações</h4>
+                    <ul>
+                        <li><strong>Individual:</strong> Enviar para funcionário específico</li>
+                        <li><strong>Broadcast:</strong> Notificar TODOS os funcionários</li>
+                    </ul>
+
+                    <div class="alert alert-danger mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> Atualiza em tempo real. Funcionário sai da lista ao marcar ponto.
+                    </div>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/09-monitoramento.png" alt="Monitoramento">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aprovações -->
+        <section id="aprovacoes" class="section">
+            <h2><i class="bi bi-check2-square text-danger"></i> Aprovações</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Fluxo WhatsApp</h3>
+                    <p class="lead">Aprovação com assinatura digital e token de segurança.</p>
+
+                    <h4 class="mt-4">Processo</h4>
+                    <ol>
+                        <li>Funcionário envia apontamento</li>
+                        <li>Sistema dispara notificação push</li>
+                        <li>Encarregado clica → WhatsApp</li>
+                        <li>WhatsApp abre link único</li>
+                        <li>Página exibe detalhes</li>
+                        <li>Encarregado assina no canvas</li>
+                        <li>Clica em Aprovar/Rejeitar</li>
+                        <li>Sistema registra com timestamp e IP</li>
+                    </ol>
+
+                    <h4 class="mt-4">Assinatura Digital</h4>
+                    <p>Canvas HTML5 para assinatura manuscrita com mouse ou toque. Convertida em imagem e armazenada.</p>
+
+                    <h4 class="mt-4">Segurança</h4>
+                    <ul>
+                        <li>Token JWT único</li>
+                        <li>Validade: 7 dias</li>
+                        <li>Rastreabilidade: IP + timestamp</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/10-aprovacoes.png" alt="Aprovações">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Faturamento -->
+        <section id="faturamento" class="section">
+            <h2><i class="bi bi-receipt text-danger"></i> Faturamento</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Geração Automática</h3>
+                    <p class="lead">Cálculo de faturas com IGI/IVA automático.</p>
+
+                    <h4 class="mt-4">Fórmula de Cálculo</h4>
+                    <div class="code-block mb-4">
+                        <code>
+                            Valor Total = (Horas Normais × Valor Hora Normal) +
+                            (Horas Extras × Valor Hora Extra × Multiplicador Extra) +
+                            (Horas Noturnas × Valor Hora Noturna × Multiplicador Noturna)
+                        </code>
+                    </div>
+
+                    <h4 class="mt-4">IGI/IVA</h4>
+                    <p>Imposto calculado automaticamente sobre o valor total e exibido de forma clara.</p>
+
+                    <h4 class="mt-4">Geração</h4>
+                    <ul>
+                        <li>Por mês</li>
+                        <li>Por obra</li>
+                        <li>Consolidação de todos os apontamentos aprovados</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/11-faturamento.png" alt="Faturamento">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Folha -->
+        <section id="folha" class="section">
+            <h2><i class="bi bi-cash-coin text-danger"></i> Folha de Pagamento</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Cálculo de Custos</h3>
+                    <p class="lead">Folha de pagamento por funcionário.</p>
+
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle"></i> <strong>Diferença:</strong><br>
+                        <strong>Faturamento:</strong> Quanto a empresa COBRA do cliente (receita)<br>
+                        <strong>Folha:</strong> Quanto a empresa PAGA aos funcionários (custo)
+                    </div>
+
+                    <h4 class="mt-4">Cálculo</h4>
+                    <ul>
+                        <li>Total de horas normais</li>
+                        <li>Total de horas extras</li>
+                        <li>Total de horas noturnas</li>
+                        <li>Valor total a pagar</li>
+                        <li>Impostos (IRP, Segurança Social)</li>
+                        <li>Valor líquido</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/12-folha.png" alt="Folha">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics -->
+        <section id="analytics" class="section">
+            <h2><i class="bi bi-graph-up text-danger"></i> Analytics</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Dashboards e Gráficos</h3>
+                    <p class="lead">Indicadores de performance com filtros avançados.</p>
+
+                    <h4 class="mt-4">Gráficos</h4>
+                    <ul>
+                        <li><strong>Horas por Obra:</strong> Barras - total por projeto</li>
+                        <li><strong>Horas por Funcionário:</strong> Ranking de produtividade</li>
+                        <li><strong>Evolução Mensal:</strong> Linha do tempo</li>
+                        <li><strong>Distribuição:</strong> Pizza Normal/Extra/Noturna</li>
+                        <li><strong>Faturamento vs Custo:</strong> Comparativo receita/despesa</li>
+                    </ul>
+
+                    <h4 class="mt-4">Indicadores</h4>
+                    <ul>
+                        <li>Taxa de aprovação</li>
+                        <li>Média de horas por funcionário</li>
+                        <li>Obras com maior faturamento</li>
+                        <li>Funcionários mais produtivos</li>
+                        <li>Margem de lucro por obra</li>
+                    </ul>
+
+                    <h4 class="mt-4">Filtros</h4>
+                    <ul>
+                        <li>Período (dia, semana, mês, ano)</li>
+                        <li>Obra específica</li>
+                        <li>Funcionário específico</li>
+                        <li>Status de aprovação</li>
+                    </ul>
+                </div>
+                <div class="feature-img">
+                    <div class="screenshot-container">
+                        <img src="screenshots/13-analytics.png" alt="Analytics">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Notifications -->
+        <section id="notifications" class="section">
+            <h2><i class="bi bi-bell text-danger"></i> Notificações Push</h2>
+
+            <h3>Sistema Dual</h3>
+            <p class="lead">Dois canais separados para organização e clareza.</p>
+
+            <div class="row g-4 mt-4">
                 <div class="col-md-6">
-                    <div class="card h-100 feature-card">
-                        <div class="card-body">
-                            <h4 class="card-title"><i class="bi bi-code-slash text-primary"></i> Frontend</h4>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-check-circle text-success"></i> React 18</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Vite</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Tailwind CSS + DaisyUI</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Recharts</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Lottie</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Tabler Icons</li>
-                            </ul>
+                    <div class="card p-4">
+                        <h4><i class="bi bi-person-check text-success"></i> Atividade</h4>
+                        <ul>
+                            <li>Aprovações</li>
+                            <li>Rejeições</li>
+                            <li>Cadastros</li>
+                            <li>Atualizações</li>
+                        </ul>
+                        <div class="alert alert-info small">
+                            <i class="bi bi-info-circle"></i> Sino de notificações do dashboard
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card h-100 feature-card">
-                        <div class="card-body">
-                            <h4 class="card-title"><i class="bi bi-server text-primary"></i> Backend</h4>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-check-circle text-success"></i> PHP 8.3</li>
-                                <li><i class="bi bi-check-circle text-success"></i> MySQL/MariaDB</li>
-                                <li><i class="bi bi-check-circle text-success"></i> JWT Authentication</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Firebase Admin SDK</li>
-                                <li><i class="bi bi-check-circle text-success"></i> OAuth2 JWT</li>
-                                <li><i class="bi bi-check-circle text-success"></i> Multi-Tenant</li>
-                            </ul>
+                    <div class="card p-4">
+                        <h4><i class="bi bi-broadcast text-danger"></i> Monitoramento</h4>
+                        <ul>
+                            <li>Ponto Pendente</li>
+                            <li>Semana Incompleta</li>
+                            <li>Broadcast Geral</li>
+                            <li>Lembretes</li>
+                        </ul>
+                        <div class="alert alert-danger small">
+                            <i class="bi bi-exclamation-triangle"></i> Tela de Monitoramento Real-Time
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <h3 class="mt-5">Funcionamento</h3>
+            <ol>
+                <li>Backend PHP envia via Firebase Cloud Messaging</li>
+                <li>App React recebe através do service worker</li>
+                <li>Notificação aparece no celular (mesmo com app fechado)</li>
+                <li>Usuário clica e é direcionado para a tela</li>
+                <li>Fica salva no histórico</li>
+            </ol>
+        </section>
+
+        <!-- Firebase -->
+        <section id="firebase" class="section">
+            <h2><i class="bi bi-cloud text-danger"></i> Firebase Integration</h2>
+
+            <h3>Firebase Cloud Messaging API V1</h3>
+            <p class="lead">Versão mais recente e segura do Firebase.</p>
+
+            <h4 class="mt-4">Configuração</h4>
+            <ul>
+                <li><strong>Service Account:</strong> Arquivo JSON com credenciais</li>
+                <li><strong>Project ID:</strong> Identificador do projeto</li>
+                <li><strong>FCM Token:</strong> Token único por dispositivo</li>
+            </ul>
+
+            <h4 class="mt-4">Backend</h4>
+            <p>Firebase Admin SDK via API V1:</p>
+            <div class="code-block mb-4">
+                <code>POST https://fcm.googleapis.com/v1/projects/{PROJECT_ID}/messages:send</code>
+            </div>
+            <p>Arquivo: <code>backend/config/firebase-config.json</code></p>
+
+            <h4 class="mt-4">App</h4>
+            <p>Service Worker: <code>public/firebase-messaging-sw.js</code></p>
+
+            <h4 class="mt-4">Fluxo</h4>
+            <ol>
+                <li>Login → app solicita permissão</li>
+                <li>Firebase gera FCM token</li>
+                <li>App envia token para backend</li>
+                <li>Backend armazena vinculado ao usuário</li>
+                <li>Evento ocorre → backend busca tokens</li>
+                <li>Backend envia payload para Firebase</li>
+                <li>Firebase entrega nos dispositivos</li>
+            </ol>
+
+            <div class="alert alert-warning mt-4">
+                <i class="bi bi-exclamation-triangle"></i> Para usar API V1, atualizar app mobile para v2.0.
             </div>
         </section>
 
-        <!-- Features Section -->
-        <section id="features" class="section">
-            <h2 class="mb-4"><i class="bi bi-lightning-fill text-warning"></i> Funcionalidades Principais</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card feature-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-building display-4 text-primary mb-3"></i>
-                            <h5 class="card-title">Gestão de Obras</h5>
-                            <p class="card-text text-muted">CRUD completo de projetos</p>
-                        </div>
+        <!-- CRUD -->
+        <section id="crud" class="section">
+            <h2><i class="bi bi-database text-danger"></i> Módulos CRUD</h2>
+
+            <p class="lead">Todas as entidades com operações completas de CRUD e isolamento multi-tenant.</p>
+
+            <div class="row g-4 mt-4">
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h4><i class="bi bi-person-vcard text-danger"></i> Clientes</h4>
+                        <p><strong>Endpoints:</strong></p>
+                        <ul class="small">
+                            <li><code class="api-badge get small">GET</code> <code>/api/clientes/list.php</code></li>
+                            <li><code class="api-badge post small">POST</code> <code>/api/clientes/create.php</code></li>
+                            <li><code class="api-badge put small">PUT</code> <code>/api/clientes/update.php</code></li>
+                            <li><code class="api-badge delete small">DELETE</code> <code>/api/clientes/delete.php</code></li>
+                        </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card feature-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-people display-4 text-primary mb-3"></i>
-                            <h5 class="card-title">Gestão de Pessoal</h5>
-                            <p class="card-text text-muted">Funcionários e Administradores</p>
-                        </div>
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h4><i class="bi bi-building text-danger"></i> Obras</h4>
+                        <p><strong>Endpoints:</strong></p>
+                        <ul class="small">
+                            <li><code class="api-badge get small">GET</code> <code>/api/obras/list.php</code></li>
+                            <li><code class="api-badge post small">POST</code> <code>/api/obras/create.php</code></li>
+                            <li><code class="api-badge put small">PUT</code> <code>/api/obras/update.php</code></li>
+                            <li><code class="api-badge delete small">DELETE</code> <code>/api/obras/delete.php</code></li>
+                        </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card feature-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-clock-history display-4 text-primary mb-3"></i>
-                            <h5 class="card-title">Apontamento</h5>
-                            <p class="card-text text-muted">Marcação de ponto</p>
-                        </div>
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h4><i class="bi bi-people text-danger"></i> Usuários</h4>
+                        <p><strong>Tipos:</strong> Funcionários, Encarregados, Admins</p>
+                        <ul class="small">
+                            <li><code class="api-badge get small">GET</code> <code>/api/usuarios/list.php</code></li>
+                            <li><code class="api-badge post small">POST</code> <code>/api/usuarios/create.php</code></li>
+                            <li><code class="api-badge put small">PUT</code> <code>/api/usuarios/update.php</code></li>
+                            <li><code class="api-badge delete small">DELETE</code> <code>/api/usuarios/delete.php</code></li>
+                        </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card feature-card border-danger">
-                        <div class="card-body text-center">
-                            <i class="bi bi-broadcast display-4 text-danger mb-3"></i>
-                            <h5 class="card-title">Monitoramento</h5>
-                            <p class="card-text text-muted">Real-Time</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card feature-card border-primary">
-                        <div class="card-body text-center">
-                            <i class="bi bi-bell-fill display-4 text-primary mb-3"></i>
-                            <h5 class="card-title">Notificações Push</h5>
-                            <p class="card-text text-muted">Firebase</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card feature-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
-                            <h5 class="card-title">Analytics</h5>
-                            <p class="card-text text-muted">Dashboard</p>
-                        </div>
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h4><i class="bi bi-briefcase text-danger"></i> Funções</h4>
+                        <p><strong>Endpoints:</strong></p>
+                        <ul class="small">
+                            <li><code class="api-badge get small">GET</code> <code>/api/funcoes/list.php</code></li>
+                            <li><code class="api-badge post small">POST</code> <code>/api/funcoes/create.php</code></li>
+                            <li><code class="api-badge put small">PUT</code> <code>/api/funcoes/update.php</code></li>
+                            <li><code class="api-badge delete small">DELETE</code> <code>/api/funcoes/delete.php</code></li>
+                        </ul>
                     </div>
                 </div>
             </div>
+
+            <h3 class="mt-5"><i class="bi bi-shield-lock text-danger"></i> Isolamento Multi-Tenant</h3>
+            <p>TODAS as queries incluem filtro por <code>tenant_id</code>:</p>
+            <div class="code-block">
+                <code>SELECT * FROM tabela WHERE tenant_id = ? AND ...</code>
+            </div>
+            <p class="mt-3">Middleware: <code>backend/includes/tenant_middleware.php</code></p>
         </section>
 
-        <!-- Monitoring Section -->
-        <section id="monitoring" class="section">
-            <h2 class="mb-4"><i class="bi bi-broadcast text-danger"></i> Monitoramento Real-Time</h2>
-            <div class="alert alert-danger border-0">
-                <h4 class="alert-heading">Funcionalidade Exclusiva</h4>
-                <p>Visualização em tempo real de funcionários que não marcaram ponto.</p>
-            </div>
-
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="card border-danger">
-                        <div class="card-body">
-                            <i class="bi bi-circle-fill text-danger me-2"></i>
-                            <strong>Pendente</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-warning">
-                        <div class="card-body">
-                            <i class="bi bi-circle-fill text-warning me-2"></i>
-                            <strong>Incompleto</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-secondary">
-                        <div class="card-body">
-                            <i class="bi bi-circle-fill text-secondary me-2"></i>
-                            <strong>Rejeitado</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- API Section -->
+        <!-- API -->
         <section id="api" class="section">
-            <h2 class="mb-4"><i class="bi bi-plug text-primary"></i> API Reference</h2>
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-2">
-                        <span class="api-badge get">GET</span>
-                        <code>/api/monitoramento/list.php</code>
-                    </div>
-                    <p class="text-muted mb-0 ms-5">Lista funcionários sem ponto</p>
-                </div>
+            <h2><i class="bi bi-plug text-danger"></i> API Reference</h2>
+
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle"></i> Todas as rotas (exceto login) requerem: <code>Authorization: Bearer TOKEN</code>
             </div>
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-2">
-                        <span class="api-badge post">POST</span>
-                        <code>/api/monitoramento/broadcast.php</code>
-                    </div>
-                    <p class="text-muted mb-0 ms-5">Broadcast para todos</p>
-                </div>
+
+            <h3>Autenticação</h3>
+            <div class="card p-3 mb-3">
+                <span class="api-badge post">POST</span> <code>/api/auth/login.php</code>
+                <p class="text-muted small mb-0 mt-2">Realiza login e retorna token JWT + dados do usuário</p>
+            </div>
+
+            <h3 class="mt-4">Monitoramento</h3>
+            <div class="card p-3 mb-3">
+                <span class="api-badge get">GET</span> <code>/api/monitoramento/list.php</code>
+                <p class="text-muted small mb-0 mt-2">Lista funcionários sem ponto</p>
+            </div>
+            <div class="card p-3 mb-3">
+                <span class="api-badge post">POST</span> <code>/api/monitoramento/broadcast.php</code>
+                <p class="text-muted small mb-0 mt-2">Broadcast para todos os usuários</p>
+            </div>
+
+            <h3 class="mt-4">Apontamentos</h3>
+            <div class="card p-3 mb-3">
+                <span class="api-badge post">POST</span> <code>/api/apontamentos/create.php</code>
+                <p class="text-muted small mb-0 mt-2">Cria ou atualiza apontamento</p>
+            </div>
+            <div class="card p-3 mb-3">
+                <span class="api-badge get">GET</span> <code>/api/apontamentos/list.php</code>
+                <p class="text-muted small mb-0 mt-2">Lista apontamentos por período</p>
+            </div>
+            <div class="card p-3 mb-3">
+                <span class="api-badge post">POST</span> <code>/api/apontamentos/aprovar.php</code>
+                <p class="text-muted small mb-0 mt-2">Aprova via WhatsApp link com token</p>
+            </div>
+
+            <h3 class="mt-4">Uploads</h3>
+            <div class="card p-3 mb-3">
+                <span class="api-badge post">POST</span> <code>/api/usuarios/upload-foto.php</code>
+                <p class="text-muted small mb-0 mt-2">Upload de foto com conversão WebP e correção EXIF</p>
+            </div>
+
+            <h3 class="mt-4">Financeiro</h3>
+            <div class="card p-3 mb-3">
+                <span class="api-badge get">GET</span> <code>/api/faturamento/calcular.php</code>
+                <p class="text-muted small mb-0 mt-2">Calcula faturamento com IGI/IVA</p>
+            </div>
+            <div class="card p-3 mb-3">
+                <span class="api-badge get">GET</span> <code>/api/folha/calcular.php</code>
+                <p class="text-muted small mb-0 mt-2">Calcula folha de pagamento</p>
             </div>
         </section>
 
-        <!-- Screenshots Section -->
-        <section id="screenshots" class="section">
-            <h2 class="mb-4"><i class="bi bi-image text-primary"></i> Screenshots</h2>
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="screenshot-container">
-                        <img src="screenshots/02-dashboard.png" alt="Dashboard" class="img-fluid">
-                    </div>
-                    <p class="text-center mt-2 fw-bold">Dashboard</p>
-                </div>
-                <div class="col-md-6">
-                    <div class="screenshot-container">
-                        <img src="screenshots/09-monitoramento.png" alt="Monitoramento" class="img-fluid">
-                    </div>
-                    <p class="text-center mt-2 fw-bold">Monitoramento</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Security Section -->
+        <!-- Security -->
         <section id="security" class="section">
-            <h2 class="mb-4"><i class="bi bi-shield-check text-success"></i> Segurança</h2>
+            <h2><i class="bi bi-shield-lock text-danger"></i> Segurança</h2>
+
+            <h3>Autenticação e Autorização</h3>
+            <ul class="list-group mb-4">
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> JWT Authentication com expiração 7 dias</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> Multi-tenant isolation via tenant_id</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> Password hashing com bcrypt</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> HTTPS obrigatório em produção</li>
+            </ul>
+
+            <h3>Proteção</h3>
+            <ul class="list-group mb-4">
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> SQL Injection prevention via PDO prepared statements</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> XSS protection via output sanitization</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> CSRF tokens em formulários</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> Rate limiting em endpoints críticos</li>
+            </ul>
+
+            <h3>Tokens</h3>
             <ul class="list-group">
-                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> JWT Authentication</li>
-                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> Multi-tenant isolation</li>
-                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> SQL Injection prevention</li>
-                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> Password hashing</li>
-                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> HTTPS</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> Tokens únicos por aprovação WhatsApp</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> Registro de IP e timestamp em aprovações</li>
+                <li class="list-group-item"><i class="bi bi-check-circle text-success"></i> FCM tokens armazenados com criptografia</li>
             </ul>
         </section>
 
@@ -466,7 +1201,7 @@
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            if (window.innerWidth < 768) {
+            if (window.innerWidth < 968) {
                 document.getElementById('sidebar').classList.remove('show');
             }
         }
@@ -474,6 +1209,19 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('show');
         }
+
+        // Fechar sidebar ao clicar fora (mobile)
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.mobile-toggle');
+
+            if (window.innerWidth < 968 &&
+                sidebar.classList.contains('show') &&
+                !sidebar.contains(event.target) &&
+                !toggle.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

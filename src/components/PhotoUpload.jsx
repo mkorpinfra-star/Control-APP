@@ -50,13 +50,13 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
         } catch (err) {
             console.error('Camera error:', err);
             if (err.name === 'NotAllowedError') {
-                setError('Permiso de cámara denegado. Por favor, permite el acceso a la cámara en la configuración de tu navegador o usa la opción Galeria.');
+                setError('Permiso de cámara denegado. Usa la opción Galeria.');
             } else if (err.name === 'NotFoundError') {
                 setError('No se encontró ninguna cámara. Usa la opción Galeria.');
             } else if (err.name === 'NotReadableError') {
-                setError('La cámara está en uso por otra aplicación. Usa la opción Galeria.');
+                setError('La cámara está en uso. Usa la opción Galeria.');
             } else {
-                setError('No se pudo acceder a la cámara. Usa la opción Galeria.');
+                setError('Error al acceder a la cámara. Usa la opción Galeria.');
             }
         }
     };
@@ -106,7 +106,13 @@ export default function PhotoUpload({ user, onPhotoUpdated, onClose, required = 
                 body: JSON.stringify({ foto: preview })
             });
 
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                console.error('JSON parse error:', jsonError);
+                throw new Error('Error del servidor. Intenta de nuevo.');
+            }
 
             if (!response.ok) {
                 throw new Error(data.message || 'Error al subir foto');
