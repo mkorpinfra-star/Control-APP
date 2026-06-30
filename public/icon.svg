@@ -1,4 +1,13 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="128" fill="#CE0201"/>
-  <text x="256" y="340" font-family="Inter, Arial, sans-serif" font-size="192" font-weight="700" fill="white" text-anchor="middle">J2S</text>
+  <rect width="512" height="512" rx="128" fill="#0A0B0D"/>
+  <!-- Perna esquerda -->
+  <polygon points="128,159 187,159 187,353 128,353" fill="#F5F5F0"/>
+  <!-- Perna direita -->
+  <polygon points="325,159 384,159 384,353 325,353" fill="#F5F5F0"/>
+  <!-- Diagonal esquerda do V -->
+  <polygon points="187,159 246,159 285,300 226,300" fill="#F5F5F0"/>
+  <!-- Diagonal direita do V -->
+  <polygon points="266,159 325,159 285,300 226,300" fill="#F5F5F0"/>
+  <!-- Acento azul (ponta do V) -->
+  <polygon points="226,300 285,300 256,348" fill="#3B6FD4"/>
 </svg>

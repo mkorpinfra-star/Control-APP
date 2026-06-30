@@ -1,753 +1,293 @@
-import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { IconChevronLeft, IconChevronRight, IconSend, IconClock, IconMinus, IconPlus, IconCheck, IconAlertCircle } from '@tabler/icons-react'
-import CustomSelect from '../components/CustomSelect'
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../contexts/AuthContext';
+import { pontoService, ordensServicoService } from '../services/supabase';
+import { STATUS_PONTO } from '../lib/theme';
+import { IconClock, IconCheck, IconSend, IconAlertCircle } from '@tabler/icons-react';
 
-const DIAS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
-const DIAS_NOME = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-const DIAS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const DIAS    = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+const DIAS_PT = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const DIAS_SH = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+function getSegunda(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().split('T')[0];
+}
+function addDias(dateStr, n) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + n);
+  return dt.toISOString().split('T')[0];
+}
+function calcHoras(entrada, saida, almSaida, almVolta) {
+  if (!entrada || !saida) return { normais: 0, extras: 0 };
+  const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  let total = toMin(saida) - toMin(entrada);
+  if (almSaida && almVolta) total -= (toMin(almVolta) - toMin(almSaida));
+  total = Math.max(0, total);
+  const normais = Math.min(total, 480) / 60;
+  const extras  = Math.max(0, total - 480) / 60;
+  return { normais: parseFloat(normais.toFixed(2)), extras: parseFloat(extras.toFixed(2)) };
+}
 
 export default function BaterPonto() {
-    const { user } = useAuth()
-    const [diaAtual, setDiaAtual] = useState(0)
-    const [semanaInicio, setSemanaInicio] = useState(getMonday(new Date()))
-    const [obraId, setObraId] = useState('')
-    const [obras, setObras] = useState([])
-    const [obraAtual, setObraAtual] = useState(null)
-    const [loading, setLoading] = useState(false)
-    const [autoSaving, setAutoSaving] = useState(false)
-    const [saveError, setSaveError] = useState(null)
-    const [apontamento, setApontamento] = useState(null)
-    const [justSaved, setJustSaved] = useState(false)
-    const autoSaveTimer = useRef(null)
-    const touchStartX = useRef(0)
+  const { perfil } = useAuth();
+  const queryClient = useQueryClient();
 
-    const [horas, setHoras] = useState({
-        mon: { normal: '', extra: '', noturna: '' },
-        tue: { normal: '', extra: '', noturna: '' },
-        wed: { normal: '', extra: '', noturna: '' },
-        thu: { normal: '', extra: '', noturna: '' },
-        fri: { normal: '', extra: '', noturna: '' },
-        sat: { normal: '', extra: '', noturna: '' }
-    })
-    const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [semanaInicio, setSemanaInicio] = useState(getSegunda(new Date()));
+  const [diaIdx, setDiaIdx] = useState(() => {
+    const dow = new Date().getDay();
+    return dow === 0 ? 0 : Math.min(dow - 1, 5);
+  });
+  const [osId, setOsId] = useState('');
+  const [campos, setCampos] = useState({ hora_entrada: '', hora_saida: '', hora_almoco_saida: '', hora_almoco_volta: '' });
+  const [showConfirm, setShowConfirm] = useState(false);
 
-    function getMonday(date) {
-        const d = new Date(date)
-        // Criar uma nova instância para não modificar a original
-        const result = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-        const day = result.getDay()
-        const diff = day === 0 ? -6 : 1 - day
-        result.setDate(result.getDate() + diff)
-        return result.toISOString().split('T')[0]
+  const dataAtual = addDias(semanaInicio, diaIdx);
+
+  const { data: minhasOS = [] } = useQuery({
+    queryKey: ['minhas-os', perfil?.id],
+    queryFn: () => ordensServicoService.getAll({ responsavel_id: perfil?.id }),
+    enabled: !!perfil?.id,
+  });
+  const { data: pontoHoje } = useQuery({
+    queryKey: ['meu-ponto', perfil?.id, dataAtual],
+    queryFn: () => pontoService.getMeuPonto(perfil?.id, dataAtual),
+    enabled: !!perfil?.id,
+  });
+  const { data: semana = [] } = useQuery({
+    queryKey: ['minha-semana', perfil?.id, semanaInicio],
+    queryFn: () => pontoService.getSemana(perfil?.id, semanaInicio, addDias(semanaInicio, 5)),
+    enabled: !!perfil?.id,
+  });
+
+  useEffect(() => {
+    if (pontoHoje) {
+      setCampos({
+        hora_entrada: pontoHoje.hora_entrada || '', hora_saida: pontoHoje.hora_saida || '',
+        hora_almoco_saida: pontoHoje.hora_almoco_saida || '', hora_almoco_volta: pontoHoje.hora_almoco_volta || '',
+      });
+      setOsId(pontoHoje.os_id || '');
+    } else {
+      setCampos({ hora_entrada: '', hora_saida: '', hora_almoco_saida: '', hora_almoco_volta: '' });
+      setOsId('');
     }
-
-    function formatDate(offset) {
-        // Criar data local (não UTC) para evitar problemas de timezone
-        const [year, month, day] = semanaInicio.split('-').map(Number)
-        const d = new Date(year, month - 1, day) // mês é 0-indexed
-        d.setDate(d.getDate() + offset)
-        return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
-    }
-
-    useEffect(() => {
-        loadObras()
-        // Auto-centrar no dia atual da semana (0=Lun … 5=Sáb; Dom=sem apontamento, fica em Lun)
-        const dayOfWeek = new Date().getDay() // 0=Dom, 1=Lun … 6=Sáb
-        if (dayOfWeek >= 1 && dayOfWeek <= 6) {
-            setDiaAtual(dayOfWeek - 1) // 1→0, 2→1 … 6→5
-        } else {
-            setDiaAtual(0) // Domingo → mostra Lunes
-        }
-    }, [])
-
-    useEffect(() => {
-        if (obraId && semanaInicio) {
-            loadApontamento()
-        }
-    }, [obraId, semanaInicio])
-
-    async function loadObras() {
-        try {
-            const res = await fetch('https://puntotouch.nextim.io/backend/api/obras/by-employee.php', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            })
-            const data = await res.json()
-            if (data.success && data.obras?.length > 0) {
-                setObras(data.obras)
-                setObraId(data.obras[0].id)
-                setObraAtual(data.obras[0])
-            }
-        } catch (err) {
-            console.error(err)
-        }
-    }
-
-    // Atualizar obra atual quando obra ID mudar
-    useEffect(() => {
-        if (obraId && obras.length > 0) {
-            const obra = obras.find(o => o.id == obraId)
-            setObraAtual(obra || null)
-        }
-    }, [obraId, obras])
-
-    async function loadApontamento() {
-        setLoading(true)
-        try {
-            const res = await fetch(
-                `https://puntotouch.nextim.io/backend/api/apontamentos/my-week.php?semana_inicio=${semanaInicio}&obra_id=${obraId}`,
-                { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
-            )
-            const data = await res.json()
-            if (data.apontamento) {
-                setApontamento(data.apontamento)
-                // horas_diarias pode vir como objeto ou string — tratar os dois casos
-                let parsed = {}
-                try {
-                    const raw = data.apontamento.horas_diarias
-                    parsed = typeof raw === 'string' ? JSON.parse(raw) : (raw || {})
-                } catch(e) { parsed = {} }
-                const newHoras = {}
-                DIAS.forEach(dia => {
-                    newHoras[dia] = {
-                        normal: parsed[dia]?.normal || '',
-                        extra: parsed[dia]?.extra || '',
-                        noturna: parsed[dia]?.noturna || ''
-                    }
-                })
-                setHoras(newHoras)
-            } else {
-                setApontamento(null)
-                const empty = {}
-                DIAS.forEach(dia => { empty[dia] = { normal: '', extra: '', noturna: '' } })
-                setHoras(empty)
-            }
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    function updateHora(tipo, valor) {
-        const dia = DIAS[diaAtual]
-        const num = valor === '' ? '' : parseFloat(valor) || 0
-        if (num !== '' && (num < 0 || num > 24)) return
-
-        setHoras(prev => ({
-            ...prev,
-            [dia]: { ...prev[dia], [tipo]: num }
-        }))
-
-        clearTimeout(autoSaveTimer.current)
-        autoSaveTimer.current = setTimeout(() => {
-            handleAutoSave()
-        }, 2000)
-    }
-
-    async function handleAutoSave() {
-        if (bloqueado) return false
-
-        setAutoSaving(true)
-        setSaveError(null)
-        setJustSaved(false)
-        try {
-            const payload = {
-                obra_id: obraId,
-                semana_inicio: semanaInicio,
-                horas_diarias: JSON.stringify(horas)
-            }
-
-            const res = await fetch('https://puntotouch.nextim.io/backend/api/apontamentos/save.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(payload)
-            })
-
-            setAutoSaving(false)
-
-            if (!res.ok) {
-                if (res.status === 403) {
-                    // Apontamento já enviado/aprovado — recarregar para refletir estado real
-                    loadApontamento()
-                }
-                return false
-            }
-
-            const data = await res.json()
-            if (data.success) {
-                // Mostrar feedback "Salvo" por 2 segundos
-                setJustSaved(true)
-                setTimeout(() => setJustSaved(false), 2000)
-            }
-            return data.success === true
-        } catch (err) {
-            setAutoSaving(false)
-            return false
-        }
-    }
-
-    async function handleSubmit() {
-        setShowConfirmModal(true)
-    }
-
-    async function confirmSubmit() {
-        setShowConfirmModal(false)
-
-        // Se já tem ID, vai direto pro submit
-        if (apontamento?.id) {
-            try {
-                const res = await fetch('https://puntotouch.nextim.io/backend/api/apontamentos/submit.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({ id: apontamento.id })
-                })
-
-                const data = await res.json()
-                if (data.success) {
-                    loadApontamento()
-
-                    // Abrir WhatsApp automaticamente
-                    if (data.whatsapp_link) {
-                        setTimeout(() => {
-                            window.open(data.whatsapp_link, '_blank')
-                        }, 500)
-                    }
-                }
-            } catch (err) {
-                console.error(err)
-            }
-            return
-        }
-
-        // Não tem ID ainda: salvar primeiro
-        const saved = await handleAutoSave()
-        if (!saved) return
-
-        await loadApontamento()
-
-        setTimeout(async () => {
-            setApontamento(prev => {
-                if (prev?.id) {
-                    fetch('https://puntotouch.nextim.io/backend/api/apontamentos/submit.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        },
-                        body: JSON.stringify({ id: prev.id })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            loadApontamento()
-
-                            // Abrir WhatsApp automaticamente
-                            if (data.whatsapp_link) {
-                                setTimeout(() => {
-                                    window.open(data.whatsapp_link, '_blank')
-                                }, 500)
-                            }
-                        }
-                    })
-                }
-                return prev
-            })
-        }, 300)
-    }
-
-    function nextDay() {
-        if (diaAtual < 5) setDiaAtual(diaAtual + 1)
-    }
-
-    function prevDay() {
-        if (diaAtual > 0) setDiaAtual(diaAtual - 1)
-    }
-
-    function handleTouchStart(e) {
-        touchStartX.current = e.touches[0].clientX
-    }
-
-    function handleTouchEnd(e) {
-        const touchEndX = e.changedTouches[0].clientX
-        const diff = touchStartX.current - touchEndX
-
-        if (Math.abs(diff) > 50) {
-            if (diff > 0) nextDay()
-            else prevDay()
-        }
-    }
-
-    function nextWeek() {
-        const [year, month, day] = semanaInicio.split('-').map(Number)
-        const d = new Date(year, month - 1, day)
-        d.setDate(d.getDate() + 7)
-        setSemanaInicio(d.toISOString().split('T')[0])
-    }
-
-    function prevWeek() {
-        const [year, month, day] = semanaInicio.split('-').map(Number)
-        const d = new Date(year, month - 1, day)
-        d.setDate(d.getDate() - 7)
-        setSemanaInicio(d.toISOString().split('T')[0])
-    }
-
-    function goToCurrentWeek() {
-        setSemanaInicio(getMonday(new Date()))
-    }
-
-    const isCurrentWeek = semanaInicio === getMonday(new Date())
-
-    // Só bloqueia se APROVADO (aprovado_encarregado ou aprovado)
-    // Se está apenas "enviado", funcionário pode corrigir
-    const bloqueado = apontamento?.status === 'aprovado_encarregado' || apontamento?.status === 'aprovado'
-    const diaKey = DIAS[diaAtual]
-    const horasDia = horas[diaKey]
-    const totalDia = (parseFloat(horasDia.normal) || 0) + (parseFloat(horasDia.extra) || 0) + (parseFloat(horasDia.noturna) || 0)
-
-    const totalSemana = DIAS.reduce((sum, dia) => {
-        return sum + (parseFloat(horas[dia].normal) || 0) + (parseFloat(horas[dia].extra) || 0) + (parseFloat(horas[dia].noturna) || 0)
-    }, 0)
-
-    // Validar se todos os dias ATÉ HOJE foram preenchidos
-    // Não permitir marcar dias futuros, mas exigir que dias passados estejam preenchidos
-    const hoje = new Date()
-    const [year, month, day] = semanaInicio.split('-').map(Number)
-    const segundaFeira = new Date(year, month - 1, day)
-
-    const todosOsDiasPreenchidos = DIAS.every((dia, idx) => {
-        const diaData = new Date(segundaFeira)
-        diaData.setDate(diaData.getDate() + idx)
-
-        // Se o dia é FUTURO, não exigir preenchimento
-        if (diaData > hoje) {
-            return true
-        }
-
-        // Se o dia é HOJE ou PASSADO, exigir que tenha horas
-        const h = horas[dia]
-        const total = (parseFloat(h.normal) || 0) + (parseFloat(h.extra) || 0) + (parseFloat(h.noturna) || 0)
-        return total > 0
-    })
-
-    // Detectar se pode enviar:
-    // - Semanas PASSADAS: sempre pode (regularização)
-    // - Semana ATUAL ou FUTURA: só sábado/domingo
-    const canSubmit = (() => {
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-
-        const weekStartDate = new Date(semanaInicio)
-        weekStartDate.setHours(0, 0, 0, 0)
-
-        // Se a semana é passada (segunda-feira da semana é antes de hoje)
-        if (weekStartDate < today) {
-            console.log('✅ BaterPonto - Semana passada - PODE ENVIAR a qualquer momento')
-            return true
-        }
-
-        // Se é semana atual ou futura, só pode no fim de semana
-        const dayOfWeek = today.getDay()
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
-
-        console.log('🗓️ BaterPonto - Hoje é:', today.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }))
-        console.log('📅 BaterPonto - Dia da semana:', dayOfWeek, '(0=Domingo, 6=Sábado)')
-        console.log('📆 BaterPonto - Semana início:', semanaInicio)
-        console.log('✅ BaterPonto - É semana passada?', weekStartDate < today)
-        console.log('✅ BaterPonto - É fim de semana?', isWeekend)
-
-        return isWeekend
-    })()
-
-    const podeEnviar = !bloqueado && totalSemana > 0 && todosOsDiasPreenchidos && canSubmit
-
-    return (
-        <div className="min-h-screen bg-white pb-32">
-            {/* Header Fixo */}
-            <div className="bg-white shadow-sm relative z-10">
-                <div className="px-4 pt-6 pb-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-                                <IconClock stroke={1} className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Hores treballades</h1>
-                                <p className="text-sm text-gray-500">{user?.nome}</p>
-                            </div>
-                        </div>
-                        {autoSaving && (
-                            <div className="flex items-center gap-2 text-gray-600 text-xs">
-                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-                                Guardando...
-                            </div>
-                        )}
-                        {justSaved && !autoSaving && (
-                            <div className="flex items-center gap-2 text-green-600 text-xs font-semibold">
-                                <IconCheck className="w-4 h-4" />
-                                Guardado
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Seleção Obra */}
-                    <CustomSelect
-                        value={obraId}
-                        onChange={(value) => {
-                            setObraId(value);
-                            setSemanaInicio(getMonday(new Date()));
-                            setDiaAtual(0);
-                        }}
-                        options={obras.map(o => ({
-                            value: o.id,
-                            label: `${o.numero} — ${o.nome}`
-                        }))}
-                    />
-
-                    {/* Navegação de Semanas */}
-                    <div className="mt-3 flex items-center justify-between gap-2">
-                        <button
-                            onClick={prevWeek}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
-                        >
-                            <IconChevronLeft className="w-4 h-4" />
-                            Semana anterior
-                        </button>
-
-                        {!isCurrentWeek && (
-                            <button
-                                onClick={goToCurrentWeek}
-                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold text-white transition-colors"
-                            >
-                                Semana actual
-                            </button>
-                        )}
-
-                        <button
-                            onClick={nextWeek}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
-                        >
-                            Semana siguiente
-                            <IconChevronRight className="w-4 h-4" />
-                        </button>
-                    </div>
-
-                </div>
-
-                {/* Navegação de Dias */}
-                <div className="px-4 py-2 bg-gray-50">
-                    <div className="flex items-center justify-between gap-2">
-                        {DIAS.map((dia, idx) => (
-                            <button
-                                key={dia}
-                                onClick={() => setDiaAtual(idx)}
-                                className={`flex-1 py-2 rounded-lg font-semibold text-xs transition-all ${
-                                    idx === diaAtual
-                                        ? 'bg-red-600 text-white shadow-lg scale-110'
-                                        : 'bg-white text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                                <div>{DIAS_SHORT[idx]}</div>
-                                <div className="text-[10px] opacity-75">{formatDate(idx)}</div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Status */}
-                {apontamento && (
-                    <div className={`px-4 py-2.5 text-center text-xs font-semibold ${
-                        apontamento.status === 'aprovado' ? 'bg-green-100 text-green-800' :
-                        apontamento.status === 'enviado' ? 'bg-blue-100 text-blue-800' :
-                        apontamento.status === 'rejeitado' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-700'
-                    }`}>
-                        {(apontamento.status === 'aprovado' || apontamento.status === 'aprovado_encarregado') && '✅ APROBADO - No se puede editar'}
-                        {apontamento.status === 'enviado' && '⏳ ENVIADO - Puedes corregir antes de la aprobación'}
-                        {apontamento.status === 'rejeitado' && '❌ RECHAZADO: ' + (apontamento.observacao_rejeicao || 'Corrige y envía nuevamente')}
-                        {apontamento.status === 'rascunho' && '💾 Guardado automáticamente'}
-                    </div>
-                )}
-            </div>
-
-            {/* Conteúdo Principal - Swipeable */}
-            <div
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-                className="px-4 py-6 pb-8"
-            >
-                {/* Título do Dia */}
-                <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">{DIAS_NOME[diaAtual]}</h2>
-                    <p className="text-gray-600 text-xs mt-0.5">{formatDate(diaAtual)}</p>
-                </div>
-
-                {/* Inputs de Horas - COMPACTO */}
-                <div className="space-y-2">
-                    {/* Normal */}
-                    <div className="bg-[#F5F5F5] rounded-xl p-3">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-bold text-gray-900">Normal</div>
-                                <div className="text-xs text-gray-600">8-17h</div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => updateHora('normal', Math.max(0, parseFloat(horasDia.normal || 0) - 0.5))}
-                                    disabled={bloqueado || horasDia.normal <= 0}
-                                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                >
-                                    <IconMinus stroke={1} size={16} />
-                                </button>
-                                <input
-                                    type="number"
-                                    inputMode="decimal"
-                                    step="0.5"
-                                    min="0"
-                                    max="24"
-                                    value={horasDia.normal}
-                                    onChange={(e) => updateHora('normal', e.target.value)}
-                                    disabled={bloqueado}
-                                    placeholder="0"
-                                    className="w-16 text-center text-xl font-black py-1.5 px-1 rounded-lg bg-white border-0 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:bg-gray-200 disabled:text-gray-500"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => updateHora('normal', Math.min(24, parseFloat(horasDia.normal || 0) + 0.5))}
-                                    disabled={bloqueado || horasDia.normal >= 24}
-                                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                >
-                                    <IconPlus stroke={1} size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Extra - só se permitido */}
-                    {obraAtual?.permite_hora_extra && (
-                        <div className="bg-[#F5F5F5] rounded-xl p-3">
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-bold text-gray-900">Extra</div>
-                                    <div className="text-xs text-gray-600">17-22h</div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => updateHora('extra', Math.max(0, parseFloat(horasDia.extra || 0) - 0.5))}
-                                        disabled={bloqueado || horasDia.extra <= 0}
-                                        className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                    >
-                                        <IconMinus stroke={1} size={16} />
-                                    </button>
-                                    <input
-                                        type="number"
-                                        inputMode="decimal"
-                                        step="0.5"
-                                        min="0"
-                                        max="24"
-                                        value={horasDia.extra}
-                                        onChange={(e) => updateHora('extra', e.target.value)}
-                                        disabled={bloqueado}
-                                        placeholder="0"
-                                        className="w-16 text-center text-xl font-black py-1.5 px-1 rounded-lg bg-white border-0 focus:outline-none focus:ring-2 focus:ring-orange-400 disabled:bg-gray-200 disabled:text-gray-500"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => updateHora('extra', Math.min(24, parseFloat(horasDia.extra || 0) + 0.5))}
-                                        disabled={bloqueado || horasDia.extra >= 24}
-                                        className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                    >
-                                        <IconPlus stroke={1} size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Noturna - só se permitido */}
-                    {obraAtual?.permite_hora_noturna && (
-                        <div className="bg-[#F5F5F5] rounded-xl p-3">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-bold text-gray-900">Nocturna</div>
-                                <div className="text-xs text-gray-600">22-6h</div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => updateHora('noturna', Math.max(0, parseFloat(horasDia.noturna || 0) - 0.5))}
-                                    disabled={bloqueado || horasDia.noturna <= 0}
-                                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                >
-                                    <IconMinus stroke={1} size={16} />
-                                </button>
-                                <input
-                                    type="number"
-                                    inputMode="decimal"
-                                    step="0.5"
-                                    min="0"
-                                    max="24"
-                                    value={horasDia.noturna}
-                                    onChange={(e) => updateHora('noturna', e.target.value)}
-                                    disabled={bloqueado}
-                                    placeholder="0"
-                                    className="w-16 text-center text-xl font-black py-1.5 px-1 rounded-lg bg-white border-0 focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:bg-gray-200 disabled:text-gray-500"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => updateHora('noturna', Math.min(24, parseFloat(horasDia.noturna || 0) + 0.5))}
-                                    disabled={bloqueado || horasDia.noturna >= 24}
-                                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
-                                >
-                                    <IconPlus stroke={1} size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    )}
-                </div>
-
-                {/* Total do Dia */}
-                <div className="mt-4 bg-gray-900 rounded-xl p-3 flex items-center justify-between">
-                    <span className="text-white text-sm font-semibold">Total hoje</span>
-                    <div className="flex items-center gap-2">
-                        <IconClock stroke={1} className="w-4 h-4 text-white" />
-                        <span className="text-white font-black text-xl">{totalDia.toFixed(1)}h</span>
-                    </div>
-                </div>
-
-                {/* Navegação Entre Dias - Compacta */}
-                <div className="flex items-center justify-between gap-2 mt-6">
-                    <button
-                        onClick={prevDay}
-                        disabled={diaAtual === 0}
-                        className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center gap-1"
-                    >
-                        <IconChevronLeft stroke={1} className="w-4 h-4" />
-                        Ant
-                    </button>
-                    <button
-                        onClick={nextDay}
-                        disabled={diaAtual === 5}
-                        className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center gap-1"
-                    >
-                        Sig
-                        <IconChevronRight stroke={1} className="w-4 h-4" />
-                    </button>
-                </div>
-            </div>
-
-            {/* Footer Fixo - COM ESPAÇO PARA MENU FLUTUANTE */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-3 pb-32 z-10">
-                <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-600 font-semibold">Total semana</span>
-                    <div className="flex items-center gap-1.5">
-                        <IconClock stroke={1} className="w-4 h-4 text-red-600" />
-                        <span className="text-xl font-black text-red-600">{totalSemana.toFixed(1)}h</span>
-                    </div>
-                </div>
-
-                {/* Alerta - Só envio no fim de semana */}
-                {!bloqueado && !canSubmit && totalSemana > 0 && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-2">
-                        <p className="text-xs font-semibold text-amber-900">🔒 Solo envío en fin de semana</p>
-                        <p className="text-[10px] text-amber-700 mt-0.5">Puedes guardar horas, pero solo enviar sábado y domingo.</p>
-                    </div>
-                )}
-
-                <button
-                    onClick={handleSubmit}
-                    disabled={!podeEnviar}
-                    className={`w-full py-3 rounded-xl font-semibold text-sm shadow-lg disabled:cursor-not-allowed active:scale-98 flex items-center justify-center gap-2 transition-all ${
-                        canSubmit && !bloqueado
-                            ? 'bg-red-600 text-white hover:bg-red-700'
-                            : 'bg-gray-200 text-gray-400'
-                    } ${!podeEnviar ? 'opacity-50' : ''}`}
-                >
-                    <IconSend stroke={1} className="w-4 h-4" />
-                    {bloqueado
-                        ? 'Ya enviado'
-                        : !canSubmit
-                        ? '🔒 Enviar (solo fin de semana)'
-                        : !todosOsDiasPreenchidos
-                        ? 'Complete los días trabajados'
-                        : 'Enviar para aprobación'}
-                </button>
-            </div>
-
-            {/* Modal de Confirmación */}
-            {showConfirmModal && (
-                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
-                    <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 sm:rounded-t-2xl rounded-t-3xl">
-                            <h2 className="text-xl font-bold text-gray-900">Confirmar envío</h2>
-                            <p className="text-sm text-gray-500 mt-1">Revisa tus horas antes de enviar</p>
-                        </div>
-
-                        <div className="p-6 space-y-4">
-                            {/* Obra */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Obra</p>
-                                <p className="text-base font-bold text-gray-900">{obraAtual?.numero} - {obraAtual?.nome}</p>
-                            </div>
-
-                            {/* Semana */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Semana</p>
-                                {DIAS.map((dia, idx) => {
-                                    const horasDia = horas[dia]
-                                    const totalDia = (parseFloat(horasDia.normal) || 0) + (parseFloat(horasDia.extra) || 0) + (parseFloat(horasDia.noturna) || 0)
-                                    if (totalDia === 0) return null
-
-                                    return (
-                                        <div key={dia} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
-                                            <span className="text-sm font-medium text-gray-700">{DIAS_NOME[idx]}</span>
-                                            <div className="flex items-center gap-3 text-xs">
-                                                {horasDia.normal > 0 && <span className="text-gray-600">N: {horasDia.normal}h</span>}
-                                                {horasDia.extra > 0 && <span className="text-blue-600">E: {horasDia.extra}h</span>}
-                                                {horasDia.noturna > 0 && <span className="text-purple-600">Nc: {horasDia.noturna}h</span>}
-                                                <span className="font-bold text-gray-900 ml-2">{totalDia.toFixed(1)}h</span>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-
-                            {/* Total */}
-                            <div className="bg-red-50 rounded-lg p-4 border-2 border-red-200">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold text-gray-700">TOTAL SEMANA</span>
-                                    <span className="text-2xl font-black text-red-600">{totalSemana.toFixed(1)}h</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 flex gap-3 sm:rounded-b-2xl">
-                            <button
-                                onClick={() => setShowConfirmModal(false)}
-                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={confirmSubmit}
-                                className="flex-1 px-4 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <IconSend size={18} stroke={2} />
-                                Enviar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+  }, [pontoHoje]);
+
+  const salvarMutation = useMutation({
+    mutationFn: (dados) => pontoService.registrar(dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meu-ponto'] });
+      queryClient.invalidateQueries({ queryKey: ['minha-semana'] });
+    },
+  });
+  const enviarMutation = useMutation({
+    mutationFn: (dados) => pontoService.registrar({ ...dados, status: 'enviado' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meu-ponto'] });
+      queryClient.invalidateQueries({ queryKey: ['minha-semana'] });
+      setShowConfirm(false);
+    },
+  });
+
+  const { normais, extras } = calcHoras(campos.hora_entrada, campos.hora_saida, campos.hora_almoco_saida, campos.hora_almoco_volta);
+
+  const dadosParaSalvar = {
+    usuario_id: perfil?.id, data: dataAtual, os_id: osId || null,
+    ...campos, horas_normais: normais, horas_extras: extras,
+    status: pontoHoje?.status || 'rascunho',
+  };
+  const bloqueado = pontoHoje?.status === 'enviado' || pontoHoje?.status === 'aprovado';
+  const getPontoDia = (idx) => semana.find(p => p.data === addDias(semanaInicio, idx));
+  const hojeStr = new Date().toISOString().split('T')[0];
+
+  return (
+    <div className="pb-32 bg-[#0A0B0D] min-h-full">
+      {/* Navegação de semana */}
+      <div className="px-4 pt-4 pb-2">
+        <div className="flex items-center justify-between mb-3">
+          <button onClick={() => setSemanaInicio(s => addDias(s, -7))} className="text-xs text-[#A8ADB8] px-3 py-1.5 bg-[#1A1D24] border border-[#30353F] rounded-lg active:bg-[#22262F]">
+            ← Semana ant.
+          </button>
+          <p className="text-xs text-[#6B7280]">
+            {new Date(semanaInicio + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+            {' – '}
+            {new Date(addDias(semanaInicio, 5) + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+          </p>
+          <button onClick={() => setSemanaInicio(s => addDias(s, 7))} className="text-xs text-[#A8ADB8] px-3 py-1.5 bg-[#1A1D24] border border-[#30353F] rounded-lg active:bg-[#22262F]">
+            Próx. →
+          </button>
         </div>
-    )
+
+        <div className="grid grid-cols-6 gap-1">
+          {DIAS.map((_, i) => {
+            const p = getPontoDia(i);
+            const isHoje = addDias(semanaInicio, i) === hojeStr;
+            const isSelected = i === diaIdx;
+            return (
+              <button
+                key={i}
+                onClick={() => setDiaIdx(i)}
+                className={`flex flex-col items-center py-2 rounded-xl transition-colors border ${
+                  isSelected ? 'bg-[#F08020] text-[#F5F5F0] border-[#F08020]' : 'bg-[#1A1D24] text-[#A8ADB8] border-[#23262E]'
+                }`}
+              >
+                <span className="text-[10px] font-medium">{DIAS_SH[i]}</span>
+                <span className={`text-[10px] mt-0.5 ${isHoje && !isSelected ? 'text-[#5B8DEF] font-bold' : 'opacity-60'}`}>
+                  {new Date(addDias(semanaInicio, i) + 'T12:00:00').getDate()}
+                </span>
+                {p && (
+                  <div className={`w-1 h-1 rounded-full mt-0.5 ${
+                    p.status === 'aprovado' ? 'bg-[#34D399]' :
+                    p.status === 'enviado'  ? 'bg-[#5B8DEF]' :
+                    isSelected ? 'bg-white/60' : 'bg-[#454A54]'
+                  }`} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="px-4 space-y-3">
+        {/* Cabeçalho dia */}
+        <div className="bg-[#1A1D24] rounded-2xl p-4 border border-[#23262E]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-[#F5F5F0]">{DIAS_PT[diaIdx]}</p>
+              <p className="text-xs text-[#6B7280]">
+                {new Date(dataAtual + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            {pontoHoje?.status && <span className={STATUS_PONTO[pontoHoje.status]?.badge}>{STATUS_PONTO[pontoHoje.status]?.label}</span>}
+          </div>
+
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-[#A8ADB8] mb-1">Ordem de serviço</label>
+            <select
+              value={osId}
+              onChange={e => setOsId(e.target.value)}
+              disabled={bloqueado}
+              className="w-full py-2 px-3 bg-[#121419] border border-[#30353F] rounded-xl text-sm text-[#F5F5F0] disabled:opacity-50 focus:outline-none focus:border-[#F08020] focus:ring-2 focus:ring-[#F08020]/30"
+            >
+              <option value="">Selecione a OS do dia</option>
+              {minhasOS.map(os => (
+                <option key={os.id} value={os.id}>OS #{os.numero} — {os.bairro || os.logradouro || 'Sem endereço'}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Horários */}
+        <div className="bg-[#1A1D24] rounded-2xl p-4 border border-[#23262E] space-y-3">
+          <p className="text-xs font-semibold text-[#A8ADB8] uppercase tracking-wider">Horários</p>
+          <div className="grid grid-cols-2 gap-3">
+            <HorarioInput label="Entrada" value={campos.hora_entrada} onChange={v => setCampos(c => ({ ...c, hora_entrada: v }))} disabled={bloqueado} />
+            <HorarioInput label="Saída" value={campos.hora_saida} onChange={v => setCampos(c => ({ ...c, hora_saida: v }))} disabled={bloqueado} />
+            <HorarioInput label="Almoço saída" value={campos.hora_almoco_saida} onChange={v => setCampos(c => ({ ...c, hora_almoco_saida: v }))} disabled={bloqueado} />
+            <HorarioInput label="Almoço volta" value={campos.hora_almoco_volta} onChange={v => setCampos(c => ({ ...c, hora_almoco_volta: v }))} disabled={bloqueado} />
+          </div>
+
+          {(normais > 0 || extras > 0) && (
+            <div className="flex gap-3 pt-1">
+              <div className="flex-1 bg-[#F08020]/10 border border-[#F08020]/20 rounded-xl p-2.5 text-center">
+                <p className="text-lg font-bold text-[#5B8DEF] tabular-nums">{normais.toFixed(1)}h</p>
+                <p className="text-[10px] text-[#5B8DEF]/70">Normais</p>
+              </div>
+              {extras > 0 && (
+                <div className="flex-1 bg-[#F08020]/10 border border-[#F08020]/20 rounded-xl p-2.5 text-center">
+                  <p className="text-lg font-bold text-[#FB8C3E] tabular-nums">{extras.toFixed(1)}h</p>
+                  <p className="text-[10px] text-[#FB8C3E]/70">Extras</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {pontoHoje?.status === 'rejeitado' && pontoHoje.motivo_rejeicao && (
+          <div className="bg-[#F87171]/10 border border-[#F87171]/20 rounded-2xl p-3 flex gap-2">
+            <IconAlertCircle size={16} className="text-[#F87171] shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-[#F87171]">Registro rejeitado</p>
+              <p className="text-xs text-[#F87171]/70 mt-0.5">{pontoHoje.motivo_rejeicao}</p>
+            </div>
+          </div>
+        )}
+
+        {!bloqueado && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => salvarMutation.mutate(dadosParaSalvar)}
+              disabled={salvarMutation.isPending}
+              className="flex-1 py-3 bg-transparent border border-[#30353F] text-[#F5F5F0] rounded-2xl text-sm font-medium flex items-center justify-center gap-2 active:bg-[#22262F] transition-colors disabled:opacity-50"
+            >
+              <IconCheck size={16} />
+              {salvarMutation.isPending ? 'Salvando...' : 'Salvar rascunho'}
+            </button>
+            <button
+              onClick={() => setShowConfirm(true)}
+              disabled={!campos.hora_entrada || enviarMutation.isPending}
+              className="flex-1 py-3 bg-[#F08020] text-[#F5F5F0] rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 active:bg-[#D86E14] transition-colors disabled:bg-[#1A1D24] disabled:text-[#454A54]"
+            >
+              <IconSend size={16} />
+              Enviar
+            </button>
+          </div>
+        )}
+
+        {bloqueado && (
+          <div className="bg-[#34D399]/10 border border-[#34D399]/20 rounded-2xl p-3 flex items-center gap-2">
+            <IconCheck size={16} className="text-[#34D399]" />
+            <p className="text-sm text-[#34D399] font-medium">
+              {pontoHoje?.status === 'aprovado' ? 'Ponto aprovado!' : 'Ponto enviado para aprovação.'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center p-4">
+          <div className="bg-[#22262F] border border-[#30353F] rounded-3xl p-6 w-full max-w-sm">
+            <h3 className="text-lg font-semibold text-[#F5F5F0] mb-2">Enviar para aprovação?</h3>
+            <p className="text-sm text-[#A8ADB8] mb-5">
+              Depois de enviado, você não poderá alterar o registro de hoje.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowConfirm(false)} className="flex-1 py-3 border border-[#30353F] rounded-2xl text-sm text-[#A8ADB8] active:bg-[#272B35]">
+                Cancelar
+              </button>
+              <button
+                onClick={() => enviarMutation.mutate(dadosParaSalvar)}
+                disabled={enviarMutation.isPending}
+                className="flex-1 py-3 bg-[#F08020] text-[#F5F5F0] rounded-2xl text-sm font-semibold active:bg-[#D86E14]"
+              >
+                {enviarMutation.isPending ? 'Enviando...' : 'Sim, enviar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HorarioInput({ label, value, onChange, disabled }) {
+  return (
+    <div>
+      <label className="block text-xs text-[#6B7280] mb-1">{label}</label>
+      <div className="relative">
+        <IconClock size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#454A54]" />
+        <input
+          type="time"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          disabled={disabled}
+          className="w-full pl-8 pr-2 py-2 bg-[#121419] border border-[#30353F] rounded-xl text-sm text-[#F5F5F0] [color-scheme:dark] disabled:opacity-50 focus:outline-none focus:border-[#F08020] focus:ring-2 focus:ring-[#F08020]/30"
+        />
+      </div>
+    </div>
+  );
 }

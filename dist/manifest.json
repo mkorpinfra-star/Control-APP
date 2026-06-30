@@ -1,12 +1,12 @@
 {
-  "name": "J2S Obras",
-  "short_name": "J2S",
-  "description": "Sistema de gestão de obras, apontamento de horas e faturamento",
+  "name": "Mkorp Control",
+  "short_name": "Mkorp",
+  "description": "Gestão de iluminação pública: ordens de serviço, equipes, ponto e almoxarifado",
   "start_url": "/login?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#CE0201",
-  "theme_color": "#CE0201",
+  "background_color": "#0A0B0D",
+  "theme_color": "#0A0B0D",
   "orientation": "portrait",
   "icons": [
     {

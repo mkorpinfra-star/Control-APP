@@ -1,96 +1,68 @@
-import { IconHome, IconBuilding, IconUsers, IconSettings, IconClipboardCheck, IconClock } from '@tabler/icons-react';
+import {
+  IconHome, IconClipboardList, IconPackage,
+  IconClipboardCheck, IconClock, IconMapPin,
+  IconTruck, IconChartBar
+} from '@tabler/icons-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { isAdmin, isSupervisor, isFuncionario } = useAuth();
 
-  const getNavItemsByRole = () => {
-    if (user?.tipo === 'funcionario') {
+  const getNavItems = () => {
+    if (isFuncionario) {
       return [
-        {
-          id: 'ponto',
-          icon: IconClock,
-          path: '/bater-ponto',
-          activePaths: ['/bater-ponto']
-        },
-        {
-          id: 'historico',
-          icon: IconClipboardCheck,
-          path: '/timesheet',
-          activePaths: ['/timesheet']
-        }
+        { id: 'ponto',       label: 'Ponto',     icon: IconClock,   path: '/bater-ponto' },
+        { id: 'campo',       label: 'Campo',     icon: IconMapPin,  path: '/registro-campo' },
+        { id: 'requisicoes', label: 'Materiais', icon: IconPackage, path: '/requisicoes' },
       ];
     }
-
-    if (user?.tipo === 'encarregado') {
+    if (isSupervisor) {
       return [
-        {
-          id: 'aprovacoes',
-          icon: IconClipboardCheck,
-          path: '/approvals',
-          activePaths: ['/approvals']
-        }
+        { id: 'aprovacoes',    label: 'Aprovar',  icon: IconClipboardCheck, path: '/aprovacoes' },
+        { id: 'ordens',        label: 'Ordens',   icon: IconClipboardList,  path: '/ordens-servico' },
+        { id: 'monitoramento', label: 'Campo',    icon: IconTruck,          path: '/monitoramento' },
       ];
     }
-
-    // Admin vê tudo (removido Settings)
     return [
-      {
-        id: 'home',
-        icon: IconHome,
-        path: '/dashboard',
-        activePaths: ['/dashboard', '/']
-      },
-      {
-        id: 'projects',
-        icon: IconBuilding,
-        path: '/projects',
-        activePaths: ['/projects', '/resumo-obra']
-      },
-      {
-        id: 'clients',
-        icon: IconUsers,
-        path: '/clients',
-        activePaths: ['/clients']
-      }
+      { id: 'home',         label: 'Início',      icon: IconHome,          path: '/dashboard' },
+      { id: 'ordens',       label: 'Ordens',      icon: IconClipboardList, path: '/ordens-servico' },
+      { id: 'almoxarifado', label: 'Estoque',     icon: IconPackage,       path: '/almoxarifado' },
+      { id: 'relatorios',   label: 'Relatórios',  icon: IconChartBar,      path: '/relatorios' },
     ];
   };
 
-  const navItems = getNavItemsByRole();
-
-  const isActive = (item) => {
-    return item.activePaths.some(path => location.pathname === path);
-  };
+  const navItems = getNavItems();
+  const isActive = (item) => location.pathname === item.path;
 
   return (
-    <div id="bottom-nav" className="fixed bottom-0 left-0 right-0 safe-area-bottom z-50 pb-4 px-4 pointer-events-none">
-      <nav className="bg-white rounded-3xl shadow-sm max-w-md mx-auto pointer-events-auto mb-4">
-        <div className="flex items-center justify-around h-14 px-2">
+    <div id="bottom-nav" className="fixed bottom-0 inset-x-0 z-50 pb-4 px-4 pointer-events-none safe-area-bottom">
+      <nav className="bg-[#121419]/95 backdrop-blur-lg border border-[#23262E] rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-md mx-auto pointer-events-auto">
+        <div className="flex items-stretch justify-around h-16 px-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item);
-
             return (
               <button
                 key={item.id}
                 onClick={() => navigate(item.path)}
-                className="flex items-center justify-center w-12 h-12 transition-all duration-200 relative"
-                aria-label={item.id}
+                className="relative flex flex-col items-center justify-center gap-1 flex-1 transition-colors"
+                aria-label={item.label}
                 aria-current={active ? 'page' : undefined}
               >
                 {active && (
-                  <div className="absolute inset-0 bg-red-50 rounded-full" />
+                  <span className="absolute top-2 w-8 h-0.5 rounded-full bg-[#F08020]" />
                 )}
                 <Icon
-                  size={26}
-                  stroke={1}
-                  className={`relative z-10 transition-colors ${
-                    active ? 'text-[#CE0201]' : 'text-gray-500'
-                  }`}
+                  size={22}
+                  stroke={1.6}
+                  className={active ? 'text-[#F08020]' : 'text-[#6B7280]'}
                 />
+                <span className={`text-[10px] font-medium ${active ? 'text-[#F08020]' : 'text-[#6B7280]'}`}>
+                  {item.label}
+                </span>
               </button>
             );
           })}

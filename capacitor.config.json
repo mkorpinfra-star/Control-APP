@@ -1,25 +1,17 @@
 {
-  "appId": "com.j2s.obras",
-  "appName": "J2S Hores",
+  "appId": "br.com.mkorp.control",
+  "appName": "Mkorp Control",
   "webDir": "dist",
-  "server": {
-    "url": "https://puntotouch.nextim.io/login",
-    "cleartext": true,
-    "allowNavigation": [
-      "puntotouch.nextim.io",
-      "*.puntotouch.nextim.io"
-    ]
-  },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 2000,
       "launchAutoHide": true,
-      "backgroundColor": "#CE0201",
+      "backgroundColor": "#0A0B0D",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false,
       "androidSpinnerStyle": "large",
       "iosSpinnerStyle": "small",
-      "spinnerColor": "#ffffff",
+      "spinnerColor": "#3B6FD4",
       "splashFullScreen": true,
       "splashImmersive": true
     }

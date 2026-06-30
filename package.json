@@ -1,5 +1,5 @@
 {
-  "name": "app-cassio",
+  "name": "mkorp-control",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,6 +16,7 @@
     "@capacitor/cli": "5.7.0",
     "@capacitor/core": "5.7.0",
     "@headlessui/react": "^2.2.9",
+    "@supabase/supabase-js": "^2.108.1",
     "@tabler/icons-react": "^3.40.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "^5.90.21",

@@ -33,7 +33,7 @@ export default function BankingLayout() {
   const location = useLocation();
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#0A0B0D] overflow-hidden">
       {/* Header Fixo */}
       <DynamicHeader />
 

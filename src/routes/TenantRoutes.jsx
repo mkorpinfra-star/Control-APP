@@ -1,71 +1,50 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-// Public pages
-import LandingHome from '../pages/landing/Home';
+// Auth
 import Login from '../pages/Login';
-import ApprovePublic from '../pages/ApprovePublic';
 
-// User pages
+// Funcionário de campo
 import BaterPonto from '../pages/BaterPonto';
-import Approvals from '../pages/Approvals';
+import RegistroCampo from '../pages/RegistroCampo';
 
-// Admin pages
-import DashboardBanking from '../pages/DashboardBanking';
-import Timesheet from '../pages/Timesheet';
-import Projects from '../pages/Projects';
-import Clients from '../pages/Clients';
-import Employees from '../pages/Employees';
-import Encarregados from '../pages/Encarregados';
-import Administradores from '../pages/Administradores';
+// Supervisor + Admin
+import Aprovacoes from '../pages/Approvals';
 import Monitoramento from '../pages/Monitoramento';
-import Payroll from '../pages/Payroll';
-import Billing from '../pages/Billing';
-import Analytics from '../pages/Analytics';
-import AnalyticsAdvanced from '../pages/AnalyticsAdvanced';
-import FinancialDashboard from '../pages/FinancialDashboard';
-import ApprovedFinancial from '../pages/ApprovedFinancial';
-import Reports from '../pages/Reports';
-import ResumoObra from '../pages/ResumoObra';
-import Settings from '../pages/Settings';
+
+// Admin
+import Dashboard from '../pages/DashboardBanking';
+import OrdensServico from '../pages/OrdensServico';
+import Contratos from '../pages/Contratos';
+import Funcionarios from '../pages/Employees';
+import Almoxarifado from '../pages/Almoxarifado';
+import Requisicoes from '../pages/Requisicoes';
+import ControlePonto from '../pages/Timesheet';
+import Relatorios from '../pages/Reports';
+import Configuracoes from '../pages/Settings';
 
 // Layout
 import BankingLayout from '../components/BankingLayout';
 
-// Protected Route Wrapper
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafafa' }}>
-        <div className="loading-spinner"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="loading-spinner" />
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
-// Home Router - redirects based on user type
 function HomeRouter() {
-  const { user } = useAuth();
-
-  const isAdmin = user?.tipo === 'admin' || user?.tipo === 'super_admin';
-  const isEncarregado = user?.tipo === 'encarregado';
-
-  if (isAdmin) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  if (isEncarregado) {
-    return <Navigate to="/approvals" replace />;
-  }
-
+  const { isAdmin, isSupervisor } = useAuth();
+  if (isAdmin) return <Navigate to="/dashboard" replace />;
+  if (isSupervisor) return <Navigate to="/aprovacoes" replace />;
   return <Navigate to="/bater-ponto" replace />;
 }
 
@@ -74,48 +53,43 @@ export default function TenantRoutes() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafafa' }}>
-        <div className="loading-spinner"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="loading-spinner" />
       </div>
     );
   }
 
   return (
     <Routes>
-      {/* Páginas públicas */}
-      <Route path="/" element={isAuthenticated ? <HomeRouter /> : <LandingHome />} />
+      <Route path="/" element={isAuthenticated ? <HomeRouter /> : <Navigate to="/login" replace />} />
       <Route path="/login" element={isAuthenticated ? <HomeRouter /> : <Login />} />
-      <Route path="/approve/:token" element={<ApprovePublic />} />
 
-      {/* Rotas protegidas com layout - FLAT STRUCTURE (sem /admin/*) */}
       <Route element={
         <ProtectedRoute>
           <BankingLayout />
         </ProtectedRoute>
       }>
-        <Route path="/dashboard" element={<DashboardBanking />} />
-        <Route path="/timesheet" element={<Timesheet />} />
-        <Route path="/bater-ponto" element={<BaterPonto />} />
-        <Route path="/approvals" element={<Approvals />} />
-        <Route path="/employees" element={<Employees />} />
-        <Route path="/encarregados" element={<Encarregados />} />
-        <Route path="/administradores" element={<Administradores />} />
+        {/* Admin */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/ordens-servico" element={<OrdensServico />} />
+        <Route path="/contratos" element={<Contratos />} />
+        <Route path="/funcionarios" element={<Funcionarios />} />
+        <Route path="/almoxarifado" element={<Almoxarifado />} />
+        <Route path="/requisicoes" element={<Requisicoes />} />
+        <Route path="/controle-ponto" element={<ControlePonto />} />
         <Route path="/monitoramento" element={<Monitoramento />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/clients" element={<Clients />} />
-        <Route path="/payroll" element={<Payroll />} />
-        <Route path="/billing" element={<Billing />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/analytics-advanced" element={<AnalyticsAdvanced />} />
-        <Route path="/financial" element={<FinancialDashboard />} />
-        <Route path="/approved-financial" element={<ApprovedFinancial />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/resumo-obra" element={<ResumoObra />} />
+        <Route path="/relatorios" element={<Relatorios />} />
+        <Route path="/configuracoes" element={<Configuracoes />} />
+
+        {/* Funcionário de campo */}
+        <Route path="/bater-ponto" element={<BaterPonto />} />
+        <Route path="/registro-campo" element={<RegistroCampo />} />
+
+        {/* Supervisor */}
+        <Route path="/aprovacoes" element={<Aprovacoes />} />
       </Route>
 
-      {/* Catch all - mantém dentro do app */}
-      <Route path="*" element={isAuthenticated ? <HomeRouter /> : <Navigate to="/" replace />} />
+      <Route path="*" element={isAuthenticated ? <HomeRouter /> : <Navigate to="/login" replace />} />
     </Routes>
   );
 }

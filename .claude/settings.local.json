@@ -3,7 +3,16 @@
     "allow": [
       "Bash(npm run build)",
       "Bash(node scripts/capture-screenshots.cjs)",
-      "Read(//c/Users/Guilherme/Downloads/**)"
+      "Read(//c/Users/Guilherme/Downloads/**)",
+      "PowerShell(tree \"C:\\\\Users\\\\afgar\\\\Downloads\\\\j2s-hores-full \\(1\\)\\\\src\" -L 2 2>$null)",
+      "PowerShell(head -200)",
+      "Bash(rm -rf android graficos playstore-assets screenshots tudo-playstore temp-splash public/assets public/_htaccess_teste.txt)",
+      "Bash(ls -d */)",
+      "Bash(grep -lE \"j2s|puntotouch|cassio\" scripts/*)",
+      "Bash(python -c \"import PIL; print\\('Pillow', PIL.__version__\\)\")",
+      "Bash(pip install *)",
+      "Read(//c/Users/afgar/Downloads/**)",
+      "Bash(python -c \"from PIL import Image; im=Image.open\\('Logo_Mkorp_branco_final_favicon.png'\\); print\\('size',im.size,'mode',im.mode\\); im2=Image.open\\('logo-mkop-site.png'\\); print\\('site:',im2.size,im2.mode\\)\")"
     ]
   },
   "diffEditor.maxComputationTime": 0,

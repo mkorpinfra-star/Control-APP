@@ -1,95 +1,74 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/supabase';
 
 const AuthContext = createContext(null);
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://puntotouch.nextim.io/backend/api';
-
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [perfil, setPerfil]   = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const savedToken = localStorage.getItem('token');
-        const savedUser = localStorage.getItem('user');
+  // Restaura sessão do localStorage ao recarregar
+  useEffect(() => {
+    try {
+      const salvo = localStorage.getItem('mkorp_sessao');
+      if (salvo) setPerfil(JSON.parse(salvo));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-        if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-        }
-        setLoading(false);
-    }, []);
+  const login = async (email, senha) => {
+    try {
+      const sessao = await authService.login(email, senha);
+      setPerfil(sessao.perfil);
+      localStorage.setItem('mkorp_sessao', JSON.stringify(sessao.perfil));
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  };
 
-    const login = async (passport, password) => {
-        try {
-            // Login Centralizado - aceita passaporte OU email
-            const response = await fetch(`${API_URL}/auth/login-central.php`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: passport, // Pode ser passaporte ou email
-                    password
-                }),
-            });
+  const logout = () => {
+    authService.logout();
+    setPerfil(null);
+    localStorage.removeItem('mkorp_sessao');
+  };
 
-            const data = await response.json();
+  const atualizarPerfil = (atualizacoes) => {
+    const novo = { ...perfil, ...atualizacoes };
+    setPerfil(novo);
+    localStorage.setItem('mkorp_sessao', JSON.stringify(novo));
+  };
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Error de autenticación');
-            }
+  // Helpers de cargo
+  const cargo = perfil?.cargo;
+  const isFuncionario = cargo === 'eletricista' || cargo === 'ajudante' || cargo === 'motorista';
+  const isSupervisor  = cargo === 'supervisor';
+  const isAdmin       = cargo === 'admin';
 
-            // Salvar dados
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            localStorage.setItem('tenant', JSON.stringify(data.tenant));
-            setToken(data.token);
-            setUser(data.user);
-
-            return { success: true, user: data.user, tenant: data.tenant };
-        } catch (error) {
-            return { success: false, message: error.message };
-        }
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
-    };
-
-    const updateUser = (updates) => {
-        const updatedUser = { ...user, ...updates };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-    };
-
-    const value = {
-        user,
-        token,
-        loading,
-        login,
-        logout,
-        updateUser,
-        isAuthenticated: !!token,
-        isEmployee: user?.tipo === 'funcionario',
-        isSupervisor: user?.tipo === 'encarregado',
-        isAdmin: user?.tipo === 'admin',
-    };
-
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={{
+      perfil,
+      loading,
+      login,
+      logout,
+      atualizarPerfil,
+      isAuthenticated: !!perfil,
+      isFuncionario,
+      isSupervisor,
+      isAdmin,
+      cargo,
+      nome: perfil?.nome,
+      // Aliases para compatibilidade com componentes antigos
+      user: perfil,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth deve ser usado dentro de AuthProvider');
+  return ctx;
 }

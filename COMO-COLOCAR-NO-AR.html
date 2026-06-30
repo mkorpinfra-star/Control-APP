@@ -1,0 +1,441 @@
+<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
+<title>Mkorp Control - Guia de Deploy</title>
+<style>
+body{max-width:820px;margin:40px auto;padding:0 24px;font-family:-apple-system,Segoe UI,Inter,Arial,sans-serif;line-height:1.65;color:#1a1a1a}
+h1{font-size:30px;border-bottom:3px solid #F08020;padding-bottom:10px}
+h2{font-size:23px;margin-top:38px;border-bottom:1px solid #e5e5e5;padding-bottom:6px;color:#0E0F13}
+h3{font-size:18px;margin-top:26px;color:#333}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:.9em;color:#c0392b}
+pre{background:#0E0F13;color:#e8e8e8;padding:16px;border-radius:8px;overflow-x:auto}
+pre code{background:none;color:#e8e8e8;padding:0}
+table{border-collapse:collapse;width:100%;margin:16px 0}
+th,td{border:1px solid #ddd;padding:8px 12px;text-align:left}
+th{background:#F08020;color:#fff}
+tr:nth-child(even){background:#fafafa}
+blockquote{border-left:4px solid #3B6FD4;background:#f0f6ff;margin:16px 0;padding:10px 18px;border-radius:0 8px 8px 0}
+a{color:#3B6FD4}
+@media print{body{margin:0}h2{page-break-after:avoid}pre,table{page-break-inside:avoid}}
+</style></head><body><h1 id="mkorp-control-guia-completo-de-deploy-colocar-no-ar">🚀 Mkorp Control — Guia completo de deploy (colocar no ar)</h1>
+<p>Guia passo a passo para publicar o app: <strong>site na sua VPS</strong> + <strong>banco de dados (Supabase)</strong> + <strong>app Android na Google Play</strong>.</p>
+<blockquote>
+<p>Escrito para quem <strong>nunca fez deploy</strong>. Cada comando pode ser copiado e colado.
+Tempo estimado total: 2 a 4 horas (primeira vez).</p>
+</blockquote>
+<hr />
+<h2 id="indice">📑 Índice</h2>
+<ol>
+<li><a href="#1-entendendo-a-arquitetura">Entendendo a arquitetura (leia primeiro)</a></li>
+<li><a href="#2-preciso-de-supabase">Preciso de Supabase? (resposta direta)</a></li>
+<li><a href="#parte-a--configurar-o-supabase">PARTE A — Configurar o Supabase (banco)</a></li>
+<li><a href="#parte-b--ligar-o-app-ao-supabase-real">PARTE B — Ligar o app ao Supabase real (sair do modo protótipo)</a></li>
+<li><a href="#parte-c--subir-o-site-na-vps">PARTE C — Subir o site na VPS</a></li>
+<li><a href="#parte-d--publicar-na-google-play">PARTE D — Publicar na Google Play (teste com 100 contas)</a></li>
+<li><a href="#parte-e--alternativa-pwa">PARTE E — Alternativa sem loja: PWA (instalar pelo navegador)</a></li>
+<li><a href="#-custos-resumidos">Custos resumidos</a></li>
+<li><a href="#-checklist-final">Checklist final</a></li>
+<li><a href="#-problemas-comuns">Problemas comuns</a></li>
+</ol>
+<hr />
+<h2 id="1-entendendo-a-arquitetura">1. Entendendo a arquitetura</h2>
+<p>O Mkorp Control tem <strong>3 peças</strong>:</p>
+<pre><code>┌─────────────────────────┐     ┌──────────────────────────┐
+│   APP (front-end)        │     │   SUPABASE (back-end)    │
+│   - site React/Vite      │────▶│   - banco de dados       │
+│   - app Android (mesmo   │     │   - login/usuários       │
+│     código via Capacitor)│     │   - fotos (storage)      │
+└─────────────────────────┘     └──────────────────────────┘
+        ▲                                   
+        │ hospedado na sua VPS              Supabase é nuvem (grátis)
+        │ (arquivos estáticos)              OU self-hosted na VPS
+</code></pre>
+<p><strong>Ponto-chave:</strong> o app em si é só <strong>arquivos estáticos</strong> (HTML/CSS/JS). Ele não precisa de "servidor rodando" — qualquer hospedagem que sirva arquivos (sua VPS com nginx) funciona. <strong>Quem guarda os dados é o Supabase.</strong></p>
+<hr />
+<h2 id="2-preciso-de-supabase">2. Preciso de Supabase?</h2>
+<p><strong>Sim — você precisa de um banco de dados.</strong> Hoje o app está em <strong>modo protótipo</strong> (dados falsos na memória que somem ao recarregar). Para virar um sistema real com dados que persistem, login de verdade e fotos, você precisa de um back-end.</p>
+<p>Você tem <strong>3 opções</strong> (escolha UMA):</p>
+<table>
+<thead>
+<tr>
+<th>Opção</th>
+<th>Esforço</th>
+<th>Custo</th>
+<th>Recomendação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A. Supabase Cloud</strong></td>
+<td>⭐ Fácil</td>
+<td>Grátis até crescer</td>
+<td>✅ <strong>Recomendado</strong> — comece por aqui</td>
+</tr>
+<tr>
+<td><strong>B. Supabase self-hosted na sua VPS</strong></td>
+<td>🔧 Médio/Difícil</td>
+<td>Só o custo da VPS</td>
+<td>Se quiser tudo no seu servidor</td>
+</tr>
+<tr>
+<td><strong>C. Outro back-end (PHP, Node...)</strong></td>
+<td>🔧🔧 Difícil</td>
+<td>—</td>
+<td>❌ Reescreveria o app. Não recomendo</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Recomendação:</strong> use o <strong>Supabase Cloud (grátis)</strong>. A VPS hospeda só o site. Você pode migrar para self-hosted depois, sem mexer no código.</p>
+<p><strong>Free tier do Supabase Cloud:</strong> 500 MB de banco, 1 GB de storage (fotos), 50.000 usuários ativos/mês. Mais que suficiente para começar.</p>
+</blockquote>
+<p>Este guia usa a <strong>Opção A</strong>. No fim há uma nota sobre a Opção B.</p>
+<hr />
+<h2 id="parte-a-configurar-o-supabase">PARTE A — Configurar o Supabase</h2>
+<h3 id="a1-criar-o-projeto">A.1 — Criar o projeto</h3>
+<ol>
+<li>Acesse <strong>https://supabase.com</strong> → <strong>Start your project</strong> → faça login (GitHub ou e-mail)</li>
+<li><strong>New Project</strong></li>
+<li><strong>Name:</strong> <code>mkorp-control</code></li>
+<li><strong>Database Password:</strong> crie uma senha forte e <strong>guarde</strong> (você vai precisar)</li>
+<li><strong>Region:</strong> <code>South America (São Paulo)</code> — mais perto = mais rápido</li>
+<li>Clique <strong>Create new project</strong> e aguarde ~2 minutos</li>
+</ol>
+<h3 id="a2-criar-as-tabelas-rodar-o-sql">A.2 — Criar as tabelas (rodar o SQL)</h3>
+<ol>
+<li>No painel do Supabase, menu lateral → <strong>SQL Editor</strong> → <strong>New query</strong></li>
+<li>Abra o arquivo <strong><code>supabase_schema.sql</code></strong> (está na raiz deste projeto)</li>
+<li><strong>Copie todo o conteúdo</strong> e cole no SQL Editor</li>
+<li>Clique <strong>Run</strong> (canto inferior direito)</li>
+<li>Deve aparecer <strong>"Success. No rows returned"</strong> — pronto, todas as tabelas, funções e o bucket de fotos foram criados</li>
+</ol>
+<blockquote>
+<p>O <code>supabase_schema.sql</code> já cria: usuários, contratos, ordens de serviço, registros de campo, controle de ponto, almoxarifado, requisições, movimentações (com quem entregou/retirou), as funções de estoque e o bucket <code>fotos-campo</code>.</p>
+</blockquote>
+<h3 id="a3-pegar-as-chaves-de-api">A.3 — Pegar as chaves de API</h3>
+<ol>
+<li>Menu lateral → <strong>Project Settings</strong> (engrenagem) → <strong>API</strong></li>
+<li>Copie e guarde dois valores:</li>
+<li><strong>Project URL</strong> → algo como <code>https://abcdxyz.supabase.co</code></li>
+<li><strong>anon public</strong> (em "Project API keys") → uma chave longa começando com <code>eyJ...</code></li>
+</ol>
+<blockquote>
+<p>⚠️ <strong>Nunca</strong> use a chave <code>service_role</code> no app (ela é secreta e dá acesso total). Use só a <code>anon public</code>.</p>
+</blockquote>
+<h3 id="a4-desativar-confirmacao-de-e-mail-facilita-o-inicio">A.4 — Desativar confirmação de e-mail (facilita o início)</h3>
+<ol>
+<li>Menu <strong>Authentication</strong> → <strong>Providers</strong> → <strong>Email</strong></li>
+<li>Desligue <strong>"Confirm email"</strong> → <strong>Save</strong>
+   (assim você cria usuários e eles já entram, sem precisar confirmar e-mail)</li>
+</ol>
+<h3 id="a5-criar-o-primeiro-usuario-admin">A.5 — Criar o primeiro usuário admin</h3>
+<p>Como o app usa login por e-mail/senha, crie o admin:</p>
+<ol>
+<li>Menu <strong>Authentication</strong> → <strong>Users</strong> → <strong>Add user</strong> → <strong>Create new user</strong></li>
+<li><strong>Email:</strong> <code>admin@mkorp.com.br</code></li>
+<li><strong>Password:</strong> escolha uma senha real (ex: a que você usará)</li>
+<li>Marque <strong>Auto Confirm User</strong></li>
+<li><strong>Create user</strong></li>
+<li><strong>Copie o User UID</strong> que aparece (um código tipo <code>a1b2c3d4-...</code>)</li>
+<li>Volte em <strong>SQL Editor</strong> → New query → rode isto (troque o UID e o nome):</li>
+</ol>
+<pre><code class="language-sql">insert into public.usuarios (id, nome, email, cargo, matricula, ativo)
+values (
+  'COLE_AQUI_O_USER_UID',   -- UID copiado do passo anterior
+  'Felipe Garcia',
+  'admin@mkorp.com.br',
+  'admin',
+  'ADM001',
+  true
+);
+</code></pre>
+<ol>
+<li><strong>Run</strong>. Agora você tem um admin de verdade. (Repita para criar supervisores/eletricistas, mudando <code>cargo</code> para <code>supervisor</code>, <code>eletricista</code>, <code>ajudante</code> ou <code>motorista</code>.)</li>
+</ol>
+<p>✅ <strong>Supabase pronto.</strong></p>
+<hr />
+<h2 id="parte-b-ligar-o-app-ao-supabase-real">PARTE B — Ligar o app ao Supabase real</h2>
+<p>Hoje o arquivo <code>src/services/supabase.js</code> está em <strong>modo protótipo</strong> (mock). Para usar o banco real:</p>
+<h3 id="b1-criar-o-arquivo-env">B.1 — Criar o arquivo <code>.env</code></h3>
+<p>Na raiz do projeto, abra o arquivo <strong><code>.env</code></strong> e coloque suas chaves (da Parte A.3):</p>
+<pre><code class="language-env">VITE_SUPABASE_URL=https://abcdxyz.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6...
+</code></pre>
+<h3 id="b2-trocar-a-camada-de-dados-mock-real">B.2 — Trocar a camada de dados (mock → real)</h3>
+<blockquote>
+<p>Esta é a única mudança de código. Peça para o desenvolvedor (ou para a IA) <strong>"gerar o <code>src/services/supabase.js</code> real com Supabase, mantendo as mesmas funções do mock"</strong>. A versão real usa <code>@supabase/supabase-js</code> (já instalado) e faz as queries no banco.</p>
+</blockquote>
+<p>O pacote já está instalado. O esqueleto da versão real começa assim:</p>
+<pre><code class="language-js">import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+</code></pre>
+<p>…e cada função (ex: <code>ordensServicoService.getAll</code>) vira uma chamada real:</p>
+<pre><code class="language-js">getAll: async (filtros = {}) =&gt; {
+  let q = supabase.from('ordens_servico').select('*, contratos(nome), usuarios(nome)');
+  if (filtros.status) q = q.eq('status', filtros.status);
+  const { data, error } = await q.order('numero', { ascending: false });
+  if (error) throw error;
+  return data;
+},
+</code></pre>
+<p>As tabelas e os nomes dos campos <strong>já batem</strong> com o que o app espera (o schema foi feito assim). O <code>AuthContext</code> também já está pronto para o Supabase Auth real.</p>
+<blockquote>
+<p>🔑 <strong>Resumo:</strong> <code>.env</code> + substituir o conteúdo do <code>supabase.js</code> mock pela versão real = app conectado ao banco.</p>
+</blockquote>
+<h3 id="b3-testar-localmente-antes-de-subir">B.3 — Testar localmente antes de subir</h3>
+<pre><code class="language-bash">npm run dev
+</code></pre>
+<p>Acesse <code>http://localhost:5173</code>, entre com <code>admin@mkorp.com.br</code> e a senha que você criou no Supabase. Se logar e os dados vierem do banco → <strong>funcionou</strong>.</p>
+<hr />
+<h2 id="parte-c-subir-o-site-na-vps">PARTE C — Subir o site na VPS</h2>
+<p>Vamos hospedar o <strong>site</strong> (build estático) numa VPS Ubuntu com <strong>nginx</strong> e <strong>HTTPS grátis</strong>.</p>
+<blockquote>
+<p>Pré-requisitos: uma VPS (Ubuntu 22.04), um <strong>domínio</strong> (ex: <code>app.mkorp.com.br</code>) apontando para o IP da VPS (registro <strong>A</strong> no seu provedor de domínio).</p>
+</blockquote>
+<h3 id="c1-gerar-o-build-de-producao-no-seu-pc">C.1 — Gerar o build de produção (no seu PC)</h3>
+<pre><code class="language-bash">npm run build
+</code></pre>
+<p>Isso cria a pasta <strong><code>dist/</code></strong> com o site pronto. É essa pasta que vai para a VPS.</p>
+<h3 id="c2-acessar-a-vps-e-instalar-o-nginx">C.2 — Acessar a VPS e instalar o nginx</h3>
+<p>No seu PC, conecte via SSH (troque pelo IP da sua VPS):</p>
+<pre><code class="language-bash">ssh root@SEU_IP_DA_VPS
+</code></pre>
+<p>Na VPS:</p>
+<pre><code class="language-bash">apt update &amp;&amp; apt upgrade -y
+apt install -y nginx
+</code></pre>
+<h3 id="c3-enviar-a-pasta-dist-para-a-vps">C.3 — Enviar a pasta <code>dist/</code> para a VPS</h3>
+<p>No <strong>seu PC</strong> (não na VPS), dentro da pasta do projeto:</p>
+<pre><code class="language-bash"># cria a pasta no servidor
+ssh root@SEU_IP_DA_VPS &quot;mkdir -p /var/www/mkorp&quot;
+
+# envia os arquivos do build (precisa do scp; no Windows use o PowerShell ou Git Bash)
+scp -r dist/* root@SEU_IP_DA_VPS:/var/www/mkorp/
+</code></pre>
+<h3 id="c4-configurar-o-nginx">C.4 — Configurar o nginx</h3>
+<p>Na VPS, crie a configuração do site:</p>
+<pre><code class="language-bash">nano /etc/nginx/sites-available/mkorp
+</code></pre>
+<p>Cole isto (troque <code>app.mkorp.com.br</code> pelo seu domínio):</p>
+<pre><code class="language-nginx">server {
+    listen 80;
+    server_name app.mkorp.com.br;
+
+    root /var/www/mkorp;
+    index index.html;
+
+    # SPA: qualquer rota cai no index.html (React Router)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # cache de assets
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control &quot;public, immutable&quot;;
+    }
+}
+</code></pre>
+<p>Salve (<code>Ctrl+O</code>, <code>Enter</code>, <code>Ctrl+X</code>). Ative o site:</p>
+<pre><code class="language-bash">ln -s /etc/nginx/sites-available/mkorp /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+nginx -t          # testa a config (deve dizer &quot;ok&quot;)
+systemctl reload nginx
+</code></pre>
+<p>Agora acessar <code>http://app.mkorp.com.br</code> já mostra o app.</p>
+<h3 id="c5-ativar-https-gratis-obrigatorio">C.5 — Ativar HTTPS grátis (obrigatório!)</h3>
+<p>⚠️ <strong>O GPS e a câmera só funcionam com HTTPS.</strong> Use o Certbot (grátis):</p>
+<pre><code class="language-bash">apt install -y certbot python3-certbot-nginx
+certbot --nginx -d app.mkorp.com.br
+</code></pre>
+<p>Responda o e-mail, aceite os termos, e escolha <strong>redirect</strong> (forçar HTTPS). Pronto — <code>https://app.mkorp.com.br</code> no ar com cadeado 🔒.</p>
+<blockquote>
+<p>O Certbot renova o certificado sozinho. Não precisa fazer nada.</p>
+</blockquote>
+<h3 id="c6-atualizacoes-futuras-do-site">C.6 — Atualizações futuras do site</h3>
+<p>Toda vez que mudar o app, repita só isto:</p>
+<pre><code class="language-bash"># no seu PC
+npm run build
+scp -r dist/* root@SEU_IP_DA_VPS:/var/www/mkorp/
+</code></pre>
+<p>(não precisa mexer no nginx de novo)</p>
+<p>✅ <strong>Site no ar.</strong></p>
+<hr />
+<h2 id="parte-d-publicar-na-google-play">PARTE D — Publicar na Google Play</h2>
+<p>O app Android usa o <strong>mesmo código</strong> do site (via <strong>Capacitor</strong>). Você gera um <code>.aab</code> e sobe na Play Console.</p>
+<blockquote>
+<p>❗ <strong>Sobre o "modo free de 100 contas":</strong> a Google Play tem a faixa <strong>Internal Testing (Teste interno)</strong> que permite <strong>até 100 testadores</strong> (por e-mail), <strong>sem revisão demorada e sem custo extra</strong>. É exatamente isso que você quer para uso interno da empresa. Existe <strong>uma taxa única de US$ 25</strong> para criar a conta de desenvolvedor (paga uma vez na vida, não é mensal).</p>
+</blockquote>
+<h3 id="d1-pre-requisitos-no-seu-pc">D.1 — Pré-requisitos no seu PC</h3>
+<ul>
+<li><strong>Android Studio</strong> instalado (https://developer.android.com/studio)</li>
+<li><strong>Java JDK 17</strong> (vem com o Android Studio)</li>
+</ul>
+<h3 id="d2-regenerar-o-projeto-android">D.2 — Regenerar o projeto Android</h3>
+<p>A pasta <code>android/</code> foi removida na limpeza. Recrie:</p>
+<pre><code class="language-bash">npm run build
+npx cap add android
+npx cap sync android
+</code></pre>
+<h3 id="d3-configurar-nome-icone-e-versao">D.3 — Configurar nome, ícone e versão</h3>
+<p>O <code>capacitor.config.json</code> já está com:
+- <strong>appId:</strong> <code>br.com.mkorp.control</code>
+- <strong>appName:</strong> <code>Mkorp Control</code></p>
+<p>Os ícones (<code>public/icon-512.png</code>) já são da Mkorp. Para gerar os ícones do Android automaticamente:</p>
+<pre><code class="language-bash">npm install -D @capacitor/assets
+npx capacitor-assets generate --android
+</code></pre>
+<h3 id="d4-abrir-no-android-studio-e-gerar-o-aab-assinado">D.4 — Abrir no Android Studio e gerar o AAB assinado</h3>
+<pre><code class="language-bash">npx cap open android
+</code></pre>
+<p>No Android Studio:</p>
+<ol>
+<li>Menu <strong>Build</strong> → <strong>Generate Signed Bundle / APK</strong></li>
+<li>Escolha <strong>Android App Bundle (.aab)</strong> → <strong>Next</strong></li>
+<li><strong>Create new...</strong> (criar a chave de assinatura — o "keystore"):</li>
+<li>Escolha um caminho e <strong>guarde esse arquivo .jks com a senha</strong> (você vai precisar dele em TODA atualização futura — se perder, não consegue mais atualizar o app!)</li>
+<li>Preencha os campos (validade 25+ anos)</li>
+<li><strong>Next</strong> → escolha <strong>release</strong> → <strong>Finish</strong></li>
+<li>O <code>.aab</code> é gerado em <code>android/app/release/app-release.aab</code></li>
+</ol>
+<h3 id="d5-criar-a-conta-na-play-console">D.5 — Criar a conta na Play Console</h3>
+<ol>
+<li>Acesse <strong>https://play.google.com/console</strong></li>
+<li>Pague a <strong>taxa única de US$ 25</strong> e preencha os dados (pessoa física ou empresa)</li>
+<li>Aguarde a verificação da conta (pode levar de horas a alguns dias)</li>
+</ol>
+<h3 id="d6-criar-o-app-e-subir-no-teste-interno-100-testadores">D.6 — Criar o app e subir no Teste Interno (100 testadores)</h3>
+<ol>
+<li>Na Play Console → <strong>Criar app</strong></li>
+<li>Nome: <strong>Mkorp Control</strong></li>
+<li>Idioma padrão: Português (Brasil)</li>
+<li>App / Gratuito</li>
+<li>Menu lateral → <strong>Testes</strong> → <strong>Teste interno</strong> → <strong>Criar versão</strong></li>
+<li>Faça upload do <strong><code>app-release.aab</code></strong></li>
+<li>Em <strong>Testadores</strong>, crie uma lista e adicione os <strong>e-mails</strong> (até 100) das pessoas que vão usar</li>
+<li><strong>Revisar versão</strong> → <strong>Iniciar lançamento para teste interno</strong></li>
+<li>A Play Console te dá um <strong>link de inscrição</strong>. Cada testador abre o link no celular, aceita ser testador e instala o app pela Play Store <strong>normalmente</strong>.</li>
+</ol>
+<blockquote>
+<p>✅ <strong>Teste interno = praticamente instantâneo</strong> (minutos, sem revisão longa) e até <strong>100 pessoas</strong>. Perfeito para a equipe da empresa. Você pode subir novas versões quando quiser.</p>
+</blockquote>
+<h3 id="d7-atualizacoes-futuras-do-app">D.7 — Atualizações futuras do app</h3>
+<pre><code class="language-bash"># 1. suba o número da versão em android/app/build.gradle (versionCode +1, versionName)
+npm run build
+npx cap sync android
+npx cap open android
+# 2. gere um novo .aab assinado (com a MESMA keystore) e suba na Play Console
+</code></pre>
+<blockquote>
+<p>📌 <strong>Sobre produção pública:</strong> se um dia quiser publicar para qualquer pessoa baixar (não só os 100 testadores), contas pessoais novas precisam de um período de <strong>teste fechado com 20 testadores por 14 dias</strong> antes de liberar produção. Para uso <strong>interno da empresa</strong>, o <strong>Teste Interno (100 contas) já resolve</strong> e você não precisa disso.</p>
+</blockquote>
+<hr />
+<h2 id="parte-e-alternativa-pwa">PARTE E — Alternativa: PWA</h2>
+<p>Se você <strong>não quiser mexer com Google Play</strong>, o app já é um <strong>PWA</strong> — dá para instalar direto pelo navegador, <strong>de graça e na hora</strong>:</p>
+<ol>
+<li>Com o site no ar com HTTPS (Parte C), abra <code>https://app.mkorp.com.br</code> no celular (Chrome/Safari)</li>
+<li>Menu do navegador → <strong>"Adicionar à tela inicial"</strong> / <strong>"Instalar app"</strong></li>
+<li>Vira um ícone na tela inicial e abre em tela cheia, como um app nativo</li>
+</ol>
+<p><strong>Vantagens:</strong> zero custo, zero loja, atualiza sozinho (só atualizar o site).
+<strong>Limitação:</strong> não aparece na Play Store (instala pelo link). GPS e câmera funcionam normalmente (porque tem HTTPS).</p>
+<blockquote>
+<p>💡 Muitas empresas usam só o PWA para apps internos. Vale considerar antes de pagar a Play Console.</p>
+</blockquote>
+<hr />
+<h2 id="custos-resumidos">💰 Custos resumidos</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Custo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supabase Cloud (free tier)</td>
+<td><strong>Grátis</strong> (até crescer muito)</td>
+</tr>
+<tr>
+<td>VPS (Ubuntu básica)</td>
+<td>já é sua / ~R$ 20–40/mês</td>
+</tr>
+<tr>
+<td>Domínio (.com.br)</td>
+<td>~R$ 40/ano</td>
+</tr>
+<tr>
+<td>HTTPS (Certbot)</td>
+<td><strong>Grátis</strong></td>
+</tr>
+<tr>
+<td>PWA</td>
+<td><strong>Grátis</strong></td>
+</tr>
+<tr>
+<td>Google Play (conta dev)</td>
+<td><strong>US$ 25 uma única vez</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mínimo para colocar no ar (sem loja):</strong> só a VPS + domínio + Supabase grátis = caminho mais barato (via PWA).</p>
+<hr />
+<h2 id="checklist-final">✅ Checklist final</h2>
+<p><strong>Banco (Supabase)</strong>
+- [ ] Projeto criado
+- [ ] <code>supabase_schema.sql</code> rodado com sucesso
+- [ ] Chaves (URL + anon) copiadas
+- [ ] "Confirm email" desativado
+- [ ] Usuário admin criado (Auth + tabela <code>usuarios</code>)</p>
+<p><strong>App ligado ao banco</strong>
+- [ ] <code>.env</code> preenchido com as chaves
+- [ ] <code>src/services/supabase.js</code> trocado de mock para real
+- [ ] Testado em <code>npm run dev</code> (login real funciona)</p>
+<p><strong>Site na VPS</strong>
+- [ ] Domínio apontando para o IP (registro A)
+- [ ] <code>npm run build</code> feito
+- [ ] <code>dist/</code> enviado para <code>/var/www/mkorp</code>
+- [ ] nginx configurado e recarregado
+- [ ] HTTPS ativo (Certbot) — cadeado 🔒
+- [ ] GPS testado no celular (só funciona com HTTPS)</p>
+<p><strong>Android (opcional)</strong>
+- [ ] <code>npx cap add android</code> feito
+- [ ] <code>.aab</code> assinado gerado (keystore guardada em local seguro!)
+- [ ] Conta Play Console criada (US$ 25)
+- [ ] Teste interno criado com a lista de e-mails (até 100)
+- [ ] Link de inscrição enviado para a equipe</p>
+<hr />
+<h2 id="problemas-comuns">🛠 Problemas comuns</h2>
+<p><strong>"Tela branca" depois do deploy</strong>
+→ Faltou a regra <code>try_files ... /index.html</code> no nginx (Parte C.4). Sem ela, rotas internas dão 404.</p>
+<p><strong>GPS / câmera não funcionam</strong>
+→ Falta HTTPS. Geolocalização e câmera <strong>exigem</strong> <code>https://</code> (ou <code>localhost</code>). Rode o Certbot (Parte C.5).</p>
+<p><strong>Login não funciona / "Invalid login credentials"</strong>
+→ O usuário precisa existir <strong>nos dois lugares</strong>: em <strong>Authentication → Users</strong> E na tabela <strong><code>usuarios</code></strong> com o mesmo UID. Veja A.5.</p>
+<p><strong>Fotos não salvam</strong>
+→ Confira se o bucket <strong><code>fotos-campo</code></strong> existe (Supabase → Storage). O <code>supabase_schema.sql</code> já cria, mas confirme.</p>
+<p><strong>App Android abre em branco</strong>
+→ Rode <code>npx cap sync android</code> depois de cada <code>npm run build</code>. O build precisa estar atualizado antes do sync.</p>
+<p><strong>Esqueci/perdi a keystore do Android</strong>
+→ Não dá para atualizar o app na Play com outra chave. <strong>Faça backup do arquivo <code>.jks</code> e da senha</strong> em local seguro (ex: gerenciador de senhas).</p>
+<hr />
+<h2 id="nota-supabase-self-hosted-na-vps-opcao-b">📌 Nota: Supabase self-hosted na VPS (Opção B)</h2>
+<p>Se quiser <strong>tudo no seu servidor</strong> (sem depender da nuvem Supabase):</p>
+<ol>
+<li>Na VPS com Docker instalado:
+   <code>bash
+   git clone --depth 1 https://github.com/supabase/supabase
+   cd supabase/docker
+   cp .env.example .env   # edite senhas e chaves
+   docker compose up -d</code></li>
+<li>O Supabase sobe localmente (banco, auth, storage, painel)</li>
+<li>No <code>.env</code> do app, use a URL do seu servidor em vez da <code>supabase.co</code></li>
+</ol>
+<blockquote>
+<p>⚠️ Self-hosted dá mais trabalho (backups, atualizações, segurança são por sua conta). <strong>Comece com o Cloud grátis</strong> e migre depois se precisar.</p>
+</blockquote>
+<hr />
+<p><em>Documento gerado para o projeto </em><em>Mkorp Control</em><em> — Gestão de iluminação pública.</em>
+<em>Dúvidas em algum passo? Peça ajuda detalhando em qual etapa travou.</em></p></body></html>

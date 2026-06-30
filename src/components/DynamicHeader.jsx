@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IconLogout, IconPlus, IconBuilding, IconBuildingFactory2, IconUserPlus, IconShieldPlus, IconUserShield, IconUsers, IconFileText, IconCurrencyDollar, IconChartBar, IconSettings, IconUserCircle, IconReceipt, IconUserCog, IconClock } from '@tabler/icons-react';
+import {
+  IconLogout, IconPlus, IconClipboardList, IconPackage,
+  IconUsers, IconFileText, IconChartBar, IconSettings,
+  IconUserCircle, IconMapPin, IconTruck, IconBuilding,
+  IconClipboardCheck, IconClock, IconArrowLeft
+} from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
 import Avatar from './Avatar';
 
 export default function DynamicHeader() {
-  const { user, logout } = useAuth();
+  const { perfil, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -18,185 +23,129 @@ export default function DynamicHeader() {
     return 'Boa noite';
   };
 
-  // Configuração de cada página
   const getPageConfig = () => {
     const path = location.pathname;
 
-    // Dashboard - mostra QuickActions
     if (path === '/' || path === '/dashboard') {
-      return {
-        type: 'dashboard',
-        showQuickActions: true
-      };
+      return { type: 'dashboard', showQuickActions: true };
     }
 
-    // Páginas com botão de adicionar
-    const pageConfigs = {
-      '/projects': {
-        type: 'list',
-        title: 'Proyectos',
-        subtitle: 'Gestión de obras',
-        icon: IconBuilding,
-        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'projects' } }))
-      },
-      '/clients': {
-        type: 'list',
-        title: 'Clientes',
-        subtitle: 'Gestión de clientes',
-        icon: IconBuildingFactory2,
-        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'clients' } }))
-      },
-      '/encarregados': {
-        type: 'list',
-        title: 'Encargados',
-        subtitle: 'Gestión de encargados',
-        icon: IconShieldPlus,
-        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'encarregados' } }))
-      },
-      '/administradores': {
-        type: 'list',
-        title: 'Administradores',
-        subtitle: 'Gestión de administradores',
-        icon: IconUserShield,
-        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'administradores' } }))
-      },
-      '/monitoramento': {
-        type: 'page',
-        title: 'Monitoreo',
-        subtitle: 'Control en tiempo real',
-        icon: IconClock
-      },
-      '/employees': {
-        type: 'list',
-        title: 'Empleados',
-        subtitle: 'Gestión de empleados',
-        icon: IconUsers,
-        addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'employees' } }))
-      },
-      '/approvals': {
-        type: 'page',
-        title: 'Aprobaciones',
-        subtitle: 'Registros pendientes',
-        icon: IconFileText
-      },
-      '/payroll': {
-        type: 'page',
-        title: 'Nómina',
-        subtitle: 'Folha de pagamento',
-        icon: IconCurrencyDollar
-      },
-      '/billing': {
-        type: 'page',
-        title: 'Facturación',
-        subtitle: 'Faturamento',
-        icon: IconFileText
-      },
-      '/analytics': {
-        type: 'page',
-        title: 'Analíticas',
-        subtitle: 'Informes y estadísticas',
-        icon: IconChartBar
-      },
-      '/settings': {
-        type: 'page',
-        title: 'Configuración',
-        subtitle: 'Ajustes del sistema',
-        icon: IconSettings
-      }
+    const configs = {
+      '/ordens-servico':  { type: 'list', title: 'Ordens de serviço', subtitle: 'Gestão de OS', icon: IconClipboardList, addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'ordens-servico' } })) },
+      '/contratos':       { type: 'list', title: 'Contratos', subtitle: 'Prefeituras e municípios', icon: IconBuilding, addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'contratos' } })) },
+      '/funcionarios':    { type: 'list', title: 'Funcionários', subtitle: 'Equipes de campo', icon: IconUsers, addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'funcionarios' } })) },
+      '/almoxarifado':    { type: 'list', title: 'Almoxarifado', subtitle: 'Estoque de materiais', icon: IconPackage, addAction: () => window.dispatchEvent(new CustomEvent('openAddModal', { detail: { page: 'almoxarifado' } })) },
+      '/requisicoes':     { type: 'page', title: 'Requisições', subtitle: 'Saída de materiais', icon: IconPackage },
+      '/controle-ponto':  { type: 'page', title: 'Controle de ponto', subtitle: 'Jornada dos funcionários', icon: IconClock },
+      '/aprovacoes':      { type: 'page', title: 'Aprovações', subtitle: 'Pendências de revisão', icon: IconClipboardCheck },
+      '/monitoramento':   { type: 'page', title: 'Monitoramento', subtitle: 'Equipes em campo', icon: IconTruck },
+      '/relatorios':      { type: 'page', title: 'Relatórios', subtitle: 'Medição e desempenho', icon: IconChartBar },
+      '/configuracoes':   { type: 'page', title: 'Configurações', subtitle: 'Ajustes do sistema', icon: IconSettings },
+      '/bater-ponto':     { type: 'page', title: 'Registro de ponto', subtitle: 'Sua jornada de hoje' },
+      '/registro-campo':  { type: 'page', title: 'Registro de campo', subtitle: 'OS em execução', icon: IconMapPin },
     };
 
-    return pageConfigs[path] || {
-      type: 'simple',
-      title: user?.tipo === 'admin' ? 'Painel' : 'Painel',
-      subtitle: 'J2S Hores'
-    };
+    return configs[path] || { type: 'simple', title: 'Mkorp Control', subtitle: 'Iluminação Pública' };
   };
 
   const config = getPageConfig();
 
-  // TODOS os QuickActions (10 itens) - Grid 5x2
   const quickActions = [
-    { label: 'Clientes', icon: IconUsers, path: '/clients', tourId: 'clientes-btn' },
-    { label: 'Obras', icon: IconBuilding, path: '/projects', tourId: 'obras-btn' },
-    { label: 'Empleados', icon: IconUserCircle, path: '/employees', tourId: 'empleados-btn' },
-    { label: 'Encargados', icon: IconUserCog, path: '/encarregados', tourId: 'encargados-btn' },
-    { label: 'Admins', icon: IconUserShield, path: '/administradores', tourId: 'admins-btn' },
-    { label: 'Folha', icon: IconCurrencyDollar, path: '/payroll', tourId: 'folha-btn' },
-    { label: 'Faturamento', icon: IconReceipt, path: '/billing', tourId: 'faturamento-btn' },
-    { label: 'Monitoreo', icon: IconClock, path: '/monitoramento', tourId: 'monitoreo-btn' },
-    { label: 'Informes', icon: IconFileText, path: '/approvals', tourId: 'informes-btn' },
-    { label: 'Análisis', icon: IconChartBar, path: '/analytics', tourId: 'analisis-btn' }
+    { label: 'Ordens de serviço', icon: IconClipboardList, path: '/ordens-servico' },
+    { label: 'Contratos',         icon: IconBuilding,      path: '/contratos' },
+    { label: 'Funcionários',      icon: IconUsers,         path: '/funcionarios' },
+    { label: 'Almoxarifado',      icon: IconPackage,       path: '/almoxarifado' },
+    { label: 'Requisições',       icon: IconFileText,      path: '/requisicoes' },
+    { label: 'Ponto',             icon: IconClock,         path: '/controle-ponto' },
+    { label: 'Aprovações',        icon: IconClipboardCheck,path: '/aprovacoes' },
+    { label: 'Monitoramento',     icon: IconTruck,         path: '/monitoramento' },
+    { label: 'Relatórios',        icon: IconChartBar,      path: '/relatorios' },
+    { label: 'Config.',           icon: IconSettings,      path: '/configuracoes' },
   ];
+
+  const isAdmin = perfil?.cargo === 'admin';
+  const homePath = isAdmin ? '/dashboard' : (perfil?.cargo === 'supervisor' ? '/aprovacoes' : '/bater-ponto');
+  const isHome = location.pathname === homePath || location.pathname === '/';
 
   return (
     <>
-      <header className="bg-gradient-to-br from-[#CE0201] to-[#A00101] text-white safe-area-top">
-        <div className={`px-4 pt-6 ${user?.tipo === 'admin' ? 'pb-6' : 'pb-3'}`}>
-          {/* Top Row - Avatar + Logout */}
+      <header className={`text-[#F5F5F0] safe-area-top border-b border-[#23262E] ${
+        config.showQuickActions
+          ? 'bg-[linear-gradient(160deg,#1B2436_0%,#121419_45%,#0A0B0D_100%)]'
+          : 'bg-gradient-to-b from-[#15171C] to-[#0A0B0D]'
+      }`}>
+        <div className={`px-4 pt-6 ${isAdmin ? 'pb-6' : 'pb-3'}`}>
+          {/* Top Row */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <button onClick={() => setShowProfileMenu(true)} className="relative group">
-                <div className="border-2 border-white/30 group-hover:border-white/50 transition-all rounded-full">
-                  <Avatar user={user} size="md" className="!bg-white/20 !text-white" />
+                <div className="border border-[#30353F] group-hover:border-[#F08020]/50 transition-all rounded-full">
+                  <Avatar user={perfil} size="md" className="!bg-[#22262F] !text-[#F5F5F0]" />
                 </div>
-                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-white rounded-full border-2 border-[#CE0201]"></div>
+                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#34D399] rounded-full border-2 border-[#0A0B0D]" />
               </button>
-
               <div>
-                <p className="text-sm opacity-90">{getGreeting()},</p>
-                <p className="text-lg font-semibold">
-                  {user?.nome?.split(' ')[0] || 'Usuário'}
+                <p className="text-sm text-[#A8ADB8]">{getGreeting()},</p>
+                <p className="text-lg font-semibold text-[#F5F5F0]">
+                  {perfil?.nome?.split(' ')[0] || 'Usuário'}
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={logout}
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
-              aria-label="Cerrar sesión"
-            >
-              <IconLogout stroke={1} size={20} />
-            </button>
+            {isHome ? (
+              <button
+                onClick={logout}
+                className="w-10 h-10 rounded-full bg-[#1A1D24] border border-[#30353F] flex items-center justify-center text-[#A8ADB8] hover:text-[#F5F5F0] hover:bg-[#22262F] transition-colors"
+                aria-label="Sair"
+              >
+                <IconLogout stroke={1.5} size={20} />
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate(-1)}
+                className="w-10 h-10 rounded-full bg-[#1A1D24] border border-[#30353F] flex items-center justify-center text-[#A8ADB8] hover:text-[#F5F5F0] hover:bg-[#22262F] transition-colors"
+                aria-label="Voltar"
+              >
+                <IconArrowLeft stroke={1.5} size={20} />
+              </button>
+            )}
           </div>
 
-          {/* Title Section - Só para páginas que NÃO são Dashboard */}
-          {!config.showQuickActions && user?.tipo === 'admin' && (
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+          {/* Título de página (não dashboard) */}
+          {!config.showQuickActions && isAdmin && (
+            <div className="bg-[#1A1D24] backdrop-blur-md rounded-2xl p-4 border border-[#23262E]">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-xs opacity-80 mb-1">{config.subtitle}</p>
-                  <p className="text-xl tracking-tight" style={{ fontFamily: 'IBM Plex Sans', fontWeight: 400 }}>{config.title}</p>
+                  <p className="text-xs text-[#6B7280] mb-1">{config.subtitle}</p>
+                  <p className="text-xl tracking-tight font-normal text-[#F5F5F0]">{config.title}</p>
                 </div>
-
-                {/* Botão de adicionar para páginas de lista */}
                 {config.type === 'list' && config.addAction && (
                   <button
                     onClick={config.addAction}
-                    className="w-12 h-12 bg-white text-[#CE0201] rounded-full hover:bg-white/90 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg ml-3 shrink-0"
+                    className="w-12 h-12 bg-[#F08020] text-[#0A0B0D] rounded-full hover:bg-[#D86E14] transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-[0_8px_24px_rgba(240,128,32,0.3)] ml-3 shrink-0"
                   >
-                    <IconPlus stroke={1} size={24} />
+                    <IconPlus stroke={2} size={24} />
                   </button>
                 )}
               </div>
             </div>
           )}
 
-          {/* Quick Actions - só aparece no Dashboard - Grid 5 colunas x 2 linhas */}
-          {config.showQuickActions && (
-            <div id="quick-actions" className="grid grid-cols-5 gap-3">
+          {/* Quick Actions — Dashboard admin */}
+          {config.showQuickActions && isAdmin && (
+            <div className="grid grid-cols-5 gap-3">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
                   <button
                     key={action.path}
                     onClick={() => navigate(action.path)}
-                    data-tour={action.tourId}
-                    className="flex flex-col items-center gap-1.5 hover:opacity-80 transition-opacity active:scale-95"
+                    className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform group"
                   >
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                      <Icon stroke={1} size={24} />
+                    <div className="w-12 h-12 bg-[#1A1D24] border border-[#23262E] rounded-xl flex items-center justify-center group-hover:border-[#F08020]/40 group-hover:bg-[#22262F] transition-colors">
+                      <Icon stroke={1.5} size={22} className="text-[#A8ADB8] group-hover:text-[#5B8DEF] transition-colors" />
                     </div>
-                    <span className="text-[10px] font-medium text-center leading-tight">{action.label}</span>
+                    <span className="text-[10px] font-medium text-center leading-tight text-[#A8ADB8]">{action.label}</span>
                   </button>
                 );
               })}
