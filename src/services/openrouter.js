@@ -1,7 +1,7 @@
 const API_KEY = import.meta.env.VITE_OPENROUTER_KEY;
 const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-async function chamarIA(messages, model = 'google/gemini-2.0-flash-exp:free') {
+async function chamarIA(messages, model = 'google/gemini-3-flash-preview') {
   const res = await fetch(BASE_URL, {
     method: 'POST',
     headers: {
