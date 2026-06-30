@@ -105,11 +105,13 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Dica de credenciais (protótipo) */}
-          <div className="mt-5 pt-4 border-t border-[#23262E]">
-            <p className="text-[11px] text-[#6B7280] text-center">
-              Protótipo · admin@mkorp.com.br · senha 123456
-            </p>
+          <div className="mt-5 pt-4 border-t border-[#23262E] text-center">
+            <a
+              href="mailto:af.garcia@gmail.com?subject=Solicitação de acesso — Mkorp Control&body=Olá, gostaria de solicitar acesso ao sistema Mkorp Control.%0A%0ANome: %0ACargo: %0AEmpresa: "
+              className="text-[12px] text-[#F08020] hover:text-[#D86E14] transition-colors"
+            >
+              Solicitar acesso
+            </a>
           </div>
         </div>
       </div>

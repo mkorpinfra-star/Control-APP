@@ -27,6 +27,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: https://dncsspudxtnrppchpldu.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuY3NzcHVkeHRucnBwY2hwbGR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTUyNTgsImV4cCI6MjA5NjU5MTI1OH0.Lkh2G5L2MiGoDpB52qS4HoSBFie-PzNCgV2YgzlymPY
+          VITE_OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
 
       - name: Enviar para VPS
         uses: appleboy/scp-action@v0.1.7

@@ -18,6 +18,7 @@ import OrdensServico from '../pages/OrdensServico';
 import Contratos from '../pages/Contratos';
 import Funcionarios from '../pages/Employees';
 import Almoxarifado from '../pages/Almoxarifado';
+import EntradaNF from '../pages/EntradaNF';
 import Requisicoes from '../pages/Requisicoes';
 import ControlePonto from '../pages/Timesheet';
 import Relatorios from '../pages/Reports';
@@ -75,6 +76,7 @@ export default function TenantRoutes() {
         <Route path="/contratos" element={<Contratos />} />
         <Route path="/funcionarios" element={<Funcionarios />} />
         <Route path="/almoxarifado" element={<Almoxarifado />} />
+        <Route path="/almoxarifado/entrada-nf" element={<EntradaNF />} />
         <Route path="/requisicoes" element={<Requisicoes />} />
         <Route path="/controle-ponto" element={<ControlePonto />} />
         <Route path="/monitoramento" element={<Monitoramento />} />

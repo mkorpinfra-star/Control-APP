@@ -360,6 +360,37 @@ export const requisicoesService = {
   },
 };
 
+// ==================== COMENTÁRIOS OS ====================
+export const comentariosService = {
+  getByOS: async (os_id) => {
+    const { data, error } = await supabase
+      .from('os_comentarios')
+      .select('*, usuarios(nome, cargo)')
+      .eq('os_id', os_id)
+      .order('criado_em', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+  create: async (os_id, usuario_id, texto, foto_url = null) => {
+    const { data, error } = await supabase
+      .from('os_comentarios')
+      .insert({ os_id, usuario_id, texto, foto_url })
+      .select('*, usuarios(nome, cargo)')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+  uploadFoto: async (arquivo) => {
+    const nome = `comentarios/${Date.now()}_${arquivo.name}`;
+    const { data, error } = await supabase.storage
+      .from('fotos-campo')
+      .upload(nome, arquivo, { cacheControl: '3600', upsert: false });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from('fotos-campo').getPublicUrl(data.path);
+    return urlData.publicUrl;
+  },
+};
+
 // ==================== DASHBOARD ====================
 export const dashboardService = {
   getResumo: async () => {

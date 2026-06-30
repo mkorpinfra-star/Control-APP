@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { almoxarifadoService } from '../services/supabase';
 import { ui } from '../lib/theme';
-import { IconPlus, IconSearch, IconAlertTriangle, IconPackage, IconArrowUp, IconArrowDown } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconAlertTriangle, IconPackage, IconArrowUp, IconArrowDown, IconReceipt } from '@tabler/icons-react';
 
 const CATEGORIA_LABEL = {
   lampada: 'Lâmpada', reator: 'Reator', cabo: 'Cabo', rele_fotoeletrico: 'Relé fotoelétrico',
@@ -10,6 +11,7 @@ const CATEGORIA_LABEL = {
 };
 
 export default function Almoxarifado() {
+  const navigate = useNavigate();
   const [busca, setBusca] = useState('');
   const [aba, setAba] = useState('estoque');
 
@@ -52,12 +54,18 @@ export default function Almoxarifado() {
         </div>
       )}
 
-      <div className="px-4 pt-4 pb-2 flex gap-2">
+      <div className="px-4 pt-4 pb-2 flex gap-2 flex-wrap">
         {['estoque', 'movimentacoes'].map(a => (
           <button key={a} onClick={() => setAba(a)} className={ui.chip(aba === a)}>
             {a === 'estoque' ? 'Estoque atual' : 'Movimentações'}
           </button>
         ))}
+        <button
+          onClick={() => navigate('/almoxarifado/entrada-nf')}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F08020]/10 border border-[#F08020]/30 rounded-full text-xs text-[#F08020] hover:bg-[#F08020]/20 transition-colors ml-auto"
+        >
+          <IconReceipt size={13} /> Entrada por NF
+        </button>
       </div>
 
       {aba === 'estoque' && (

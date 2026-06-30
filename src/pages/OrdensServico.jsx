@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ordensServicoService } from '../services/supabase';
 import { STATUS_OS, PRIORIDADE, ui } from '../lib/theme';
-import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle } from '@tabler/icons-react';
+import ComentariosOS from '../components/ComentariosOS';
 
 const TIPO_DEFEITO_LABEL = {
   lampada_queimada: 'Lâmpada queimada',
@@ -19,6 +20,7 @@ const TIPO_DEFEITO_LABEL = {
 export default function OrdensServico() {
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
+  const [osSelecionada, setOsSelecionada] = useState(null);
 
   const { data: ordens = [], isLoading } = useQuery({
     queryKey: ['ordens-servico', filtroStatus],
@@ -79,7 +81,11 @@ export default function OrdensServico() {
             const status = STATUS_OS[os.status] || STATUS_OS.aberta;
             const prio = PRIORIDADE[os.prioridade];
             return (
-              <div key={os.id} className="bg-[#1A1D24] rounded-2xl p-4 border border-[#23262E]">
+              <div
+                key={os.id}
+                className="bg-[#1A1D24] rounded-2xl p-4 border border-[#23262E] active:scale-[0.99] transition-transform cursor-pointer"
+                onClick={() => setOsSelecionada(os)}
+              >
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <div className="flex items-center gap-2">
@@ -108,6 +114,7 @@ export default function OrdensServico() {
                     <span className="text-xs text-[#6B7280]">
                       {os.data_abertura ? new Date(os.data_abertura).toLocaleDateString('pt-BR') : '—'}
                     </span>
+                    <IconMessageCircle size={13} className="text-[#454A54]" />
                   </div>
                 </div>
               </div>
@@ -116,6 +123,42 @@ export default function OrdensServico() {
         )}
       </div>
 
+      {/* Drawer de detalhe + mensagens */}
+      {osSelecionada && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOsSelecionada(null)} />
+          <div className="relative bg-[#0E0F13] border-t border-[#23262E] rounded-t-3xl max-h-[85vh] overflow-y-auto">
+            {/* Handle */}
+            <div className="sticky top-0 bg-[#0E0F13] pt-3 pb-2 px-4 border-b border-[#23262E] flex items-center justify-between z-10">
+              <div>
+                <span className="text-xs font-mono text-[#6B7280]">OS #{osSelecionada.numero}</span>
+                <p className="font-semibold text-[#F5F5F0] text-sm">{TIPO_DEFEITO_LABEL[osSelecionada.tipo_defeito] || osSelecionada.tipo_defeito}</p>
+              </div>
+              <button onClick={() => setOsSelecionada(null)} className="text-[#6B7280] hover:text-[#F5F5F0]">
+                <IconX size={20} />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {/* Info resumida */}
+              <div className="bg-[#121419] border border-[#23262E] rounded-2xl p-3 space-y-1.5 text-sm">
+                {osSelecionada.descricao && <p className="text-[#A8ADB8]">{osSelecionada.descricao}</p>}
+                {(osSelecionada.logradouro || osSelecionada.bairro) && (
+                  <div className="flex items-center gap-1 text-xs text-[#6B7280]">
+                    <IconMapPin size={12} />
+                    {[osSelecionada.logradouro, osSelecionada.bairro].filter(Boolean).join(' — ')}
+                  </div>
+                )}
+                {osSelecionada.numero_poste && <p className="text-xs text-[#6B7280]">Poste: {osSelecionada.numero_poste}</p>}
+                {osSelecionada.usuarios?.nome && <p className="text-xs text-[#6B7280]">Responsável: {osSelecionada.usuarios.nome}</p>}
+              </div>
+
+              {/* Feed de mensagens */}
+              <ComentariosOS osId={osSelecionada.id} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
