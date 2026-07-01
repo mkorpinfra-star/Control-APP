@@ -50,6 +50,20 @@ function HomeRouter() {
   return <Navigate to="/bater-ponto" replace />;
 }
 
+// Guarda de acesso por papel: se não permitido, volta para a home do usuário
+function Guard({ allow, children }) {
+  const auth = useAuth();
+  return allow(auth) ? children : <HomeRouter />;
+}
+
+// Regras de acesso
+const REGRAS = {
+  gestao:    (a) => a.isAdmin || a.isSupervisor,               // OS, contratos, monitoramento, relatórios, aprovações, ponto
+  adminOnly: (a) => a.isAdmin,                                  // dashboard, funcionários
+  estoque:   (a) => a.isAdmin || a.isSupervisor || a.isAlmoxarife, // almoxarifado
+  todos:     () => true,                                        // requisições, config, ponto próprio, campo
+};
+
 export default function TenantRoutes() {
   const { user, isAuthenticated, loading } = useAuth();
 
@@ -72,24 +86,26 @@ export default function TenantRoutes() {
         </ProtectedRoute>
       }>
         {/* Admin */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/ordens-servico" element={<OrdensServico />} />
-        <Route path="/contratos" element={<Contratos />} />
-        <Route path="/funcionarios" element={<Funcionarios />} />
-        <Route path="/almoxarifado" element={<Almoxarifado />} />
-        <Route path="/almoxarifado/entrada-nf" element={<EntradaNF />} />
-        <Route path="/requisicoes" element={<Requisicoes />} />
-        <Route path="/controle-ponto" element={<ControlePonto />} />
-        <Route path="/monitoramento" element={<Monitoramento />} />
-        <Route path="/relatorios" element={<Relatorios />} />
-        <Route path="/configuracoes" element={<Configuracoes />} />
+        <Route path="/dashboard" element={<Guard allow={REGRAS.adminOnly}><Dashboard /></Guard>} />
+        <Route path="/funcionarios" element={<Guard allow={REGRAS.adminOnly}><Funcionarios /></Guard>} />
 
-        {/* Funcionário de campo */}
+        {/* Gestão (admin + supervisor) */}
+        <Route path="/ordens-servico" element={<Guard allow={REGRAS.gestao}><OrdensServico /></Guard>} />
+        <Route path="/contratos" element={<Guard allow={REGRAS.gestao}><Contratos /></Guard>} />
+        <Route path="/controle-ponto" element={<Guard allow={REGRAS.gestao}><ControlePonto /></Guard>} />
+        <Route path="/monitoramento" element={<Guard allow={REGRAS.gestao}><Monitoramento /></Guard>} />
+        <Route path="/relatorios" element={<Guard allow={REGRAS.gestao}><Relatorios /></Guard>} />
+        <Route path="/aprovacoes" element={<Guard allow={REGRAS.gestao}><Aprovacoes /></Guard>} />
+
+        {/* Estoque (admin + supervisor + almoxarife) */}
+        <Route path="/almoxarifado" element={<Guard allow={REGRAS.estoque}><Almoxarifado /></Guard>} />
+        <Route path="/almoxarifado/entrada-nf" element={<Guard allow={REGRAS.estoque}><EntradaNF /></Guard>} />
+
+        {/* Todos os autenticados */}
+        <Route path="/requisicoes" element={<Requisicoes />} />
+        <Route path="/configuracoes" element={<Configuracoes />} />
         <Route path="/bater-ponto" element={<BaterPonto />} />
         <Route path="/registro-campo" element={<RegistroCampo />} />
-
-        {/* Supervisor */}
-        <Route path="/aprovacoes" element={<Aprovacoes />} />
       </Route>
 
       <Route path="*" element={isAuthenticated ? <HomeRouter /> : <Navigate to="/login" replace />} />

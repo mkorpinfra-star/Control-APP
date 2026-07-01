@@ -355,6 +355,16 @@ export const almoxarifadoService = {
       item_id, tipo: 'entrada', quantidade, saldo_apos: saldoNovo, observacao,
     });
   },
+  saida: async (item_id, quantidade, observacao = '') => {
+    const { data: estoqueAtual } = await supabase.from('estoque').select('quantidade').eq('item_id', item_id).single();
+    const saldoAtual = estoqueAtual?.quantidade ?? 0;
+    if (quantidade > saldoAtual) throw new Error(`Estoque insuficiente (saldo: ${saldoAtual}).`);
+    const saldoNovo = saldoAtual - quantidade;
+    await supabase.from('estoque').update({ quantidade: saldoNovo }).eq('item_id', item_id);
+    await supabase.from('movimentacoes_estoque').insert({
+      item_id, tipo: 'saida_manual', quantidade, saldo_apos: saldoNovo, observacao,
+    });
+  },
 };
 
 // ==================== REQUISIÇÕES ====================

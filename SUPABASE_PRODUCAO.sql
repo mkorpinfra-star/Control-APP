@@ -87,6 +87,17 @@ begin
   end if;
 end $$;
 
+-- 2d) Garante que o tipo 'saida_manual' é aceito em movimentações
+do $$
+begin
+  if exists (
+    select 1 from information_schema.table_constraints
+    where table_name = 'movimentacoes_estoque' and constraint_name = 'movimentacoes_estoque_tipo_check'
+  ) then
+    execute 'alter table movimentacoes_estoque drop constraint movimentacoes_estoque_tipo_check';
+  end if;
+end $$;
+
 -- 3) Linha inicial da empresa (edite depois pelo app em Config)
 -- ============================================================
 insert into config_empresa (id, nome)

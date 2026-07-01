@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { almoxarifadoService } from '../services/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { ui } from '../lib/theme';
 import { IconPlus, IconSearch, IconAlertTriangle, IconPackage, IconArrowUp, IconArrowDown, IconReceipt, IconLoader2 } from '@tabler/icons-react';
 import Modal from '../components/Modal';
@@ -16,6 +17,7 @@ const PRODUTO_INICIAL = { nome: '', categoria: 'lampada', unidade: 'un', estoque
 export default function Almoxarifado() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { canGerenciarEstoque } = useAuth();
   const [busca, setBusca] = useState('');
   const [aba, setAba] = useState('estoque');
   const [modalAberto, setModalAberto] = useState(false);
@@ -23,6 +25,7 @@ export default function Almoxarifado() {
   const [erroForm, setErroForm] = useState('');
   const [editando, setEditando] = useState(null); // { item, quantidade }
   const [ajuste, setAjuste] = useState('');
+  const [saida, setSaida] = useState('');
 
   const { data: estoque = [], isLoading } = useQuery({
     queryKey: ['almoxarifado-estoque'],
@@ -63,6 +66,15 @@ export default function Almoxarifado() {
       queryClient.invalidateQueries({ queryKey: ['movimentacoes-estoque'] });
       setEditando(null); setAjuste('');
     },
+  });
+  const saidaMutation = useMutation({
+    mutationFn: ({ item_id, quantidade, obs }) => almoxarifadoService.saida(item_id, quantidade, obs),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['almoxarifado-estoque'] });
+      queryClient.invalidateQueries({ queryKey: ['movimentacoes-estoque'] });
+      setEditando(null); setSaida('');
+    },
+    onError: (e) => alert(e.message),
   });
 
   const setCampo = (campo, valor) => setProduto(p => ({ ...p, [campo]: valor }));
@@ -113,12 +125,14 @@ export default function Almoxarifado() {
             {a === 'estoque' ? 'Estoque atual' : 'Movimentações'}
           </button>
         ))}
-        <button
-          onClick={() => navigate('/almoxarifado/entrada-nf')}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F08020]/10 border border-[#F08020]/30 rounded-full text-xs text-[#F08020] hover:bg-[#F08020]/20 transition-colors ml-auto"
-        >
-          <IconReceipt size={13} /> Entrada por NF
-        </button>
+        {canGerenciarEstoque && (
+          <button
+            onClick={() => navigate('/almoxarifado/entrada-nf')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F08020]/10 border border-[#F08020]/30 rounded-full text-xs text-[#F08020] hover:bg-[#F08020]/20 transition-colors ml-auto"
+          >
+            <IconReceipt size={13} /> Entrada por NF
+          </button>
+        )}
       </div>
 
       {aba === 'estoque' && (
@@ -146,11 +160,12 @@ export default function Almoxarifado() {
               estoqueFiltrado.map(e => {
                 const item = e.almoxarifado_itens;
                 const critico = e.quantidade <= (item?.estoque_minimo || 0);
+                const Wrapper = canGerenciarEstoque ? 'button' : 'div';
                 return (
-                  <button
+                  <Wrapper
                     key={e.id}
-                    onClick={() => { setEditando({ ...item, quantidade: e.quantidade }); setAjuste(''); }}
-                    className={`w-full text-left bg-[#1A1D24] rounded-2xl p-4 border active:bg-[#272B35] transition-colors ${critico ? 'border-[#F08020]/30' : 'border-[#23262E]'}`}
+                    onClick={canGerenciarEstoque ? () => { setEditando({ ...item, quantidade: e.quantidade }); setAjuste(''); setSaida(''); } : undefined}
+                    className={`w-full text-left bg-[#1A1D24] rounded-2xl p-4 border transition-colors ${canGerenciarEstoque ? 'active:bg-[#272B35]' : ''} ${critico ? 'border-[#F08020]/30' : 'border-[#23262E]'}`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -168,7 +183,7 @@ export default function Almoxarifado() {
                         <span>Mínimo: {item?.estoque_minimo} {item?.unidade}</span>
                       </div>
                     )}
-                  </button>
+                  </Wrapper>
                 );
               })
             )}
@@ -177,12 +192,14 @@ export default function Almoxarifado() {
       )}
 
       {/* FAB Adicionar produto */}
-      <button
-        onClick={() => { setProduto(PRODUTO_INICIAL); setErroForm(''); setModalAberto(true); }}
-        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
-      >
-        <IconPlus size={24} className="text-white" />
-      </button>
+      {canGerenciarEstoque && (
+        <button
+          onClick={() => { setProduto(PRODUTO_INICIAL); setErroForm(''); setModalAberto(true); }}
+          className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <IconPlus size={24} className="text-white" />
+        </button>
+      )}
 
       {/* Modal Adicionar produto */}
       <Modal aberto={modalAberto} onClose={() => setModalAberto(false)} titulo="Adicionar produto">
@@ -262,19 +279,36 @@ export default function Almoxarifado() {
               {editarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : 'Salvar alterações'}
             </button>
 
-            {/* Ajuste rápido de estoque */}
-            <div className="pt-2 border-t border-[#23262E]">
-              <label className={ui.label}>Ajuste de estoque (entrada)</label>
-              <p className="text-[11px] text-[#454A54] mb-2">Saldo atual: {editando.quantidade} {editando.unidade}</p>
-              <div className="flex gap-2">
-                <input type="number" value={ajuste} onChange={e => setAjuste(e.target.value)} placeholder="Qtd a adicionar" className={`${ui.input} flex-1`} />
-                <button
-                  onClick={() => Number(ajuste) > 0 && ajusteMutation.mutate({ item_id: editando.id, quantidade: Number(ajuste), obs: 'Ajuste manual' })}
-                  disabled={ajusteMutation.isPending || !(Number(ajuste) > 0)}
-                  className="px-4 bg-[#34D399]/10 border border-[#34D399]/30 text-[#34D399] rounded-xl text-sm font-medium disabled:opacity-40"
-                >
-                  Adicionar
-                </button>
+            {/* Movimentação de estoque */}
+            <div className="pt-2 border-t border-[#23262E] space-y-3">
+              <p className="text-[11px] text-[#454A54]">Saldo atual: <strong className="text-[#A8ADB8]">{editando.quantidade} {editando.unidade}</strong></p>
+
+              <div>
+                <label className={ui.label}>Entrada manual</label>
+                <div className="flex gap-2">
+                  <input type="number" min="1" value={ajuste} onChange={e => setAjuste(e.target.value)} placeholder="Qtd a adicionar" className={`${ui.input} flex-1`} />
+                  <button
+                    onClick={() => Number(ajuste) > 0 && ajusteMutation.mutate({ item_id: editando.id, quantidade: Number(ajuste), obs: 'Entrada manual' })}
+                    disabled={ajusteMutation.isPending || !(Number(ajuste) > 0)}
+                    className="px-4 bg-[#34D399]/10 border border-[#34D399]/30 text-[#34D399] rounded-xl text-sm font-medium disabled:opacity-40 flex items-center gap-1"
+                  >
+                    <IconArrowUp size={14} /> Entrada
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className={ui.label}>Saída manual</label>
+                <div className="flex gap-2">
+                  <input type="number" min="1" value={saida} onChange={e => setSaida(e.target.value)} placeholder="Qtd a retirar" className={`${ui.input} flex-1`} />
+                  <button
+                    onClick={() => Number(saida) > 0 && saidaMutation.mutate({ item_id: editando.id, quantidade: Number(saida), obs: 'Saída manual' })}
+                    disabled={saidaMutation.isPending || !(Number(saida) > 0)}
+                    className="px-4 bg-[#F87171]/10 border border-[#F87171]/30 text-[#F87171] rounded-xl text-sm font-medium disabled:opacity-40 flex items-center gap-1"
+                  >
+                    <IconArrowDown size={14} /> Saída
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -23,7 +23,6 @@ export default function BottomNav() {
       return [
         { id: 'almoxarifado', label: 'Estoque',    icon: IconPackage,        path: '/almoxarifado' },
         { id: 'requisicoes',  label: 'Requisições', icon: IconClipboardCheck, path: '/requisicoes' },
-        { id: 'movimentacoes',label: 'OS',          icon: IconClipboardList,  path: '/ordens-servico' },
       ];
     }
     if (isSupervisor) {
