@@ -234,7 +234,7 @@ export const registrosCampoService = {
 export const pontoService = {
   getMeuPonto: async (usuario_id, data) => {
     const { data: result } = await supabase
-      .from('ponto')
+      .from('controle_ponto')
       .select('*')
       .eq('usuario_id', usuario_id)
       .eq('data', data)
@@ -243,7 +243,7 @@ export const pontoService = {
   },
   getSemana: async (usuario_id, data_inicio, data_fim) => {
     const { data, error } = await supabase
-      .from('ponto')
+      .from('controle_ponto')
       .select('*')
       .eq('usuario_id', usuario_id)
       .gte('data', data_inicio)
@@ -253,7 +253,7 @@ export const pontoService = {
     return data;
   },
   getTodos: async (filtros = {}) => {
-    let q = supabase.from('ponto').select('*, usuarios(nome)').order('data', { ascending: false });
+    let q = supabase.from('controle_ponto').select('*, usuarios(nome)').order('data', { ascending: false });
     if (filtros.usuario_id) q = q.eq('usuario_id', filtros.usuario_id);
     if (filtros.data_inicio) q = q.gte('data', filtros.data_inicio);
     if (filtros.data_fim)    q = q.lte('data', filtros.data_fim);
@@ -264,23 +264,23 @@ export const pontoService = {
   },
   registrar: async (dados) => {
     const { data: existente } = await supabase
-      .from('ponto')
+      .from('controle_ponto')
       .select('id')
       .eq('usuario_id', dados.usuario_id)
       .eq('data', dados.data)
       .single();
     if (existente) {
-      const { data, error } = await supabase.from('ponto').update(dados).eq('id', existente.id).select().single();
+      const { data, error } = await supabase.from('controle_ponto').update(dados).eq('id', existente.id).select().single();
       if (error) throw error;
       return data;
     }
-    const { data, error } = await supabase.from('ponto').insert(dados).select().single();
+    const { data, error } = await supabase.from('controle_ponto').insert(dados).select().single();
     if (error) throw error;
     return data;
   },
   aprovar: async (id) => {
     const { data, error } = await supabase
-      .from('ponto')
+      .from('controle_ponto')
       .update({ status: 'aprovado', aprovado_em: new Date().toISOString() })
       .eq('id', id)
       .select()
@@ -290,7 +290,7 @@ export const pontoService = {
   },
   rejeitar: async (id, motivo) => {
     const { data, error } = await supabase
-      .from('ponto')
+      .from('controle_ponto')
       .update({ status: 'rejeitado', motivo_rejeicao: motivo })
       .eq('id', id)
       .select()
@@ -301,7 +301,7 @@ export const pontoService = {
   // Fechamento mensal: consolida os pontos aprovados do período como "fechado"
   fecharMes: async (data_inicio, data_fim) => {
     const { data, error } = await supabase
-      .from('ponto')
+      .from('controle_ponto')
       .update({ status: 'fechado', fechado_em: new Date().toISOString() })
       .gte('data', data_inicio)
       .lte('data', data_fim)
@@ -321,7 +321,7 @@ export const almoxarifadoService = {
   },
   getEstoque: async () => {
     const { data, error } = await supabase
-      .from('estoque')
+      .from('almoxarifado_estoque')
       .select('*, almoxarifado_itens(*)');
     if (error) throw error;
     return data;
@@ -339,7 +339,7 @@ export const almoxarifadoService = {
   criarItem: async (dados) => {
     const { data: item, error } = await supabase.from('almoxarifado_itens').insert({ ...dados, ativo: true }).select().single();
     if (error) throw error;
-    await supabase.from('estoque').insert({ item_id: item.id, quantidade: 0 });
+    await supabase.from('almoxarifado_estoque').insert({ item_id: item.id, quantidade: 0 });
     return item;
   },
   atualizarItem: async (id, dados) => {
@@ -348,19 +348,19 @@ export const almoxarifadoService = {
     return data;
   },
   entrada: async (item_id, quantidade, observacao = '') => {
-    const { data: estoqueAtual } = await supabase.from('estoque').select('quantidade').eq('item_id', item_id).single();
+    const { data: estoqueAtual } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item_id).single();
     const saldoNovo = (estoqueAtual?.quantidade ?? 0) + quantidade;
-    await supabase.from('estoque').update({ quantidade: saldoNovo }).eq('item_id', item_id);
+    await supabase.from('almoxarifado_estoque').update({ quantidade: saldoNovo }).eq('item_id', item_id);
     await supabase.from('movimentacoes_estoque').insert({
       item_id, tipo: 'entrada', quantidade, saldo_apos: saldoNovo, observacao,
     });
   },
   saida: async (item_id, quantidade, observacao = '') => {
-    const { data: estoqueAtual } = await supabase.from('estoque').select('quantidade').eq('item_id', item_id).single();
+    const { data: estoqueAtual } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item_id).single();
     const saldoAtual = estoqueAtual?.quantidade ?? 0;
     if (quantidade > saldoAtual) throw new Error(`Estoque insuficiente (saldo: ${saldoAtual}).`);
     const saldoNovo = saldoAtual - quantidade;
-    await supabase.from('estoque').update({ quantidade: saldoNovo }).eq('item_id', item_id);
+    await supabase.from('almoxarifado_estoque').update({ quantidade: saldoNovo }).eq('item_id', item_id);
     await supabase.from('movimentacoes_estoque').insert({
       item_id, tipo: 'saida_manual', quantidade, saldo_apos: saldoNovo, observacao,
     });
@@ -402,12 +402,12 @@ export const requisicoesService = {
       .eq('id', id)
       .single();
     for (const item of req.requisicao_itens) {
-      const { data: est } = await supabase.from('estoque').select('quantidade').eq('item_id', item.item_id).single();
+      const { data: est } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item.item_id).single();
       if (!est || est.quantidade < item.quantidade) {
         throw new Error(`Estoque insuficiente para item ${item.item_id}`);
       }
       const saldoNovo = est.quantidade - item.quantidade;
-      await supabase.from('estoque').update({ quantidade: saldoNovo }).eq('item_id', item.item_id);
+      await supabase.from('almoxarifado_estoque').update({ quantidade: saldoNovo }).eq('item_id', item.item_id);
       await supabase.from('movimentacoes_estoque').insert({
         item_id: item.item_id, tipo: 'saida_requisicao',
         quantidade: item.quantidade, saldo_apos: saldoNovo,
@@ -465,9 +465,9 @@ export const dashboardService = {
     const hoje = new Date().toISOString().split('T')[0];
     const [os, ponto, requisicoes, estoque] = await Promise.all([
       supabase.from('ordens_servico').select('status, tipo_defeito, data_abertura'),
-      supabase.from('ponto').select('hora_saida').eq('data', hoje),
+      supabase.from('controle_ponto').select('hora_saida').eq('data', hoje),
       supabase.from('requisicoes').select('status').eq('status', 'pendente'),
-      supabase.from('estoque').select('quantidade, almoxarifado_itens(estoque_minimo)'),
+      supabase.from('almoxarifado_estoque').select('quantidade, almoxarifado_itens(estoque_minimo)'),
     ]);
     const osData = os.data ?? [];
     const pontoData = ponto.data ?? [];
