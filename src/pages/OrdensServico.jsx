@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ordensServicoService, contratosService, usuariosService } from '../services/supabase';
+import { ordensServicoService, contratosService, usuariosService, notificacoesService } from '../services/supabase';
 import { STATUS_OS, PRIORIDADE, ui } from '../lib/theme';
 import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle, IconLoader2 } from '@tabler/icons-react';
 import ComentariosOS from '../components/ComentariosOS';
@@ -43,7 +43,18 @@ export default function OrdensServico() {
   const { data: responsaveis = [] } = useQuery({ queryKey: ['usuarios'], queryFn: () => usuariosService.getAll() });
 
   const criarMutation = useMutation({
-    mutationFn: (dados) => ordensServicoService.create(dados),
+    mutationFn: async (dados) => {
+      const os = await ordensServicoService.create(dados);
+      if (dados.responsavel_id) {
+        await notificacoesService.criar({
+          usuario_id: dados.responsavel_id,
+          titulo: `Nova OS #${os.numero} atribuída a você`,
+          mensagem: `${TIPO_DEFEITO_LABEL[os.tipo_defeito] || os.tipo_defeito}${os.bairro ? ' — ' + os.bairro : ''}`,
+          tipo: 'os', link: '/registro-campo',
+        });
+      }
+      return os;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ordens-servico'] });
       setModalAberto(false);
@@ -54,7 +65,18 @@ export default function OrdensServico() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, dados }) => ordensServicoService.update(id, dados),
+    mutationFn: async ({ id, dados, notificar }) => {
+      const os = await ordensServicoService.update(id, dados);
+      if (notificar && dados.responsavel_id) {
+        await notificacoesService.criar({
+          usuario_id: dados.responsavel_id,
+          titulo: `OS #${os.numero} atribuída a você`,
+          mensagem: `${TIPO_DEFEITO_LABEL[os.tipo_defeito] || os.tipo_defeito}${os.bairro ? ' — ' + os.bairro : ''}`,
+          tipo: 'os', link: '/registro-campo',
+        });
+      }
+      return os;
+    },
     onSuccess: (osAtualizada) => {
       queryClient.invalidateQueries({ queryKey: ['ordens-servico'] });
       setOsSelecionada(prev => prev ? { ...prev, ...osAtualizada } : prev);
@@ -302,7 +324,7 @@ export default function OrdensServico() {
                   <label className="text-xs text-[#6B7280] mb-1.5 block">Responsável</label>
                   <select
                     value={osSelecionada.responsavel_id || ''}
-                    onChange={e => updateMutation.mutate({ id: osSelecionada.id, dados: { responsavel_id: e.target.value || null } })}
+                    onChange={e => updateMutation.mutate({ id: osSelecionada.id, dados: { responsavel_id: e.target.value || null }, notificar: !!e.target.value })}
                     className={ui.input}
                   >
                     <option value="">Sem responsável</option>

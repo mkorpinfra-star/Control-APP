@@ -19,6 +19,20 @@ create table if not exists config_empresa (
 
 alter table config_empresa enable row level security;
 
+-- 1b) Tabela de notificações (in-app)
+create table if not exists notificacoes (
+  id uuid primary key default gen_random_uuid(),
+  usuario_id uuid references usuarios(id) on delete cascade not null,
+  titulo text not null,
+  mensagem text,
+  tipo text default 'info',
+  link text,
+  lida boolean default false,
+  criado_em timestamptz default now()
+);
+create index if not exists idx_notif_usuario on notificacoes(usuario_id, lida);
+alter table notificacoes enable row level security;
+
 -- ============================================================
 -- 2) Função utilitária: cria policies de leitura/escrita para
 --    authenticated em uma tabela (idempotente).
@@ -29,7 +43,7 @@ declare
   tabelas text[] := array[
     'usuarios','contratos','ordens_servico','registros_campo',
     'ponto','almoxarifado_itens','estoque','movimentacoes_estoque',
-    'requisicoes','requisicao_itens','os_comentarios','config_empresa'
+    'requisicoes','requisicao_itens','os_comentarios','config_empresa','notificacoes'
   ];
 begin
   foreach t in array tabelas loop

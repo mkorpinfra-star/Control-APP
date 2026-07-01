@@ -17,14 +17,32 @@ export default function Funcionarios() {
   const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('');
+  const [verInativos, setVerInativos] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [form, setForm] = useState(FORM_INICIAL);
   const [erroForm, setErroForm] = useState('');
   const [sucesso, setSucesso] = useState('');
+  const [editando, setEditando] = useState(null); // funcionário em edição
 
   const { data: funcionarios = [], isLoading } = useQuery({
-    queryKey: ['funcionarios', filtro],
-    queryFn: () => usuariosService.getAll(filtro || null),
+    queryKey: ['funcionarios', filtro, verInativos],
+    queryFn: () => usuariosService.getAll(filtro || null, verInativos),
+  });
+
+  const editarMutation = useMutation({
+    mutationFn: ({ id, dados }) => usuariosService.update(id, dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['funcionarios'] });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      setEditando(null);
+    },
+  });
+  const toggleAtivo = useMutation({
+    mutationFn: ({ id, ativo }) => ativo ? usuariosService.delete(id) : usuariosService.reativar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['funcionarios'] });
+      setEditando(null);
+    },
   });
 
   const criarMutation = useMutation({
@@ -83,6 +101,11 @@ export default function Funcionarios() {
               {c === '' ? 'Todos' : CARGO[c]?.label}
             </button>
           ))}
+          {isAdmin && (
+            <button onClick={() => setVerInativos(v => !v)} className={ui.chip(verInativos)}>
+              Inativos
+            </button>
+          )}
         </div>
       </div>
 
@@ -91,18 +114,27 @@ export default function Funcionarios() {
       </div>
 
       <div className="px-4 space-y-2">
-        {filtrados.map(f => (
-          <div key={f.id} className="bg-[#1A1D24] rounded-2xl px-4 py-3 border border-[#23262E] flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#22262F] rounded-full flex items-center justify-center shrink-0">
-              <IconUser size={18} className="text-[#6B7280]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-[#F5F5F0] text-sm truncate">{f.nome}</p>
-              <p className="text-xs text-[#6B7280] truncate">{f.matricula ? `${f.matricula} · ` : ''}{f.email}</p>
-            </div>
-            <span className={CARGO[f.cargo]?.badge}>{CARGO[f.cargo]?.label}</span>
-          </div>
-        ))}
+        {filtrados.map(f => {
+          const Wrapper = isAdmin ? 'button' : 'div';
+          return (
+            <Wrapper
+              key={f.id}
+              onClick={isAdmin ? () => { setEditando({ ...f }); } : undefined}
+              className={`w-full text-left bg-[#1A1D24] rounded-2xl px-4 py-3 border border-[#23262E] flex items-center gap-3 ${isAdmin ? 'active:bg-[#272B35] transition-colors' : ''} ${f.ativo === false ? 'opacity-50' : ''}`}
+            >
+              <div className="w-10 h-10 bg-[#22262F] rounded-full flex items-center justify-center shrink-0">
+                <IconUser size={18} className="text-[#6B7280]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-[#F5F5F0] text-sm truncate">
+                  {f.nome} {f.ativo === false && <span className="text-[10px] text-[#F87171]">(inativo)</span>}
+                </p>
+                <p className="text-xs text-[#6B7280] truncate">{f.matricula ? `${f.matricula} · ` : ''}{f.email}</p>
+              </div>
+              <span className={CARGO[f.cargo]?.badge}>{CARGO[f.cargo]?.label}</span>
+            </Wrapper>
+          );
+        })}
       </div>
 
       {/* FAB Novo funcionário (só admin) */}
@@ -169,6 +201,51 @@ export default function Funcionarios() {
             {criarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Criando...</> : <><IconPlus size={16} /> Criar funcionário</>}
           </button>
         </div>
+      </Modal>
+
+      {/* Modal Editar funcionário */}
+      <Modal aberto={!!editando} onClose={() => setEditando(null)} titulo="Editar funcionário">
+        {editando && (
+          <div className="space-y-4">
+            <div>
+              <label className={ui.label}>Nome completo</label>
+              <input value={editando.nome || ''} onChange={e => setEditando(v => ({ ...v, nome: e.target.value }))} className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Cargo</label>
+              <select value={editando.cargo} onChange={e => setEditando(v => ({ ...v, cargo: e.target.value }))} className={ui.input}>
+                {CARGOS.map(c => <option key={c} value={c}>{CARGO[c]?.label}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={ui.label}>Matrícula</label>
+                <input value={editando.matricula || ''} onChange={e => setEditando(v => ({ ...v, matricula: e.target.value }))} className={ui.input} />
+              </div>
+              <div>
+                <label className={ui.label}>Telefone</label>
+                <input value={editando.telefone || ''} onChange={e => setEditando(v => ({ ...v, telefone: e.target.value }))} className={ui.input} />
+              </div>
+            </div>
+            <p className="text-[11px] text-[#454A54]">E-mail de login: {editando.email} (não editável)</p>
+
+            <button
+              onClick={() => editarMutation.mutate({ id: editando.id, dados: { nome: editando.nome, cargo: editando.cargo, matricula: editando.matricula || null, telefone: editando.telefone || null } })}
+              disabled={editarMutation.isPending}
+              className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {editarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : 'Salvar alterações'}
+            </button>
+
+            <button
+              onClick={() => toggleAtivo.mutate({ id: editando.id, ativo: editando.ativo !== false })}
+              disabled={toggleAtivo.isPending}
+              className={`w-full py-3 rounded-xl text-sm font-medium border transition-colors ${editando.ativo !== false ? 'border-[#F87171]/30 text-[#F87171] active:bg-[#F87171]/10' : 'border-[#34D399]/30 text-[#34D399] active:bg-[#34D399]/10'}`}
+            >
+              {editando.ativo !== false ? 'Desativar funcionário' : 'Reativar funcionário'}
+            </button>
+          </div>
+        )}
       </Modal>
     </div>
   );

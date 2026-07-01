@@ -21,6 +21,8 @@ export default function Almoxarifado() {
   const [modalAberto, setModalAberto] = useState(false);
   const [produto, setProduto] = useState(PRODUTO_INICIAL);
   const [erroForm, setErroForm] = useState('');
+  const [editando, setEditando] = useState(null); // { item, quantidade }
+  const [ajuste, setAjuste] = useState('');
 
   const { data: estoque = [], isLoading } = useQuery({
     queryKey: ['almoxarifado-estoque'],
@@ -45,6 +47,22 @@ export default function Almoxarifado() {
       setErroForm('');
     },
     onError: (e) => setErroForm('Erro ao criar produto: ' + e.message),
+  });
+
+  const editarMutation = useMutation({
+    mutationFn: ({ id, dados }) => almoxarifadoService.atualizarItem(id, dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['almoxarifado-estoque'] });
+      setEditando(null); setAjuste('');
+    },
+  });
+  const ajusteMutation = useMutation({
+    mutationFn: ({ item_id, quantidade, obs }) => almoxarifadoService.entrada(item_id, quantidade, obs),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['almoxarifado-estoque'] });
+      queryClient.invalidateQueries({ queryKey: ['movimentacoes-estoque'] });
+      setEditando(null); setAjuste('');
+    },
   });
 
   const setCampo = (campo, valor) => setProduto(p => ({ ...p, [campo]: valor }));
@@ -129,7 +147,11 @@ export default function Almoxarifado() {
                 const item = e.almoxarifado_itens;
                 const critico = e.quantidade <= (item?.estoque_minimo || 0);
                 return (
-                  <div key={e.id} className={`bg-[#1A1D24] rounded-2xl p-4 border ${critico ? 'border-[#F08020]/30' : 'border-[#23262E]'}`}>
+                  <button
+                    key={e.id}
+                    onClick={() => { setEditando({ ...item, quantidade: e.quantidade }); setAjuste(''); }}
+                    className={`w-full text-left bg-[#1A1D24] rounded-2xl p-4 border active:bg-[#272B35] transition-colors ${critico ? 'border-[#F08020]/30' : 'border-[#23262E]'}`}
+                  >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-[#F5F5F0] text-sm">{item?.nome}</p>
@@ -146,7 +168,7 @@ export default function Almoxarifado() {
                         <span>Mínimo: {item?.estoque_minimo} {item?.unidade}</span>
                       </div>
                     )}
-                  </div>
+                  </button>
                 );
               })
             )}
@@ -205,6 +227,58 @@ export default function Almoxarifado() {
             {criarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : <><IconPlus size={16} /> Adicionar produto</>}
           </button>
         </div>
+      </Modal>
+
+      {/* Modal Editar produto */}
+      <Modal aberto={!!editando} onClose={() => setEditando(null)} titulo="Editar produto">
+        {editando && (
+          <div className="space-y-4">
+            <div>
+              <label className={ui.label}>Nome do produto</label>
+              <input value={editando.nome || ''} onChange={e => setEditando(v => ({ ...v, nome: e.target.value }))} className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Categoria</label>
+              <select value={editando.categoria} onChange={e => setEditando(v => ({ ...v, categoria: e.target.value }))} className={ui.input}>
+                {Object.entries(CATEGORIA_LABEL).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={ui.label}>Unidade</label>
+                <input value={editando.unidade || ''} onChange={e => setEditando(v => ({ ...v, unidade: e.target.value }))} className={ui.input} />
+              </div>
+              <div>
+                <label className={ui.label}>Estoque mínimo</label>
+                <input type="number" min="0" value={editando.estoque_minimo ?? 0} onChange={e => setEditando(v => ({ ...v, estoque_minimo: e.target.value }))} className={ui.input} />
+              </div>
+            </div>
+
+            <button
+              onClick={() => editarMutation.mutate({ id: editando.id, dados: { nome: editando.nome, categoria: editando.categoria, unidade: editando.unidade, estoque_minimo: Number(editando.estoque_minimo) || 0 } })}
+              disabled={editarMutation.isPending}
+              className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {editarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : 'Salvar alterações'}
+            </button>
+
+            {/* Ajuste rápido de estoque */}
+            <div className="pt-2 border-t border-[#23262E]">
+              <label className={ui.label}>Ajuste de estoque (entrada)</label>
+              <p className="text-[11px] text-[#454A54] mb-2">Saldo atual: {editando.quantidade} {editando.unidade}</p>
+              <div className="flex gap-2">
+                <input type="number" value={ajuste} onChange={e => setAjuste(e.target.value)} placeholder="Qtd a adicionar" className={`${ui.input} flex-1`} />
+                <button
+                  onClick={() => Number(ajuste) > 0 && ajusteMutation.mutate({ item_id: editando.id, quantidade: Number(ajuste), obs: 'Ajuste manual' })}
+                  disabled={ajusteMutation.isPending || !(Number(ajuste) > 0)}
+                  className="px-4 bg-[#34D399]/10 border border-[#34D399]/30 text-[#34D399] rounded-xl text-sm font-medium disabled:opacity-40"
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {aba === 'movimentacoes' && (

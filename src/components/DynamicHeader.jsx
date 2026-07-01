@@ -9,6 +9,7 @@ import {
 } from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
 import Avatar from './Avatar';
+import NotificacoesSino from './NotificacoesSino';
 
 export default function DynamicHeader() {
   const { perfil, logout } = useAuth();
@@ -92,23 +93,26 @@ export default function DynamicHeader() {
               </div>
             </div>
 
-            {isHome ? (
-              <button
-                onClick={logout}
-                className="w-10 h-10 rounded-full bg-[#1A1D24] border border-[#30353F] flex items-center justify-center text-[#A8ADB8] hover:text-[#F5F5F0] hover:bg-[#22262F] transition-colors"
-                aria-label="Sair"
-              >
-                <IconLogout stroke={1.5} size={20} />
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate(-1)}
-                className="w-10 h-10 rounded-full bg-[#1A1D24] border border-[#30353F] flex items-center justify-center text-[#A8ADB8] hover:text-[#F5F5F0] hover:bg-[#22262F] transition-colors"
-                aria-label="Voltar"
-              >
-                <IconArrowLeft stroke={1.5} size={20} />
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              <NotificacoesSino />
+              {isHome ? (
+                <button
+                  onClick={logout}
+                  className="w-10 h-10 rounded-full bg-[#1A1D24] border border-[#30353F] flex items-center justify-center text-[#A8ADB8] hover:text-[#F5F5F0] hover:bg-[#22262F] transition-colors"
+                  aria-label="Sair"
+                >
+                  <IconLogout stroke={1.5} size={20} />
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="w-10 h-10 rounded-full bg-[#1A1D24] border border-[#30353F] flex items-center justify-center text-[#A8ADB8] hover:text-[#F5F5F0] hover:bg-[#22262F] transition-colors"
+                  aria-label="Voltar"
+                >
+                  <IconArrowLeft stroke={1.5} size={20} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Título de página (não dashboard) */}

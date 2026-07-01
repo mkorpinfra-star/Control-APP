@@ -62,8 +62,9 @@ export const configService = {
 
 // ==================== USUÁRIOS ====================
 export const usuariosService = {
-  getAll: async (cargo = null) => {
-    let q = supabase.from('usuarios').select('*').eq('ativo', true);
+  getAll: async (cargo = null, incluirInativos = false) => {
+    let q = supabase.from('usuarios').select('*');
+    if (!incluirInativos) q = q.eq('ativo', true);
     if (cargo) q = q.eq('cargo', cargo);
     const { data, error } = await q;
     if (error) throw error;
@@ -441,7 +442,7 @@ export const dashboardService = {
   getResumo: async () => {
     const hoje = new Date().toISOString().split('T')[0];
     const [os, ponto, requisicoes, estoque] = await Promise.all([
-      supabase.from('ordens_servico').select('status'),
+      supabase.from('ordens_servico').select('status, tipo_defeito, data_abertura'),
       supabase.from('ponto').select('hora_saida').eq('data', hoje),
       supabase.from('requisicoes').select('status').eq('status', 'pendente'),
       supabase.from('estoque').select('quantidade, almoxarifado_itens(estoque_minimo)'),
@@ -450,6 +451,36 @@ export const dashboardService = {
     const pontoData = ponto.data ?? [];
     const reqData = requisicoes.data ?? [];
     const estData = estoque.data ?? [];
+
+    // OS por dia (últimos 7 dias)
+    const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const os_por_dia = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const iso = d.toISOString().split('T')[0];
+      os_por_dia.push({
+        dia: DIAS_SEMANA[d.getDay()],
+        total: osData.filter(o => o.data_abertura === iso).length,
+      });
+    }
+
+    // OS por tipo de defeito (top 6)
+    const TIPO_LABEL = {
+      lampada_queimada: 'Lâmpada queimada', reator_defeituoso: 'Reator', cabo_danificado: 'Cabo',
+      rele_fotoeletrico: 'Relé', braco_quebrado: 'Braço', poste_danificado: 'Poste',
+      vandalismo: 'Vandalismo', manutencao_preventiva: 'Preventiva', outro: 'Outro',
+    };
+    const contagem = {};
+    osData.forEach(o => {
+      const t = TIPO_LABEL[o.tipo_defeito] || o.tipo_defeito || 'Outro';
+      contagem[t] = (contagem[t] || 0) + 1;
+    });
+    const os_por_tipo = Object.entries(contagem)
+      .map(([tipo, total]) => ({ tipo, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 6);
+
     return {
       os_abertas:              osData.filter(o => o.status === 'aberta').length,
       os_em_andamento:         osData.filter(o => o.status === 'em_andamento').length,
@@ -457,8 +488,38 @@ export const dashboardService = {
       funcionarios_campo_hoje: pontoData.filter(p => !p.hora_saida).length,
       requisicoes_pendentes:   reqData.length,
       itens_estoque_critico:   estData.filter(e => e.quantidade <= (e.almoxarifado_itens?.estoque_minimo ?? 0)).length,
-      os_por_tipo:  [],
-      os_por_dia:   [],
+      os_por_tipo,
+      os_por_dia,
     };
+  },
+};
+
+// ==================== NOTIFICAÇÕES ====================
+export const notificacoesService = {
+  getByUsuario: async (usuario_id, apenasNaoLidas = false) => {
+    let q = supabase.from('notificacoes').select('*').eq('usuario_id', usuario_id).order('criado_em', { ascending: false }).limit(50);
+    if (apenasNaoLidas) q = q.eq('lida', false);
+    const { data, error } = await q;
+    if (error) return [];
+    return data;
+  },
+  contarNaoLidas: async (usuario_id) => {
+    const { count, error } = await supabase
+      .from('notificacoes')
+      .select('id', { count: 'exact', head: true })
+      .eq('usuario_id', usuario_id)
+      .eq('lida', false);
+    if (error) return 0;
+    return count ?? 0;
+  },
+  criar: async ({ usuario_id, titulo, mensagem, tipo = 'info', link = null }) => {
+    if (!usuario_id) return;
+    await supabase.from('notificacoes').insert({ usuario_id, titulo, mensagem, tipo, link, lida: false });
+  },
+  marcarLida: async (id) => {
+    await supabase.from('notificacoes').update({ lida: true }).eq('id', id);
+  },
+  marcarTodasLidas: async (usuario_id) => {
+    await supabase.from('notificacoes').update({ lida: true }).eq('usuario_id', usuario_id).eq('lida', false);
   },
 };
