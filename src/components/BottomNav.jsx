@@ -9,7 +9,14 @@ import { useAuth } from '../contexts/AuthContext';
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isSupervisor, isFuncionario, isAlmoxarife } = useAuth();
+  const { isAdmin, isSupervisor, isFuncionario, isAlmoxarife, podeAcessar } = useAuth();
+
+  // path → módulo configurável (para filtrar itens bloqueados pelo admin)
+  const MODULO_POR_PATH = {
+    '/ordens-servico': 'ordens', '/contratos': 'contratos', '/almoxarifado': 'almoxarifado',
+    '/controle-ponto': 'ponto_gestao', '/monitoramento': 'monitoramento', '/relatorios': 'relatorios',
+    '/aprovacoes': 'aprovacoes',
+  };
 
   const getNavItems = () => {
     if (isFuncionario) {
@@ -40,7 +47,11 @@ export default function BottomNav() {
     ];
   };
 
-  const navItems = getNavItems();
+  // Remove itens de módulos bloqueados pelo admin (fica pelo menos 1)
+  const navItems = getNavItems().filter(item => {
+    const mod = MODULO_POR_PATH[item.path];
+    return !mod || podeAcessar(mod);
+  });
   const isActive = (item) => location.pathname === item.path;
 
   return (

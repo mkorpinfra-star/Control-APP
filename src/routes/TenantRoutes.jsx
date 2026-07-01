@@ -57,12 +57,15 @@ function Guard({ allow, children }) {
   return allow(auth) ? children : <HomeRouter />;
 }
 
-// Regras de acesso
+// Guarda por módulo configurável (admin sempre passa)
+function GuardModulo({ modulo, children }) {
+  const { podeAcessar } = useAuth();
+  return podeAcessar(modulo) ? children : <HomeRouter />;
+}
+
+// Regras fixas (não configuráveis)
 const REGRAS = {
-  gestao:    (a) => a.isAdmin || a.isSupervisor,               // OS, contratos, monitoramento, relatórios, aprovações, ponto
-  adminOnly: (a) => a.isAdmin,                                  // dashboard, funcionários
-  estoque:   (a) => a.isAdmin || a.isSupervisor || a.isAlmoxarife, // almoxarifado
-  todos:     () => true,                                        // requisições, config, ponto próprio, campo
+  adminOnly: (a) => a.isAdmin, // dashboard, funcionários, medição/valores
 };
 
 export default function TenantRoutes() {
@@ -86,22 +89,20 @@ export default function TenantRoutes() {
           <BankingLayout />
         </ProtectedRoute>
       }>
-        {/* Admin */}
+        {/* Fixos do admin */}
         <Route path="/dashboard" element={<Guard allow={REGRAS.adminOnly}><Dashboard /></Guard>} />
         <Route path="/funcionarios" element={<Guard allow={REGRAS.adminOnly}><Funcionarios /></Guard>} />
+        <Route path="/medicao" element={<Guard allow={REGRAS.adminOnly}><Medicao /></Guard>} />
 
-        {/* Gestão (admin + supervisor) */}
-        <Route path="/ordens-servico" element={<Guard allow={REGRAS.gestao}><OrdensServico /></Guard>} />
-        <Route path="/contratos" element={<Guard allow={REGRAS.gestao}><Contratos /></Guard>} />
-        <Route path="/controle-ponto" element={<Guard allow={REGRAS.gestao}><ControlePonto /></Guard>} />
-        <Route path="/monitoramento" element={<Guard allow={REGRAS.gestao}><Monitoramento /></Guard>} />
-        <Route path="/relatorios" element={<Guard allow={REGRAS.gestao}><Relatorios /></Guard>} />
-        <Route path="/medicao" element={<Guard allow={REGRAS.gestao}><Medicao /></Guard>} />
-        <Route path="/aprovacoes" element={<Guard allow={REGRAS.gestao}><Aprovacoes /></Guard>} />
-
-        {/* Estoque (admin + supervisor + almoxarife) */}
-        <Route path="/almoxarifado" element={<Guard allow={REGRAS.estoque}><Almoxarifado /></Guard>} />
-        <Route path="/almoxarifado/entrada-nf" element={<Guard allow={REGRAS.estoque}><EntradaNF /></Guard>} />
+        {/* Configuráveis pelo admin (por módulo) */}
+        <Route path="/ordens-servico" element={<GuardModulo modulo="ordens"><OrdensServico /></GuardModulo>} />
+        <Route path="/contratos" element={<GuardModulo modulo="contratos"><Contratos /></GuardModulo>} />
+        <Route path="/controle-ponto" element={<GuardModulo modulo="ponto_gestao"><ControlePonto /></GuardModulo>} />
+        <Route path="/monitoramento" element={<GuardModulo modulo="monitoramento"><Monitoramento /></GuardModulo>} />
+        <Route path="/relatorios" element={<GuardModulo modulo="relatorios"><Relatorios /></GuardModulo>} />
+        <Route path="/aprovacoes" element={<GuardModulo modulo="aprovacoes"><Aprovacoes /></GuardModulo>} />
+        <Route path="/almoxarifado" element={<GuardModulo modulo="almoxarifado"><Almoxarifado /></GuardModulo>} />
+        <Route path="/almoxarifado/entrada-nf" element={<GuardModulo modulo="almoxarifado"><EntradaNF /></GuardModulo>} />
 
         {/* Todos os autenticados */}
         <Route path="/requisicoes" element={<Requisicoes />} />

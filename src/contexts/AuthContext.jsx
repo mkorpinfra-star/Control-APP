@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/supabase';
+import { authService, configService } from '../services/supabase';
+import { podeAcessarModulo } from '../lib/acessos';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [perfil, setPerfil]   = useState(null);
   const [loading, setLoading] = useState(true);
+  const [acessos, setAcessos] = useState(null); // matriz configurada pelo admin
 
   // Restaura sessão do localStorage ao recarregar
   useEffect(() => {
@@ -16,6 +18,12 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   }, []);
+
+  // Carrega a matriz de acessos configurada
+  useEffect(() => {
+    if (!perfil) return;
+    configService.get().then(cfg => setAcessos(cfg?.acessos || null)).catch(() => setAcessos(null));
+  }, [perfil]);
 
   const login = async (email, senha) => {
     try {
@@ -54,6 +62,10 @@ export function AuthProvider({ children }) {
   const canFecharPonto       = isAdmin; // admin/RH
   const canGerenciarOS       = isAdmin || isSupervisor;
   const canGerenciarUsuarios = isAdmin;
+  const podeVerValores       = isAdmin; // valores R$ só admin
+
+  // Acesso configurável por módulo (admin sempre pode)
+  const podeAcessar = (modulo) => podeAcessarModulo(cargo, modulo, acessos);
 
   return (
     <AuthContext.Provider value={{
@@ -73,6 +85,8 @@ export function AuthProvider({ children }) {
       canFecharPonto,
       canGerenciarOS,
       canGerenciarUsuarios,
+      podeVerValores,
+      podeAcessar,
       cargo,
       nome: perfil?.nome,
       // Aliases para compatibilidade com componentes antigos

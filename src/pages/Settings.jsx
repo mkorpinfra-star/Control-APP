@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { authService, configService } from '../services/supabase';
 import { ui } from '../lib/theme';
-import { IconUser, IconBuildingFactory2, IconShield, IconLoader2, IconCheck, IconChevronRight } from '@tabler/icons-react';
+import { IconUser, IconBuildingFactory2, IconShield, IconLoader2, IconCheck, IconChevronRight, IconLock } from '@tabler/icons-react';
 import Modal from '../components/Modal';
+import { MODULOS, PAPEIS_CONFIG, ACESSO_PADRAO } from '../lib/acessos';
 
 export default function Configuracoes() {
   const { perfil, isAdmin, logout } = useAuth();
@@ -12,6 +13,7 @@ export default function Configuracoes() {
 
   const [modalSenha, setModalSenha] = useState(false);
   const [modalEmpresa, setModalEmpresa] = useState(false);
+  const [modalAcesso, setModalAcesso] = useState(false);
 
   // ----- Alterar senha -----
   const [senha, setSenha] = useState('');
@@ -55,9 +57,36 @@ export default function Configuracoes() {
     setErroEmpresa(''); setOkEmpresa(''); setModalEmpresa(true);
   };
 
+  // ----- Controle de acesso (matriz papel × módulo) -----
+  const [matriz, setMatriz] = useState(null);
+  const [okAcesso, setOkAcesso] = useState('');
+  const acessoMut = useMutation({
+    mutationFn: (acessos) => configService.update({ ...config, acessos }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['config-empresa'] });
+      setOkAcesso('Permissões salvas! (aplicam no próximo login dos usuários)');
+      setTimeout(() => { setModalAcesso(false); setOkAcesso(''); }, 2200);
+    },
+    onError: (e) => alert('Erro: ' + e.message),
+  });
+  const abrirAcesso = () => {
+    // parte do que está salvo, senão do padrão
+    const base = {};
+    PAPEIS_CONFIG.forEach(p => {
+      base[p.key] = { ...ACESSO_PADRAO[p.key], ...(config?.acessos?.[p.key] || {}) };
+    });
+    setMatriz(base);
+    setOkAcesso('');
+    setModalAcesso(true);
+  };
+  const toggle = (papel, modulo) => setMatriz(m => ({ ...m, [papel]: { ...m[papel], [modulo]: !m[papel][modulo] } }));
+
   const linhas = [
     { icon: IconShield, label: 'Segurança', sub: 'Alterar minha senha', onClick: () => { setSenha(''); setSenha2(''); setErroSenha(''); setOkSenha(''); setModalSenha(true); } },
-    ...(isAdmin ? [{ icon: IconBuildingFactory2, label: 'Dados da empresa', sub: config?.nome || 'Configurar razão social, CNPJ...', onClick: abrirEmpresa }] : []),
+    ...(isAdmin ? [
+      { icon: IconBuildingFactory2, label: 'Dados da empresa', sub: config?.nome || 'Configurar razão social, CNPJ...', onClick: abrirEmpresa },
+      { icon: IconLock, label: 'Controle de acesso', sub: 'Definir o que cada papel vê', onClick: abrirAcesso },
+    ] : []),
   ];
 
   return (
@@ -128,6 +157,41 @@ export default function Configuracoes() {
             {senhaMut.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : 'Alterar senha'}
           </button>
         </div>
+      </Modal>
+
+      {/* Modal controle de acesso */}
+      <Modal aberto={modalAcesso} onClose={() => setModalAcesso(false)} titulo="Controle de acesso">
+        {matriz && (
+          <div className="space-y-4">
+            {okAcesso && <div className="p-3 bg-[#34D399]/10 border border-[#34D399]/20 rounded-xl text-sm text-[#34D399] flex items-center gap-2"><IconCheck size={16} /> {okAcesso}</div>}
+            <p className="text-xs text-[#6B7280]">Marque o que cada papel pode acessar. O <strong>admin</strong> tem acesso total sempre. Valores (R$) são exclusivos do admin.</p>
+
+            {PAPEIS_CONFIG.map(papel => (
+              <div key={papel.key} className="bg-[#121419] border border-[#23262E] rounded-2xl p-3">
+                <p className="text-sm font-semibold text-[#F5F5F0] mb-2">{papel.label}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {MODULOS.filter(m => m.key !== 'medicao').map(mod => {
+                    const on = matriz[papel.key]?.[mod.key];
+                    return (
+                      <button
+                        key={mod.key}
+                        onClick={() => toggle(papel.key, mod.key)}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${on ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]' : 'bg-[#0A0B0D] border-[#30353F] text-[#6B7280]'}`}
+                      >
+                        {mod.label}
+                        <span className={`w-2 h-2 rounded-full ${on ? 'bg-[#34D399]' : 'bg-[#454A54]'}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            <button onClick={() => acessoMut.mutate(matriz)} disabled={acessoMut.isPending} className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+              {acessoMut.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : 'Salvar permissões'}
+            </button>
+          </div>
+        )}
       </Modal>
 
       {/* Modal dados da empresa */}

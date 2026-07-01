@@ -10,6 +10,7 @@ create table if not exists config_empresa (
   atualizado_em timestamptz default now(),
   constraint config_empresa_single check (id = 1)
 );
+alter table config_empresa add column if not exists acessos jsonb;
 
 -- 1b) Notificações
 create table if not exists notificacoes (
