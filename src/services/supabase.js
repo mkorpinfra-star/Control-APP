@@ -26,13 +26,17 @@ export const auditService = {
       });
     } catch { /* auditoria não pode quebrar o app */ }
   },
-  listar: async (filtros = {}) => {
-    let q = supabase.from('audit_log').select('*').order('criado_em', { ascending: false }).limit(200);
-    if (filtros.entidade) q = q.eq('entidade', filtros.entidade);
-    if (filtros.entidade_id) q = q.eq('entidade_id', String(filtros.entidade_id));
-    const { data, error } = await q;
-    if (error) return [];
-    return data;
+  listar: async ({ acao, entidade, data_inicio, data_fim, pagina = 0, porPagina = 30 } = {}) => {
+    let q = supabase.from('audit_log').select('*', { count: 'exact' }).order('criado_em', { ascending: false });
+    if (acao) q = q.eq('acao', acao);
+    if (entidade) q = q.eq('entidade', entidade);
+    if (data_inicio) q = q.gte('criado_em', data_inicio);
+    if (data_fim) q = q.lte('criado_em', data_fim + 'T23:59:59');
+    const de = pagina * porPagina;
+    q = q.range(de, de + porPagina - 1);
+    const { data, error, count } = await q;
+    if (error) return { itens: [], total: 0 };
+    return { itens: data, total: count ?? 0 };
   },
 };
 

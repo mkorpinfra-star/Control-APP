@@ -5,7 +5,7 @@ import {
   IconLogout, IconPlus, IconClipboardList, IconPackage,
   IconUsers, IconFileText, IconChartBar, IconSettings,
   IconUserCircle, IconMapPin, IconTruck, IconBuilding,
-  IconClipboardCheck, IconClock, IconArrowLeft
+  IconClipboardCheck, IconClock, IconArrowLeft, IconHistory
 } from '@tabler/icons-react';
 import ProfileMenu from './ProfileMenu';
 import Avatar from './Avatar';
@@ -42,6 +42,7 @@ export default function DynamicHeader() {
       '/monitoramento':   { type: 'page', title: 'Monitoramento', subtitle: 'Equipes em campo', icon: IconTruck },
       '/relatorios':      { type: 'page', title: 'Relatórios', subtitle: 'Medição e desempenho', icon: IconChartBar },
       '/medicao':         { type: 'page', title: 'Medição', subtitle: 'Faturamento por contrato', icon: IconFileText },
+      '/auditoria':       { type: 'page', title: 'Auditoria', subtitle: 'Histórico de ações', icon: IconFileText },
       '/configuracoes':   { type: 'page', title: 'Configurações', subtitle: 'Ajustes do sistema', icon: IconSettings },
       '/bater-ponto':     { type: 'page', title: 'Registro de ponto', subtitle: 'Sua jornada de hoje' },
       '/registro-campo':  { type: 'page', title: 'Registro de campo', subtitle: 'OS em execução', icon: IconMapPin },
@@ -63,6 +64,7 @@ export default function DynamicHeader() {
     { label: 'Monitoramento',     icon: IconTruck,         path: '/monitoramento' },
     { label: 'Medição',          icon: IconFileText,      path: '/medicao' },
     { label: 'Relatórios',        icon: IconChartBar,      path: '/relatorios' },
+    { label: 'Auditoria',        icon: IconHistory,       path: '/auditoria' },
     { label: 'Config.',           icon: IconSettings,      path: '/configuracoes' },
   ];
 

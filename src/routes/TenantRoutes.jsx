@@ -23,6 +23,7 @@ import Requisicoes from '../pages/Requisicoes';
 import ControlePonto from '../pages/Timesheet';
 import Relatorios from '../pages/Reports';
 import Medicao from '../pages/Medicao';
+import Auditoria from '../pages/Auditoria';
 import Configuracoes from '../pages/Settings';
 
 // Layout
@@ -93,6 +94,7 @@ export default function TenantRoutes() {
         <Route path="/dashboard" element={<Guard allow={REGRAS.adminOnly}><Dashboard /></Guard>} />
         <Route path="/funcionarios" element={<Guard allow={REGRAS.adminOnly}><Funcionarios /></Guard>} />
         <Route path="/medicao" element={<Guard allow={REGRAS.adminOnly}><Medicao /></Guard>} />
+        <Route path="/auditoria" element={<Guard allow={REGRAS.adminOnly}><Auditoria /></Guard>} />
 
         {/* Configuráveis pelo admin (por módulo) */}
         <Route path="/ordens-servico" element={<GuardModulo modulo="ordens"><OrdensServico /></GuardModulo>} />
