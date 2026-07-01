@@ -95,7 +95,7 @@ export const usuariosService = {
   },
   // Admin redefine a senha na hora (via Edge Function)
   resetSenhaAdmin: async (user_id, nova_senha) => {
-    const { data, error } = await supabase.functions.invoke('admin-reset-senha', {
+    const { data, error } = await supabase.functions.invoke('bright-worker', {
       body: { user_id, nova_senha },
     });
     if (error) throw new Error(error.message || 'Erro ao redefinir senha');
