@@ -93,6 +93,18 @@ export const usuariosService = {
     const { error } = await supabase.from('usuarios').update({ ativo: true }).eq('id', id);
     if (error) throw error;
   },
+  uploadAvatar: async (id, arquivo) => {
+    const ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase();
+    const nome = `avatars/${id}_${Date.now()}.${ext}`;
+    const { data, error } = await supabase.storage
+      .from('fotos-campo')
+      .upload(nome, arquivo, { cacheControl: '3600', upsert: true });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from('fotos-campo').getPublicUrl(data.path);
+    const url = urlData.publicUrl;
+    await supabase.from('usuarios').update({ avatar_url: url }).eq('id', id);
+    return url;
+  },
   // Cria usuário COM login (auth + perfil), sem derrubar sessão do admin
   criarComLogin: async ({ email, senha, nome, cargo, matricula, telefone }) => {
     const { data: signup, error: signupError } = await supabaseSignup.auth.signUp({

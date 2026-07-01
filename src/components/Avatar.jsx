@@ -17,6 +17,16 @@ export default function Avatar({ user, size = 'md', className = '' }) {
   };
   const sizeClass = sizes[size] || sizes.md;
 
+  if (user?.avatar_url) {
+    return (
+      <img
+        src={user.avatar_url}
+        alt={user?.nome || 'Avatar'}
+        className={`${sizeClass} rounded-full object-cover shrink-0 ${className}`}
+      />
+    );
+  }
+
   return (
     <div className={`${sizeClass} rounded-full bg-[#22262F] text-[#F5F5F0] font-bold flex items-center justify-center shrink-0 ${className}`}>
       {getInitials()}

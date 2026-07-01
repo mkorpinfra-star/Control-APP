@@ -5,7 +5,7 @@ export default function Modal({ aberto, onClose, titulo, children }) {
   return (
     <AnimatePresence>
       {aberto && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <div className="fixed inset-0 z-[70] flex flex-col justify-end sm:justify-center sm:items-center sm:p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -18,7 +18,7 @@ export default function Modal({ aberto, onClose, titulo, children }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="relative bg-[#0E0F13] border-t border-[#23262E] rounded-t-3xl max-h-[90vh] overflow-y-auto"
+            className="relative bg-[#0E0F13] border-t border-[#23262E] rounded-t-3xl sm:rounded-3xl sm:border sm:max-w-lg sm:w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="sticky top-0 bg-[#0E0F13] px-4 pt-4 pb-3 border-b border-[#23262E] flex items-center justify-between z-10">
               <h2 className="font-semibold text-[#F5F5F0] text-base">{titulo}</h2>

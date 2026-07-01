@@ -1,15 +1,34 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, configService } from '../services/supabase';
+import { authService, configService, usuariosService } from '../services/supabase';
+import Avatar from '../components/Avatar';
+import { IconCamera } from '@tabler/icons-react';
 import { ui } from '../lib/theme';
 import { IconUser, IconBuildingFactory2, IconShield, IconLoader2, IconCheck, IconChevronRight, IconLock } from '@tabler/icons-react';
 import Modal from '../components/Modal';
 import { MODULOS, PAPEIS_CONFIG, ACESSO_PADRAO } from '../lib/acessos';
 
 export default function Configuracoes() {
-  const { perfil, isAdmin, logout } = useAuth();
+  const { perfil, isAdmin, logout, atualizarPerfil } = useAuth();
   const queryClient = useQueryClient();
+  const fotoRef = useRef(null);
+  const [subindoFoto, setSubindoFoto] = useState(false);
+
+  const trocarFoto = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSubindoFoto(true);
+    try {
+      const url = await usuariosService.uploadAvatar(perfil.id, file);
+      atualizarPerfil({ avatar_url: url });
+    } catch (err) {
+      alert('Erro ao enviar foto: ' + err.message);
+    } finally {
+      setSubindoFoto(false);
+      e.target.value = '';
+    }
+  };
 
   const [modalSenha, setModalSenha] = useState(false);
   const [modalEmpresa, setModalEmpresa] = useState(false);
@@ -94,11 +113,18 @@ export default function Configuracoes() {
       {/* Perfil */}
       <div className="bg-[#1A1D24] rounded-2xl p-4 border border-[#23262E]">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-[#F08020]/12 rounded-full flex items-center justify-center">
-            <IconUser size={22} className="text-[#F08020]" />
-          </div>
+          <button onClick={() => fotoRef.current?.click()} className="relative group">
+            <Avatar user={perfil} size="md" className="!bg-[#F08020]/12" />
+            <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <IconCamera size={16} className="text-white" />
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-[#F08020] rounded-full flex items-center justify-center border-2 border-[#1A1D24]">
+              <IconCamera size={10} className="text-white" />
+            </span>
+          </button>
+          <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={trocarFoto} />
           <div>
-            <p className="font-semibold text-[#F5F5F0]">{perfil?.nome}</p>
+            <p className="font-semibold text-[#F5F5F0]">{perfil?.nome}{subindoFoto && <span className="text-xs text-[#6B7280] ml-2">enviando foto...</span>}</p>
             <p className="text-xs text-[#6B7280] capitalize">{perfil?.cargo}{perfil?.matricula ? ` · ${perfil.matricula}` : ''}</p>
           </div>
         </div>

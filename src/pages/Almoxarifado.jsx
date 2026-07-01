@@ -12,12 +12,12 @@ const CATEGORIA_LABEL = {
   braco: 'Braço', luminaria: 'Luminária', fusivel: 'Fusível', conector: 'Conector', outros: 'Outros',
 };
 
-const PRODUTO_INICIAL = { nome: '', categoria: 'lampada', unidade: 'un', estoque_minimo: 0, quantidade_inicial: 0 };
+const PRODUTO_INICIAL = { nome: '', codigo: '', categoria: 'lampada', unidade: 'un', estoque_minimo: 0, quantidade_inicial: 0, fornecedor: '', localizacao: '', valor_unitario: '', descricao: '' };
 
 export default function Almoxarifado() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { canGerenciarEstoque } = useAuth();
+  const { canGerenciarEstoque, podeVerValores, perfil } = useAuth();
   const [busca, setBusca] = useState('');
   const [aba, setAba] = useState('estoque');
   const [modalAberto, setModalAberto] = useState(false);
@@ -26,6 +26,7 @@ export default function Almoxarifado() {
   const [editando, setEditando] = useState(null); // { item, quantidade }
   const [ajuste, setAjuste] = useState('');
   const [saida, setSaida] = useState('');
+  const [destino, setDestino] = useState('');
 
   const { data: estoque = [], isLoading } = useQuery({
     queryKey: ['almoxarifado-estoque'],
@@ -35,8 +36,11 @@ export default function Almoxarifado() {
   const criarMutation = useMutation({
     mutationFn: async (dados) => {
       const item = await almoxarifadoService.criarItem({
-        nome: dados.nome, categoria: dados.categoria, unidade: dados.unidade,
+        nome: dados.nome, codigo: dados.codigo || null, categoria: dados.categoria, unidade: dados.unidade,
         estoque_minimo: Number(dados.estoque_minimo) || 0,
+        fornecedor: dados.fornecedor || null, localizacao: dados.localizacao || null,
+        valor_unitario: dados.valor_unitario ? Number(dados.valor_unitario) : null,
+        descricao: dados.descricao || null,
       });
       if (Number(dados.quantidade_inicial) > 0) {
         await almoxarifadoService.entrada(item.id, Number(dados.quantidade_inicial), 'Estoque inicial');
@@ -72,7 +76,7 @@ export default function Almoxarifado() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['almoxarifado-estoque'] });
       queryClient.invalidateQueries({ queryKey: ['movimentacoes-estoque'] });
-      setEditando(null); setSaida('');
+      setEditando(null); setSaida(''); setDestino('');
     },
     onError: (e) => alert(e.message),
   });
@@ -170,7 +174,10 @@ export default function Almoxarifado() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-[#F5F5F0] text-sm">{item?.nome}</p>
-                        <p className="text-xs text-[#6B7280] mt-0.5">{CATEGORIA_LABEL[item?.categoria] || item?.categoria}</p>
+                        <p className="text-xs text-[#6B7280] mt-0.5">
+                          {item?.codigo ? `${item.codigo} · ` : ''}{CATEGORIA_LABEL[item?.categoria] || item?.categoria}
+                          {item?.localizacao ? ` · ${item.localizacao}` : ''}
+                        </p>
                       </div>
                       <div className="text-right">
                         <p className={`text-xl font-bold tabular-nums ${critico ? 'text-[#FB8C3E]' : 'text-[#F5F5F0]'}`}>{e.quantidade}</p>
@@ -208,19 +215,21 @@ export default function Almoxarifado() {
             <div className="p-3 bg-[#F87171]/10 border border-[#F87171]/20 rounded-xl text-sm text-[#F87171]">{erroForm}</div>
           )}
 
-          <div>
-            <label className={ui.label}>Nome do produto *</label>
-            <input value={produto.nome} onChange={e => setCampo('nome', e.target.value)} placeholder="Ex: Lâmpada LED 100W" className={ui.input} />
-          </div>
-
-          <div>
-            <label className={ui.label}>Categoria</label>
-            <select value={produto.categoria} onChange={e => setCampo('categoria', e.target.value)} className={ui.input}>
-              {Object.entries(CATEGORIA_LABEL).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
-            </select>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className={ui.label}>Nome do produto *</label>
+              <input value={produto.nome} onChange={e => setCampo('nome', e.target.value)} placeholder="Ex: Lâmpada LED 100W" className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Código / SKU</label>
+              <input value={produto.codigo} onChange={e => setCampo('codigo', e.target.value)} placeholder="Ex: LMP-100" className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Categoria</label>
+              <select value={produto.categoria} onChange={e => setCampo('categoria', e.target.value)} className={ui.input}>
+                {Object.entries(CATEGORIA_LABEL).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+              </select>
+            </div>
             <div>
               <label className={ui.label}>Unidade *</label>
               <input value={produto.unidade} onChange={e => setCampo('unidade', e.target.value)} placeholder="un, m, kg..." className={ui.input} />
@@ -229,11 +238,28 @@ export default function Almoxarifado() {
               <label className={ui.label}>Estoque mínimo</label>
               <input type="number" min="0" value={produto.estoque_minimo} onChange={e => setCampo('estoque_minimo', e.target.value)} className={ui.input} />
             </div>
-          </div>
-
-          <div>
-            <label className={ui.label}>Quantidade inicial em estoque</label>
-            <input type="number" min="0" value={produto.quantidade_inicial} onChange={e => setCampo('quantidade_inicial', e.target.value)} className={ui.input} />
+            <div>
+              <label className={ui.label}>Fornecedor</label>
+              <input value={produto.fornecedor} onChange={e => setCampo('fornecedor', e.target.value)} placeholder="Fornecedor" className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Localização</label>
+              <input value={produto.localizacao} onChange={e => setCampo('localizacao', e.target.value)} placeholder="Prateleira / depósito" className={ui.input} />
+            </div>
+            {podeVerValores && (
+              <div>
+                <label className={ui.label}>Custo unit. (R$)</label>
+                <input type="number" step="0.01" value={produto.valor_unitario} onChange={e => setCampo('valor_unitario', e.target.value)} placeholder="0,00" className={ui.input} />
+              </div>
+            )}
+            <div className={podeVerValores ? '' : 'col-span-2'}>
+              <label className={ui.label}>Qtd. inicial</label>
+              <input type="number" min="0" value={produto.quantidade_inicial} onChange={e => setCampo('quantidade_inicial', e.target.value)} className={ui.input} />
+            </div>
+            <div className="col-span-2">
+              <label className={ui.label}>Descrição</label>
+              <textarea value={produto.descricao} onChange={e => setCampo('descricao', e.target.value)} rows={2} placeholder="Detalhes do material..." className={`${ui.input} h-auto py-2.5 resize-none`} />
+            </div>
           </div>
 
           <button
@@ -250,17 +276,21 @@ export default function Almoxarifado() {
       <Modal aberto={!!editando} onClose={() => setEditando(null)} titulo="Editar produto">
         {editando && (
           <div className="space-y-4">
-            <div>
-              <label className={ui.label}>Nome do produto</label>
-              <input value={editando.nome || ''} onChange={e => setEditando(v => ({ ...v, nome: e.target.value }))} className={ui.input} />
-            </div>
-            <div>
-              <label className={ui.label}>Categoria</label>
-              <select value={editando.categoria} onChange={e => setEditando(v => ({ ...v, categoria: e.target.value }))} className={ui.input}>
-                {Object.entries(CATEGORIA_LABEL).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
-              </select>
-            </div>
             <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className={ui.label}>Nome do produto</label>
+                <input value={editando.nome || ''} onChange={e => setEditando(v => ({ ...v, nome: e.target.value }))} className={ui.input} />
+              </div>
+              <div>
+                <label className={ui.label}>Código / SKU</label>
+                <input value={editando.codigo || ''} onChange={e => setEditando(v => ({ ...v, codigo: e.target.value }))} className={ui.input} />
+              </div>
+              <div>
+                <label className={ui.label}>Categoria</label>
+                <select value={editando.categoria} onChange={e => setEditando(v => ({ ...v, categoria: e.target.value }))} className={ui.input}>
+                  {Object.entries(CATEGORIA_LABEL).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+                </select>
+              </div>
               <div>
                 <label className={ui.label}>Unidade</label>
                 <input value={editando.unidade || ''} onChange={e => setEditando(v => ({ ...v, unidade: e.target.value }))} className={ui.input} />
@@ -269,10 +299,34 @@ export default function Almoxarifado() {
                 <label className={ui.label}>Estoque mínimo</label>
                 <input type="number" min="0" value={editando.estoque_minimo ?? 0} onChange={e => setEditando(v => ({ ...v, estoque_minimo: e.target.value }))} className={ui.input} />
               </div>
+              <div>
+                <label className={ui.label}>Fornecedor</label>
+                <input value={editando.fornecedor || ''} onChange={e => setEditando(v => ({ ...v, fornecedor: e.target.value }))} className={ui.input} />
+              </div>
+              <div>
+                <label className={ui.label}>Localização</label>
+                <input value={editando.localizacao || ''} onChange={e => setEditando(v => ({ ...v, localizacao: e.target.value }))} className={ui.input} />
+              </div>
+              {podeVerValores && (
+                <div className="col-span-2">
+                  <label className={ui.label}>Custo unitário (R$)</label>
+                  <input type="number" step="0.01" value={editando.valor_unitario ?? ''} onChange={e => setEditando(v => ({ ...v, valor_unitario: e.target.value }))} className={ui.input} />
+                </div>
+              )}
+              <div className="col-span-2">
+                <label className={ui.label}>Descrição</label>
+                <textarea value={editando.descricao || ''} onChange={e => setEditando(v => ({ ...v, descricao: e.target.value }))} rows={2} className={`${ui.input} h-auto py-2.5 resize-none`} />
+              </div>
             </div>
 
             <button
-              onClick={() => editarMutation.mutate({ id: editando.id, dados: { nome: editando.nome, categoria: editando.categoria, unidade: editando.unidade, estoque_minimo: Number(editando.estoque_minimo) || 0 } })}
+              onClick={() => editarMutation.mutate({ id: editando.id, dados: {
+                nome: editando.nome, codigo: editando.codigo || null, categoria: editando.categoria,
+                unidade: editando.unidade, estoque_minimo: Number(editando.estoque_minimo) || 0,
+                fornecedor: editando.fornecedor || null, localizacao: editando.localizacao || null,
+                valor_unitario: editando.valor_unitario ? Number(editando.valor_unitario) : null,
+                descricao: editando.descricao || null,
+              } })}
               disabled={editarMutation.isPending}
               className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
@@ -288,7 +342,7 @@ export default function Almoxarifado() {
                 <div className="flex gap-2">
                   <input type="number" min="1" value={ajuste} onChange={e => setAjuste(e.target.value)} placeholder="Qtd a adicionar" className={`${ui.input} flex-1`} />
                   <button
-                    onClick={() => Number(ajuste) > 0 && ajusteMutation.mutate({ item_id: editando.id, quantidade: Number(ajuste), obs: 'Entrada manual' })}
+                    onClick={() => Number(ajuste) > 0 && ajusteMutation.mutate({ item_id: editando.id, quantidade: Number(ajuste), obs: `Entrada manual · ${perfil?.nome}` })}
                     disabled={ajusteMutation.isPending || !(Number(ajuste) > 0)}
                     className="px-4 bg-[#34D399]/10 border border-[#34D399]/30 text-[#34D399] rounded-xl text-sm font-medium disabled:opacity-40 flex items-center gap-1"
                   >
@@ -299,10 +353,11 @@ export default function Almoxarifado() {
 
               <div>
                 <label className={ui.label}>Saída manual</label>
+                <input value={destino} onChange={e => setDestino(e.target.value)} placeholder="Destino / departamento / obra (quem retirou)" className={`${ui.input} mb-2`} />
                 <div className="flex gap-2">
                   <input type="number" min="1" value={saida} onChange={e => setSaida(e.target.value)} placeholder="Qtd a retirar" className={`${ui.input} flex-1`} />
                   <button
-                    onClick={() => Number(saida) > 0 && saidaMutation.mutate({ item_id: editando.id, quantidade: Number(saida), obs: 'Saída manual' })}
+                    onClick={() => Number(saida) > 0 && saidaMutation.mutate({ item_id: editando.id, quantidade: Number(saida), obs: `Saída manual${destino ? ' → ' + destino : ''} · reg. ${perfil?.nome}` })}
                     disabled={saidaMutation.isPending || !(Number(saida) > 0)}
                     className="px-4 bg-[#F87171]/10 border border-[#F87171]/30 text-[#F87171] rounded-xl text-sm font-medium disabled:opacity-40 flex items-center gap-1"
                   >

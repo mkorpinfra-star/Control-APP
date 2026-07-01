@@ -90,9 +90,19 @@ begin
     alter table controle_ponto add column if not exists fechado_em timestamptz;
   end if;
 
-  -- override de acesso por usuário
+  -- override de acesso por usuário + foto de perfil
   if exists (select 1 from information_schema.tables where table_schema='public' and table_name='usuarios') then
     alter table usuarios add column if not exists acessos jsonb;
+    alter table usuarios add column if not exists avatar_url text;
+  end if;
+
+  -- campos extras de material
+  if exists (select 1 from information_schema.tables where table_schema='public' and table_name='almoxarifado_itens') then
+    alter table almoxarifado_itens add column if not exists codigo text;
+    alter table almoxarifado_itens add column if not exists fornecedor text;
+    alter table almoxarifado_itens add column if not exists localizacao text;
+    alter table almoxarifado_itens add column if not exists valor_unitario numeric(12,2);
+    alter table almoxarifado_itens add column if not exists descricao text;
   end if;
 
   -- remove CHECK de cargo (para aceitar 'almoxarife')

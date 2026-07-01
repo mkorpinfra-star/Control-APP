@@ -55,7 +55,7 @@ export default function BottomNav() {
   const isActive = (item) => location.pathname === item.path;
 
   return (
-    <div id="bottom-nav" className="fixed bottom-0 inset-x-0 z-50 pb-4 px-4 pointer-events-none safe-area-bottom">
+    <div id="bottom-nav" className="fixed bottom-0 inset-x-0 z-30 pb-4 px-4 pointer-events-none safe-area-bottom">
       <nav className="bg-[#121419]/95 backdrop-blur-lg border border-[#23262E] rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-md mx-auto pointer-events-auto">
         <div className="flex items-stretch justify-around h-16 px-2">
           {navItems.map((item) => {
