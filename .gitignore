@@ -13,3 +13,5 @@ openjdk*android/keystore.properties
 qa-runner.mjs
 test-results/
 playwright-report/
+qa-cleanup.mjs
+qa-check-schema.mjs

@@ -10,6 +10,8 @@ export async function login(page, { email, senha }) {
   await page.getByPlaceholder('seu@email.com').fill(email);
   await page.getByPlaceholder('••••••••').fill(senha);
   await page.getByRole('button', { name: 'Entrar' }).click();
-  // espera sair da tela de login
-  await expect(page.getByRole('button', { name: 'Entrar' })).toHaveCount(0, { timeout: 15000 });
+  // espera SAIR da rota de login (login pode levar alguns segundos)
+  await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 20000 });
+  // garante que a sessão foi persistida
+  await expect.poll(async () => await page.evaluate(() => !!localStorage.getItem('mkorp_sessao')), { timeout: 5000 }).toBe(true);
 }
