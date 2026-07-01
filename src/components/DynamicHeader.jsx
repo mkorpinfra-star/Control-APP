@@ -41,6 +41,7 @@ export default function DynamicHeader() {
       '/aprovacoes':      { type: 'page', title: 'Aprovações', subtitle: 'Pendências de revisão', icon: IconClipboardCheck },
       '/monitoramento':   { type: 'page', title: 'Monitoramento', subtitle: 'Equipes em campo', icon: IconTruck },
       '/relatorios':      { type: 'page', title: 'Relatórios', subtitle: 'Medição e desempenho', icon: IconChartBar },
+      '/medicao':         { type: 'page', title: 'Medição', subtitle: 'Faturamento por contrato', icon: IconFileText },
       '/configuracoes':   { type: 'page', title: 'Configurações', subtitle: 'Ajustes do sistema', icon: IconSettings },
       '/bater-ponto':     { type: 'page', title: 'Registro de ponto', subtitle: 'Sua jornada de hoje' },
       '/registro-campo':  { type: 'page', title: 'Registro de campo', subtitle: 'OS em execução', icon: IconMapPin },
@@ -60,6 +61,7 @@ export default function DynamicHeader() {
     { label: 'Ponto',             icon: IconClock,         path: '/controle-ponto' },
     { label: 'Aprovações',        icon: IconClipboardCheck,path: '/aprovacoes' },
     { label: 'Monitoramento',     icon: IconTruck,         path: '/monitoramento' },
+    { label: 'Medição',          icon: IconFileText,      path: '/medicao' },
     { label: 'Relatórios',        icon: IconChartBar,      path: '/relatorios' },
     { label: 'Config.',           icon: IconSettings,      path: '/configuracoes' },
   ];

@@ -22,6 +22,7 @@ import EntradaNF from '../pages/EntradaNF';
 import Requisicoes from '../pages/Requisicoes';
 import ControlePonto from '../pages/Timesheet';
 import Relatorios from '../pages/Reports';
+import Medicao from '../pages/Medicao';
 import Configuracoes from '../pages/Settings';
 
 // Layout
@@ -95,6 +96,7 @@ export default function TenantRoutes() {
         <Route path="/controle-ponto" element={<Guard allow={REGRAS.gestao}><ControlePonto /></Guard>} />
         <Route path="/monitoramento" element={<Guard allow={REGRAS.gestao}><Monitoramento /></Guard>} />
         <Route path="/relatorios" element={<Guard allow={REGRAS.gestao}><Relatorios /></Guard>} />
+        <Route path="/medicao" element={<Guard allow={REGRAS.gestao}><Medicao /></Guard>} />
         <Route path="/aprovacoes" element={<Guard allow={REGRAS.gestao}><Aprovacoes /></Guard>} />
 
         {/* Estoque (admin + supervisor + almoxarife) */}

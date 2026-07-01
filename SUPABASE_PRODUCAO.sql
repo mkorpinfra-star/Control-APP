@@ -20,6 +20,39 @@ create table if not exists notificacoes (
 );
 create index if not exists idx_notif_usuario on notificacoes(usuario_id, lida);
 
+-- 1c) Módulo de Medição
+create table if not exists tipos_servico (
+  id uuid primary key default gen_random_uuid(),
+  nome text not null, unidade text default 'un',
+  valor_padrao numeric(12,2) default 0, ativo boolean default true,
+  criado_em timestamptz default now()
+);
+create table if not exists precos_servico (
+  id uuid primary key default gen_random_uuid(),
+  tipo_servico_id uuid references tipos_servico(id) on delete cascade,
+  contrato_id uuid references contratos(id) on delete cascade,
+  valor numeric(12,2) not null,
+  unique(tipo_servico_id, contrato_id)
+);
+create table if not exists os_servicos (
+  id uuid primary key default gen_random_uuid(),
+  os_id uuid references ordens_servico(id) on delete cascade not null,
+  tipo_servico_id uuid references tipos_servico(id),
+  quantidade numeric(12,2) default 1,
+  valor_unitario numeric(12,2) default 0,
+  valor_total numeric(12,2) default 0,
+  criado_em timestamptz default now()
+);
+create table if not exists medicoes (
+  id uuid primary key default gen_random_uuid(),
+  contrato_id uuid references contratos(id),
+  mes int, ano int,
+  valor_total numeric(12,2) default 0,
+  status text default 'aberta',
+  gerado_em timestamptz default now(), fechado_em timestamptz,
+  unique(contrato_id, ano, mes)
+);
+
 -- 2) Policies para autenticados — só nas tabelas que EXISTEM
 do $$
 declare
@@ -28,7 +61,7 @@ declare
     'usuarios','contratos','ordens_servico','registros_campo',
     'controle_ponto','almoxarifado_itens','almoxarifado_estoque','movimentacoes_estoque',
     'requisicoes','requisicao_itens','os_comentarios','config_empresa','notificacoes',
-    'materiais_usados'
+    'materiais_usados','tipos_servico','precos_servico','os_servicos','medicoes'
   ];
 begin
   foreach t in array tabelas loop

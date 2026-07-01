@@ -459,6 +459,119 @@ export const comentariosService = {
   },
 };
 
+// ==================== SERVIÇOS (catálogo p/ medição) ====================
+export const servicosService = {
+  getTipos: async (incluirInativos = false) => {
+    let q = supabase.from('tipos_servico').select('*').order('nome');
+    if (!incluirInativos) q = q.eq('ativo', true);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data;
+  },
+  criarTipo: async (dados) => {
+    const { data, error } = await supabase.from('tipos_servico').insert({ ...dados, ativo: true }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  atualizarTipo: async (id, dados) => {
+    const { data, error } = await supabase.from('tipos_servico').update(dados).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  // Resolve preço: preço específico do contrato, senão valor_padrão
+  getPreco: async (tipo_servico_id, contrato_id) => {
+    if (contrato_id) {
+      const { data: esp } = await supabase
+        .from('precos_servico').select('valor')
+        .eq('tipo_servico_id', tipo_servico_id).eq('contrato_id', contrato_id).single();
+      if (esp) return Number(esp.valor);
+    }
+    const { data: tipo } = await supabase.from('tipos_servico').select('valor_padrao').eq('id', tipo_servico_id).single();
+    return Number(tipo?.valor_padrao ?? 0);
+  },
+};
+
+// ==================== SERVIÇOS EXECUTADOS NA OS ====================
+export const osServicosService = {
+  getByOS: async (os_id) => {
+    const { data, error } = await supabase
+      .from('os_servicos')
+      .select('*, tipos_servico(nome, unidade)')
+      .eq('os_id', os_id)
+      .order('criado_em');
+    if (error) throw error;
+    return data;
+  },
+  adicionar: async ({ os_id, tipo_servico_id, quantidade, contrato_id }) => {
+    const valor_unitario = await servicosService.getPreco(tipo_servico_id, contrato_id);
+    const valor_total = valor_unitario * Number(quantidade);
+    const { data, error } = await supabase
+      .from('os_servicos')
+      .insert({ os_id, tipo_servico_id, quantidade: Number(quantidade), valor_unitario, valor_total })
+      .select('*, tipos_servico(nome, unidade)')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+  remover: async (id) => {
+    const { error } = await supabase.from('os_servicos').delete().eq('id', id);
+    if (error) throw error;
+  },
+};
+
+// ==================== MEDIÇÃO MENSAL ====================
+export const medicaoService = {
+  // Consolida serviços executados em OS concluídas do contrato no mês
+  consolidar: async (contrato_id, ano, mes) => {
+    const ini = `${ano}-${String(mes + 1).padStart(2, '0')}-01`;
+    const ultimo = new Date(ano, mes + 1, 0).getDate();
+    const fim = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(ultimo).padStart(2, '0')}`;
+
+    let q = supabase
+      .from('ordens_servico')
+      .select('id, numero, data_conclusao, contrato_id, os_servicos(quantidade, valor_total, tipos_servico(nome, unidade))')
+      .eq('status', 'concluida')
+      .gte('data_conclusao', ini)
+      .lte('data_conclusao', fim);
+    if (contrato_id) q = q.eq('contrato_id', contrato_id);
+    const { data: ordens, error } = await q;
+    if (error) throw error;
+
+    const porTipo = {};
+    let total = 0;
+    let qtdOS = 0;
+    (ordens ?? []).forEach(os => {
+      if (os.os_servicos?.length) qtdOS++;
+      os.os_servicos?.forEach(s => {
+        const nome = s.tipos_servico?.nome || '—';
+        if (!porTipo[nome]) porTipo[nome] = { nome, quantidade: 0, valor: 0, unidade: s.tipos_servico?.unidade || 'un' };
+        porTipo[nome].quantidade += Number(s.quantidade || 0);
+        porTipo[nome].valor += Number(s.valor_total || 0);
+        total += Number(s.valor_total || 0);
+      });
+    });
+
+    return {
+      itens: Object.values(porTipo).sort((a, b) => b.valor - a.valor),
+      total, qtdOS, qtdOrdens: ordens?.length ?? 0, periodo: { ini, fim },
+    };
+  },
+  fechar: async (contrato_id, ano, mes, valor_total) => {
+    const { data, error } = await supabase
+      .from('medicoes')
+      .upsert({ contrato_id, ano, mes, valor_total, status: 'fechada', fechado_em: new Date().toISOString() },
+              { onConflict: 'contrato_id,ano,mes' })
+      .select().single();
+    if (error) throw error;
+    return data;
+  },
+  getStatus: async (contrato_id, ano, mes) => {
+    const { data } = await supabase.from('medicoes').select('*')
+      .eq('contrato_id', contrato_id).eq('ano', ano).eq('mes', mes).single();
+    return data || null;
+  },
+};
+
 // ==================== DASHBOARD ====================
 export const dashboardService = {
   getResumo: async () => {

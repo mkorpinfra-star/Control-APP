@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ordensServicoService, contratosService, usuariosService, notificacoesService } from '../services/supabase';
+import { ordensServicoService, contratosService, usuariosService, notificacoesService, servicosService, osServicosService } from '../services/supabase';
 import { STATUS_OS, PRIORIDADE, ui } from '../lib/theme';
 import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle, IconLoader2 } from '@tabler/icons-react';
 import ComentariosOS from '../components/ComentariosOS';
+import ServicosOS from '../components/ServicosOS';
 import Modal from '../components/Modal';
 
 const TIPO_DEFEITO_LABEL = {
@@ -332,6 +333,9 @@ export default function OrdensServico() {
                   </select>
                 </div>
               </div>
+
+              {/* Serviços executados (medição) */}
+              <ServicosOS osId={osSelecionada.id} contratoId={osSelecionada.contrato_id} />
 
               {/* Feed de mensagens */}
               <ComentariosOS osId={osSelecionada.id} />
