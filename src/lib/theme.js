@@ -64,6 +64,7 @@ export const STATUS_PONTO = {
   enviado:   { label: 'Enviado',   badge: `${ui.badge} bg-[#5B8DEF]/12 text-[#5B8DEF]`, text: 'text-[#5B8DEF]' },
   aprovado:  { label: 'Aprovado',  badge: `${ui.badge} bg-[#34D399]/12 text-[#34D399]`, text: 'text-[#34D399]' },
   rejeitado: { label: 'Rejeitado', badge: `${ui.badge} bg-[#F87171]/12 text-[#F87171]`, text: 'text-[#F87171]' },
+  fechado:   { label: 'Fechado',   badge: `${ui.badge} bg-[#A78BFA]/15 text-[#A78BFA]`, text: 'text-[#A78BFA]' },
 };
 
 export const STATUS_REQ = {
@@ -89,6 +90,7 @@ export const STATUS_CONTRATO = {
 export const CARGO = {
   admin:       { label: 'Admin',       badge: `${ui.badge} bg-[#5B8DEF]/12 text-[#5B8DEF]` },
   supervisor:  { label: 'Supervisor',  badge: `${ui.badge} bg-[#3B6FD4]/15 text-[#5B8DEF]` },
+  almoxarife:  { label: 'Almoxarife',  badge: `${ui.badge} bg-[#A78BFA]/15 text-[#A78BFA]` },
   eletricista: { label: 'Eletricista', badge: `${ui.badge} bg-[#34D399]/12 text-[#34D399]` },
   ajudante:    { label: 'Ajudante',    badge: `${ui.badge} bg-[#FBBF24]/12 text-[#FBBF24]` },
   motorista:   { label: 'Motorista',   badge: `${ui.badge} bg-[#FB8C3E]/14 text-[#FB8C3E]` },

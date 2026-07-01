@@ -73,6 +73,20 @@ begin
 end $$;
 
 -- ============================================================
+-- 2b) Coluna de fechamento mensal do ponto
+alter table ponto add column if not exists fechado_em timestamptz;
+
+-- 2c) Garante que o cargo 'almoxarife' é aceito (remove CHECK antigo se houver)
+do $$
+begin
+  if exists (
+    select 1 from information_schema.table_constraints
+    where table_name = 'usuarios' and constraint_name = 'usuarios_cargo_check'
+  ) then
+    execute 'alter table usuarios drop constraint usuarios_cargo_check';
+  end if;
+end $$;
+
 -- 3) Linha inicial da empresa (edite depois pelo app em Config)
 -- ============================================================
 insert into config_empresa (id, nome)

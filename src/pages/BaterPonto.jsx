@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
-import { pontoService, ordensServicoService } from '../services/supabase';
+import { pontoService, ordensServicoService, notificacoesService } from '../services/supabase';
 import { STATUS_PONTO } from '../lib/theme';
 import { IconClock, IconCheck, IconSend, IconAlertCircle } from '@tabler/icons-react';
 
@@ -85,7 +85,16 @@ export default function BaterPonto() {
     },
   });
   const enviarMutation = useMutation({
-    mutationFn: (dados) => pontoService.registrar({ ...dados, status: 'enviado' }),
+    mutationFn: async (dados) => {
+      const r = await pontoService.registrar({ ...dados, status: 'enviado' });
+      // Amarração: notifica quem aprova ponto (supervisor + admin)
+      await notificacoesService.notificarCargos(['admin', 'supervisor'], {
+        titulo: 'Ponto enviado para aprovação',
+        mensagem: `${perfil?.nome} enviou o ponto de ${new Date(dados.data + 'T12:00:00').toLocaleDateString('pt-BR')}.`,
+        tipo: 'info', link: '/controle-ponto', exceto: perfil?.id,
+      });
+      return r;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meu-ponto'] });
       queryClient.invalidateQueries({ queryKey: ['minha-semana'] });

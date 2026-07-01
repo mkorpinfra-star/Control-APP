@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { requisicoesService, almoxarifadoService, ordensServicoService } from '../services/supabase';
+import { requisicoesService, almoxarifadoService, ordensServicoService, notificacoesService } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { STATUS_REQ, ui } from '../lib/theme';
 import { IconPackage, IconCheck, IconX, IconPlus, IconTrash, IconLoader2 } from '@tabler/icons-react';
 import Modal from '../components/Modal';
 
 export default function Requisicoes() {
-  const { isAdmin, isSupervisor, perfil } = useAuth();
+  const { isAdmin, isSupervisor, canAprovarRequisicao, perfil } = useAuth();
   const queryClient = useQueryClient();
   const [filtro, setFiltro] = useState('pendente');
   const [modalAberto, setModalAberto] = useState(false);
@@ -27,7 +27,16 @@ export default function Requisicoes() {
   const { data: ordens = [] } = useQuery({ queryKey: ['ordens-servico', ''], queryFn: () => ordensServicoService.getAll({}) });
 
   const criarMutation = useMutation({
-    mutationFn: ({ dados, itens }) => requisicoesService.create(dados, itens),
+    mutationFn: async ({ dados, itens }) => {
+      const req = await requisicoesService.create(dados, itens);
+      // Amarração: notifica quem aprova (admin, almoxarife, supervisor)
+      await notificacoesService.notificarCargos(['admin', 'almoxarife', 'supervisor'], {
+        titulo: 'Nova requisição de material',
+        mensagem: `${perfil?.nome} solicitou ${itens.length} item(ns).`,
+        tipo: 'info', link: '/requisicoes', exceto: perfil?.id,
+      });
+      return req;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['requisicoes'] });
       setModalAberto(false);
@@ -50,11 +59,28 @@ export default function Requisicoes() {
   };
 
   const aprovarMutation = useMutation({
-    mutationFn: requisicoesService.aprovar,
+    mutationFn: async (req) => {
+      await requisicoesService.aprovar(req.id);
+      await notificacoesService.criar({
+        usuario_id: req.usuario_id,
+        titulo: 'Requisição aprovada',
+        mensagem: 'Sua requisição de material foi aprovada. Retire no almoxarifado.',
+        tipo: 'info', link: '/requisicoes',
+      });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['requisicoes'] }),
+    onError: (e) => alert('Erro ao aprovar: ' + e.message),
   });
   const rejeitarMutation = useMutation({
-    mutationFn: ({ id, motivo }) => requisicoesService.rejeitar(id, motivo),
+    mutationFn: async ({ req, motivo }) => {
+      await requisicoesService.rejeitar(req.id, motivo);
+      await notificacoesService.criar({
+        usuario_id: req.usuario_id,
+        titulo: 'Requisição rejeitada',
+        mensagem: `Motivo: ${motivo}`,
+        tipo: 'info', link: '/requisicoes',
+      });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['requisicoes'] }),
   });
 
@@ -116,10 +142,10 @@ export default function Requisicoes() {
                   {new Date(r.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </p>
 
-                {r.status === 'pendente' && (isAdmin || isSupervisor) && (
+                {r.status === 'pendente' && canAprovarRequisicao && (
                   <div className="flex gap-2 pt-2 border-t border-[#23262E]">
                     <button
-                      onClick={() => aprovarMutation.mutate(r.id)}
+                      onClick={() => aprovarMutation.mutate(r)}
                       className="flex-1 flex items-center justify-center gap-1 py-2 bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] rounded-xl text-xs font-medium active:bg-[#34D399]/20 transition-colors"
                     >
                       <IconCheck size={14} /> Aprovar
@@ -127,7 +153,7 @@ export default function Requisicoes() {
                     <button
                       onClick={() => {
                         const motivo = window.prompt('Motivo da rejeição:');
-                        if (motivo) rejeitarMutation.mutate({ id: r.id, motivo });
+                        if (motivo) rejeitarMutation.mutate({ req: r, motivo });
                       }}
                       className="flex-1 flex items-center justify-center gap-1 py-2 bg-[#F87171]/10 border border-[#F87171]/20 text-[#F87171] rounded-xl text-xs font-medium active:bg-[#F87171]/20 transition-colors"
                     >

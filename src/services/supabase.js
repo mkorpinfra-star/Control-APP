@@ -298,6 +298,18 @@ export const pontoService = {
     if (error) throw error;
     return data;
   },
+  // Fechamento mensal: consolida os pontos aprovados do período como "fechado"
+  fecharMes: async (data_inicio, data_fim) => {
+    const { data, error } = await supabase
+      .from('ponto')
+      .update({ status: 'fechado', fechado_em: new Date().toISOString() })
+      .gte('data', data_inicio)
+      .lte('data', data_fim)
+      .eq('status', 'aprovado')
+      .select();
+    if (error) throw error;
+    return data;
+  },
 };
 
 // ==================== ALMOXARIFADO ====================
@@ -521,5 +533,18 @@ export const notificacoesService = {
   },
   marcarTodasLidas: async (usuario_id) => {
     await supabase.from('notificacoes').update({ lida: true }).eq('usuario_id', usuario_id).eq('lida', false);
+  },
+  // Notifica todos os usuários ativos de determinados cargos (opcionalmente exclui um id)
+  notificarCargos: async (cargos, { titulo, mensagem, tipo = 'info', link = null, exceto = null }) => {
+    const { data: alvos } = await supabase
+      .from('usuarios')
+      .select('id')
+      .in('cargo', cargos)
+      .eq('ativo', true);
+    if (!alvos || alvos.length === 0) return;
+    const linhas = alvos
+      .filter(u => u.id !== exceto)
+      .map(u => ({ usuario_id: u.id, titulo, mensagem, tipo, link, lida: false }));
+    if (linhas.length) await supabase.from('notificacoes').insert(linhas);
   },
 };

@@ -65,7 +65,10 @@ export default function DynamicHeader() {
   ];
 
   const isAdmin = perfil?.cargo === 'admin';
-  const homePath = isAdmin ? '/dashboard' : (perfil?.cargo === 'supervisor' ? '/aprovacoes' : '/bater-ponto');
+  const homePath = isAdmin ? '/dashboard'
+    : perfil?.cargo === 'supervisor' ? '/aprovacoes'
+    : perfil?.cargo === 'almoxarife' ? '/almoxarifado'
+    : '/bater-ponto';
   const isHome = location.pathname === homePath || location.pathname === '/';
 
   return (

@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isSupervisor, isFuncionario } = useAuth();
+  const { isAdmin, isSupervisor, isFuncionario, isAlmoxarife } = useAuth();
 
   const getNavItems = () => {
     if (isFuncionario) {
@@ -17,6 +17,13 @@ export default function BottomNav() {
         { id: 'ponto',       label: 'Ponto',     icon: IconClock,   path: '/bater-ponto' },
         { id: 'campo',       label: 'Campo',     icon: IconMapPin,  path: '/registro-campo' },
         { id: 'requisicoes', label: 'Materiais', icon: IconPackage, path: '/requisicoes' },
+      ];
+    }
+    if (isAlmoxarife) {
+      return [
+        { id: 'almoxarifado', label: 'Estoque',    icon: IconPackage,        path: '/almoxarifado' },
+        { id: 'requisicoes',  label: 'Requisições', icon: IconClipboardCheck, path: '/requisicoes' },
+        { id: 'movimentacoes',label: 'OS',          icon: IconClipboardList,  path: '/ordens-servico' },
       ];
     }
     if (isSupervisor) {

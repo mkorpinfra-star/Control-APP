@@ -43,9 +43,10 @@ function ProtectedRoute({ children }) {
 }
 
 function HomeRouter() {
-  const { isAdmin, isSupervisor } = useAuth();
+  const { isAdmin, isSupervisor, isAlmoxarife } = useAuth();
   if (isAdmin) return <Navigate to="/dashboard" replace />;
   if (isSupervisor) return <Navigate to="/aprovacoes" replace />;
+  if (isAlmoxarife) return <Navigate to="/almoxarifado" replace />;
   return <Navigate to="/bater-ponto" replace />;
 }
 

@@ -6,7 +6,7 @@ import { CARGO, ui } from '../lib/theme';
 import { IconSearch, IconPlus, IconUser, IconLoader2, IconCheck } from '@tabler/icons-react';
 import Modal from '../components/Modal';
 
-const CARGOS = ['eletricista', 'ajudante', 'motorista', 'supervisor', 'admin'];
+const CARGOS = ['eletricista', 'ajudante', 'motorista', 'almoxarife', 'supervisor', 'admin'];
 
 const FORM_INICIAL = {
   nome: '', email: '', senha: '', cargo: 'eletricista', matricula: '', telefone: '',
@@ -96,7 +96,7 @@ export default function Funcionarios() {
           />
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
-          {['', 'eletricista', 'ajudante', 'motorista', 'supervisor', 'admin'].map(c => (
+          {['', 'eletricista', 'ajudante', 'motorista', 'almoxarife', 'supervisor', 'admin'].map(c => (
             <button key={c} onClick={() => setFiltro(c)} className={ui.chip(filtro === c)}>
               {c === '' ? 'Todos' : CARGO[c]?.label}
             </button>

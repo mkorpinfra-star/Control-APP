@@ -44,7 +44,16 @@ export function AuthProvider({ children }) {
   const cargo = perfil?.cargo;
   const isFuncionario = cargo === 'eletricista' || cargo === 'ajudante' || cargo === 'motorista';
   const isSupervisor  = cargo === 'supervisor';
+  const isAlmoxarife  = cargo === 'almoxarife';
   const isAdmin       = cargo === 'admin';
+
+  // Matriz de permissões (amarrações de fluxo)
+  const canAprovarRequisicao = isAdmin || isSupervisor || isAlmoxarife;
+  const canGerenciarEstoque  = isAdmin || isAlmoxarife;
+  const canAprovarPonto      = isAdmin || isSupervisor;
+  const canFecharPonto       = isAdmin; // admin/RH
+  const canGerenciarOS       = isAdmin || isSupervisor;
+  const canGerenciarUsuarios = isAdmin;
 
   return (
     <AuthContext.Provider value={{
@@ -56,7 +65,14 @@ export function AuthProvider({ children }) {
       isAuthenticated: !!perfil,
       isFuncionario,
       isSupervisor,
+      isAlmoxarife,
       isAdmin,
+      canAprovarRequisicao,
+      canGerenciarEstoque,
+      canAprovarPonto,
+      canFecharPonto,
+      canGerenciarOS,
+      canGerenciarUsuarios,
       cargo,
       nome: perfil?.nome,
       // Aliases para compatibilidade com componentes antigos

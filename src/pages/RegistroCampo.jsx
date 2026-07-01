@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ordensServicoService, registrosCampoService } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { IconMapPin, IconCamera, IconCheck, IconLoader } from '@tabler/icons-react';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 export default function RegistroCampo() {
   const { perfil } = useAuth();
@@ -26,31 +28,54 @@ export default function RegistroCampo() {
     select: (lista) => lista.filter(os => os.status === 'aberta' || os.status === 'em_andamento'),
   });
 
-  const obterLocalizacao = () => {
-    if (!('geolocation' in navigator)) {
-      return alert('Seu dispositivo/navegador não suporta geolocalização.');
-    }
+  const obterLocalizacao = async () => {
     setLocalizando(true);
-    navigator.geolocation.getCurrentPosition(
-      pos => {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        // App nativo: pede permissão e usa GPS nativo
+        const perm = await Geolocation.checkPermissions();
+        if (perm.location !== 'granted') {
+          const req = await Geolocation.requestPermissions();
+          if (req.location !== 'granted') {
+            alert('Permissão de localização negada. Habilite nas configurações do app (Configurações → Apps → Mkorp Control → Permissões → Localização).');
+            setLocalizando(false);
+            return;
+          }
+        }
+        const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
         setCoordenadas({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           precisao: Math.round(pos.coords.accuracy),
         });
-        setLocalizando(false);
-      },
-      err => {
-        const msgs = {
-          1: 'Permissão de localização negada. Habilite o acesso à localização no navegador.',
-          2: 'Localização indisponível no momento. Tente novamente.',
-          3: 'Tempo esgotado ao obter a localização. Tente novamente.',
-        };
-        alert(msgs[err.code] || 'Não foi possível obter a localização.');
-        setLocalizando(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+      } else {
+        // Navegador: usa geolocation web (pede permissão automaticamente)
+        if (!('geolocation' in navigator)) {
+          alert('Seu dispositivo/navegador não suporta geolocalização.');
+          setLocalizando(false);
+          return;
+        }
+        await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            pos => {
+              setCoordenadas({ lat: pos.coords.latitude, lng: pos.coords.longitude, precisao: Math.round(pos.coords.accuracy) });
+              resolve();
+            },
+            err => reject(err),
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+          );
+        });
+      }
+    } catch (err) {
+      const msgs = {
+        1: 'Permissão de localização negada. Habilite o acesso à localização.',
+        2: 'Localização indisponível no momento. Tente novamente.',
+        3: 'Tempo esgotado ao obter a localização. Tente novamente.',
+      };
+      alert(msgs[err?.code] || 'Não foi possível obter a localização. Verifique se o GPS está ligado.');
+    } finally {
+      setLocalizando(false);
+    }
   };
 
   const handleFoto = (e) => setFotos(prev => [...prev, ...Array.from(e.target.files)].slice(0, 5));

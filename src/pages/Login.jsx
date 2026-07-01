@@ -28,15 +28,8 @@ export default function Login() {
   return (
     <div
       className="min-h-screen flex flex-col relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #17191F 0%, #0E0F13 48%, #070809 100%)' }}
+      style={{ background: '#0A0A0A' }}
     >
-      {/* Glow laranja sutil no topo */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% -10%, rgba(240,128,32,0.12) 0%, transparent 60%)' }} />
-      {/* Glow branco fosco centro */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.025) 0%, transparent 55%)' }} />
-      {/* Vinheta */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 50%, transparent 50%, rgba(0,0,0,0.5) 100%)' }} />
-
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 relative z-10">
 
         {/* Logo */}
