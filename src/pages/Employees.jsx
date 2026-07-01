@@ -10,7 +10,7 @@ import { MODULOS, ACESSO_PADRAO } from '../lib/acessos';
 const CARGOS = ['eletricista', 'ajudante', 'motorista', 'almoxarife', 'supervisor', 'admin'];
 
 const FORM_INICIAL = {
-  nome: '', email: '', senha: '', cargo: 'eletricista', matricula: '', telefone: '',
+  nome: '', email: '', senha: '', cargo: 'eletricista', matricula: '', telefone: '', cpf: '', data_admissao: '',
 };
 
 export default function Funcionarios() {
@@ -44,6 +44,19 @@ export default function Funcionarios() {
       queryClient.invalidateQueries({ queryKey: ['funcionarios'] });
       setEditando(null);
     },
+  });
+
+  const [novaSenha, setNovaSenha] = useState('');
+  const [msgSenha, setMsgSenha] = useState('');
+  const resetSenhaMut = useMutation({
+    mutationFn: ({ id, senha }) => usuariosService.resetSenhaAdmin(id, senha),
+    onSuccess: () => { setMsgSenha('Senha redefinida com sucesso!'); setNovaSenha(''); },
+    onError: (e) => setMsgSenha('Erro: ' + e.message),
+  });
+  const emailResetMut = useMutation({
+    mutationFn: (email) => usuariosService.enviarEmailReset(email),
+    onSuccess: () => setMsgSenha('E-mail de redefinição enviado!'),
+    onError: (e) => setMsgSenha('Erro: ' + e.message),
   });
 
   const criarMutation = useMutation({
@@ -120,7 +133,7 @@ export default function Funcionarios() {
           return (
             <Wrapper
               key={f.id}
-              onClick={isAdmin ? () => { setEditando({ ...f }); } : undefined}
+              onClick={isAdmin ? () => { setEditando({ ...f }); setNovaSenha(''); setMsgSenha(''); } : undefined}
               className={`w-full text-left bg-[#1A1D24] rounded-2xl px-4 py-3 border border-[#23262E] flex items-center gap-3 ${isAdmin ? 'active:bg-[#272B35] transition-colors' : ''} ${f.ativo === false ? 'opacity-50' : ''}`}
             >
               <div className="w-10 h-10 bg-[#22262F] rounded-full flex items-center justify-center shrink-0">
@@ -192,6 +205,14 @@ export default function Funcionarios() {
               <label className={ui.label}>Telefone</label>
               <input value={form.telefone} onChange={e => setCampo('telefone', e.target.value)} placeholder="(11) 90000-0000" className={ui.input} />
             </div>
+            <div>
+              <label className={ui.label}>CPF</label>
+              <input value={form.cpf} onChange={e => setCampo('cpf', e.target.value)} placeholder="000.000.000-00" className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Admissão</label>
+              <input type="date" value={form.data_admissao} onChange={e => setCampo('data_admissao', e.target.value)} className={`${ui.input} [color-scheme:dark]`} />
+            </div>
           </div>
 
           <button
@@ -227,8 +248,39 @@ export default function Funcionarios() {
                 <label className={ui.label}>Telefone</label>
                 <input value={editando.telefone || ''} onChange={e => setEditando(v => ({ ...v, telefone: e.target.value }))} className={ui.input} />
               </div>
+              <div>
+                <label className={ui.label}>CPF</label>
+                <input value={editando.cpf || ''} onChange={e => setEditando(v => ({ ...v, cpf: e.target.value }))} className={ui.input} />
+              </div>
+              <div>
+                <label className={ui.label}>Admissão</label>
+                <input type="date" value={editando.data_admissao || ''} onChange={e => setEditando(v => ({ ...v, data_admissao: e.target.value }))} className={`${ui.input} [color-scheme:dark]`} />
+              </div>
             </div>
             <p className="text-[11px] text-[#454A54]">E-mail de login: {editando.email} (não editável)</p>
+
+            {/* Redefinir senha (admin) */}
+            <div className="pt-2 border-t border-[#23262E]">
+              <label className={ui.label}>Redefinir senha</label>
+              {msgSenha && <div className={`p-2 rounded-lg text-xs mb-2 ${msgSenha.startsWith('Erro') ? 'bg-[#F87171]/10 text-[#F87171]' : 'bg-[#34D399]/10 text-[#34D399]'}`}>{msgSenha}</div>}
+              <div className="flex gap-2">
+                <input type="text" value={novaSenha} onChange={e => { setNovaSenha(e.target.value); setMsgSenha(''); }} placeholder="Nova senha (mín. 6)" className={`${ui.input} flex-1`} />
+                <button
+                  onClick={() => novaSenha.length >= 6 ? resetSenhaMut.mutate({ id: editando.id, senha: novaSenha }) : setMsgSenha('Erro: mínimo 6 caracteres')}
+                  disabled={resetSenhaMut.isPending}
+                  className="px-4 bg-[#F08020] text-white rounded-xl text-sm font-medium disabled:opacity-40"
+                >
+                  Definir
+                </button>
+              </div>
+              <button
+                onClick={() => emailResetMut.mutate(editando.email)}
+                disabled={emailResetMut.isPending}
+                className="mt-2 text-xs text-[#5B8DEF]"
+              >
+                Ou enviar e-mail de redefinição para {editando.email}
+              </button>
+            </div>
 
             {/* Acesso individual (sobrepõe o padrão do papel) */}
             {editando.cargo !== 'admin' && (
@@ -261,7 +313,7 @@ export default function Funcionarios() {
             )}
 
             <button
-              onClick={() => editarMutation.mutate({ id: editando.id, dados: { nome: editando.nome, cargo: editando.cargo, matricula: editando.matricula || null, telefone: editando.telefone || null, acessos: editando.acessos ?? null } })}
+              onClick={() => editarMutation.mutate({ id: editando.id, dados: { nome: editando.nome, cargo: editando.cargo, matricula: editando.matricula || null, telefone: editando.telefone || null, cpf: editando.cpf || null, data_admissao: editando.data_admissao || null, acessos: editando.acessos ?? null } })}
               disabled={editarMutation.isPending}
               className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >

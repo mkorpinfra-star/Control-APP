@@ -93,6 +93,23 @@ export const usuariosService = {
     const { error } = await supabase.from('usuarios').update({ ativo: true }).eq('id', id);
     if (error) throw error;
   },
+  // Admin redefine a senha na hora (via Edge Function)
+  resetSenhaAdmin: async (user_id, nova_senha) => {
+    const { data, error } = await supabase.functions.invoke('admin-reset-senha', {
+      body: { user_id, nova_senha },
+    });
+    if (error) throw new Error(error.message || 'Erro ao redefinir senha');
+    if (data?.error) throw new Error(data.error);
+    return true;
+  },
+  // Envia e-mail de redefinição de senha
+  enviarEmailReset: async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://app.mkorp.com.br',
+    });
+    if (error) throw new Error(error.message);
+    return true;
+  },
   uploadAvatar: async (id, arquivo) => {
     const ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase();
     const nome = `avatars/${id}_${Date.now()}.${ext}`;
@@ -106,7 +123,7 @@ export const usuariosService = {
     return url;
   },
   // Cria usuário COM login (auth + perfil), sem derrubar sessão do admin
-  criarComLogin: async ({ email, senha, nome, cargo, matricula, telefone }) => {
+  criarComLogin: async ({ email, senha, nome, cargo, matricula, telefone, cpf, data_admissao }) => {
     const { data: signup, error: signupError } = await supabaseSignup.auth.signUp({
       email, password: senha,
     });
@@ -114,7 +131,8 @@ export const usuariosService = {
     const novoId = signup.user?.id;
     if (!novoId) throw new Error('Não foi possível criar a conta de acesso.');
     const { data, error } = await supabase.from('usuarios').insert({
-      id: novoId, email, nome, cargo, matricula: matricula || null, telefone: telefone || null, ativo: true,
+      id: novoId, email, nome, cargo, matricula: matricula || null, telefone: telefone || null,
+      cpf: cpf || null, data_admissao: data_admissao || null, ativo: true,
     }).select().single();
     if (error) throw new Error('Login criado, mas erro ao salvar perfil: ' + error.message);
     return data;
