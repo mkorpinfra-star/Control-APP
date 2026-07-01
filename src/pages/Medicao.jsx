@@ -146,12 +146,26 @@ export default function Medicao() {
   );
 }
 
-// ---------- Catálogo de serviços (gerencia tipos + preço padrão) ----------
+// ---------- Catálogo de serviços (gerencia tipos + preço padrão + preço por contrato) ----------
 function CatalogoServicos({ aberto, onClose }) {
   const queryClient = useQueryClient();
   const [novo, setNovo] = useState({ nome: '', unidade: 'un', valor_padrao: '' });
+  const [contratoSel, setContratoSel] = useState('');
 
   const { data: tipos = [] } = useQuery({ queryKey: ['tipos-servico'], queryFn: () => servicosService.getTipos(), enabled: aberto });
+  const { data: contratos = [] } = useQuery({ queryKey: ['contratos'], queryFn: contratosService.getAll, enabled: aberto });
+  const { data: precosContrato = [] } = useQuery({
+    queryKey: ['precos-contrato', contratoSel],
+    queryFn: () => servicosService.getPrecosContrato(contratoSel),
+    enabled: aberto && !!contratoSel,
+  });
+  const precoDe = (tipoId) => precosContrato.find(p => p.tipo_servico_id === tipoId)?.valor;
+
+  const setPrecoMut = useMutation({
+    mutationFn: ({ tipoId, valor }) => servicosService.setPrecoContrato(tipoId, contratoSel, valor),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['precos-contrato', contratoSel] }),
+    onError: (e) => alert('Erro: ' + e.message),
+  });
 
   const criar = useMutation({
     mutationFn: (dados) => servicosService.criarTipo(dados),
@@ -196,6 +210,29 @@ function CatalogoServicos({ aberto, onClose }) {
               <IconPlus size={14} /> Add
             </button>
           </div>
+        </div>
+
+        {/* Preço por contrato (opcional) */}
+        <div className="pt-3 border-t border-[#23262E] space-y-2">
+          <label className={ui.label}>Preço por contrato (opcional)</label>
+          <p className="text-[11px] text-[#454A54]">Selecione um contrato para definir preços específicos. Em branco = usa o preço padrão.</p>
+          <select value={contratoSel} onChange={e => setContratoSel(e.target.value)} className={ui.input}>
+            <option value="">Selecione um contrato...</option>
+            {contratos.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          </select>
+          {contratoSel && tipos.map(t => (
+            <div key={t.id} className="flex items-center gap-2">
+              <span className="text-xs text-[#A8ADB8] flex-1 truncate">{t.nome}</span>
+              <input
+                type="number" step="0.01"
+                defaultValue={precoDe(t.id) ?? ''}
+                key={`${t.id}-${precoDe(t.id) ?? ''}`}
+                placeholder={`padrão ${(t.valor_padrao||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`}
+                onBlur={e => { const v = e.target.value; if (String(v) !== String(precoDe(t.id) ?? '')) setPrecoMut.mutate({ tipoId: t.id, valor: v === '' ? null : v }); }}
+                className={`${ui.input} w-32 h-9`}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </Modal>

@@ -95,12 +95,21 @@ export default function Almoxarifado() {
     enabled: aba === 'movimentacoes',
   });
 
+  // Histórico do item selecionado (passo 7)
+  const { data: histItem = [] } = useQuery({
+    queryKey: ['mov-item', editando?.id],
+    queryFn: () => almoxarifadoService.getMovimentacoes(editando.id),
+    enabled: !!editando?.id,
+  });
+
   const estoqueFiltrado = estoque.filter(e =>
     e.almoxarifado_itens?.nome?.toLowerCase().includes(busca.toLowerCase()) ||
     e.almoxarifado_itens?.categoria?.toLowerCase().includes(busca.toLowerCase())
   );
 
   const itensCriticos = estoqueFiltrado.filter(e => e.quantidade <= (e.almoxarifado_itens?.estoque_minimo || 0));
+  const valorEstoque = estoque.reduce((s, e) => s + (Number(e.quantidade || 0) * Number(e.almoxarifado_itens?.valor_unitario || 0)), 0);
+  const brl = (v) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   if (isLoading) {
     return (
@@ -114,6 +123,12 @@ export default function Almoxarifado() {
 
   return (
     <div className="pb-32 bg-[#0A0B0D] min-h-full">
+      {podeVerValores && valorEstoque > 0 && (
+        <div className="mx-4 mt-4 bg-gradient-to-br from-[#34D399]/12 to-[#1A1D24] rounded-2xl p-4 border border-[#34D399]/20">
+          <p className="text-xs text-[#A8ADB8]">Valor total do estoque</p>
+          <p className="text-2xl font-bold text-[#34D399] tabular-nums">{brl(valorEstoque)}</p>
+        </div>
+      )}
       {itensCriticos.length > 0 && (
         <div className="mx-4 mt-4 bg-[#F08020]/10 border border-[#F08020]/25 rounded-2xl p-3 flex items-center gap-2">
           <IconAlertTriangle size={16} className="text-[#FB8C3E] shrink-0" />
@@ -365,6 +380,32 @@ export default function Almoxarifado() {
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Histórico do item */}
+            <div className="pt-2 border-t border-[#23262E]">
+              <label className={ui.label}>Histórico de movimentação</label>
+              {histItem.length === 0 ? (
+                <p className="text-xs text-[#454A54]">Nenhuma movimentação registrada.</p>
+              ) : (
+                <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                  {histItem.map(m => (
+                    <div key={m.id} className="flex items-center justify-between text-xs bg-[#121419] border border-[#23262E] rounded-lg px-2.5 py-2">
+                      <div className="min-w-0">
+                        <span className={m.tipo === 'entrada' ? 'text-[#34D399]' : 'text-[#F87171]'}>
+                          {m.tipo === 'entrada' ? '+' : '-'}{m.quantidade}
+                        </span>
+                        <span className="text-[#6B7280]"> · {m.tipo === 'entrada' ? 'Entrada' : m.tipo === 'saida_requisicao' ? 'Saída (req.)' : 'Saída manual'}</span>
+                        {m.observacao && <span className="text-[#454A54] block truncate">{m.observacao}</span>}
+                      </div>
+                      <div className="text-right shrink-0 ml-2">
+                        <span className="text-[#6B7280]">saldo {m.saldo_apos}</span>
+                        <span className="text-[#454A54] block">{new Date(m.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

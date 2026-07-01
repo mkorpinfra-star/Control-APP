@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { dashboardService } from '../services/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { CHART } from '../lib/theme';
+
+const brl = (v) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 import {
   IconClipboardList, IconClipboardCheck, IconPackage,
   IconUsers, IconAlertTriangle, IconTool, IconArrowRight,
@@ -11,6 +14,7 @@ import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from 'recharts';
 
 export default function DashboardBanking() {
   const navigate = useNavigate();
+  const { podeVerValores } = useAuth();
 
   const { data: resumo, isLoading } = useQuery({
     queryKey: ['dashboard'],
@@ -38,8 +42,33 @@ export default function DashboardBanking() {
         </p>
       </div>
 
+      {/* Card financeiro (admin) */}
+      {podeVerValores && (
+        <div className="mx-4 mt-2 mb-1 bg-gradient-to-br from-[#F08020]/15 to-[#1A1D24] rounded-2xl p-4 border border-[#F08020]/25">
+          <p className="text-xs text-[#A8ADB8]">Faturamento do mês (medição)</p>
+          <p className="text-2xl font-bold text-[#F5F5F0] tabular-nums">{brl(resumo.faturamento_mes)}</p>
+          <div className="flex gap-4 mt-2 pt-2 border-t border-[#F08020]/20 text-xs text-[#A8ADB8]">
+            <button onClick={() => navigate('/medicao')} className="text-[#F08020]">Ver medição →</button>
+            <span>Estoque: {brl(resumo.valor_estoque)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Alerta OS atrasadas */}
+      {resumo.os_atrasadas > 0 && (
+        <button onClick={() => navigate('/ordens-servico')} className="mx-4 mt-2 w-[calc(100%-2rem)] flex items-center gap-3 bg-[#F87171]/10 border border-[#F87171]/25 rounded-2xl p-3 text-left active:bg-[#F87171]/15 transition-colors">
+          <div className="w-8 h-8 bg-[#F87171]/15 rounded-xl flex items-center justify-center shrink-0">
+            <IconAlertTriangle size={16} className="text-[#F87171]" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-medium text-[#F87171]">{resumo.os_atrasadas} OS com prazo vencido (SLA)</p>
+            <p className="text-xs text-[#F87171]/60">Toque para priorizar</p>
+          </div>
+        </button>
+      )}
+
       {/* Cards KPI */}
-      <div className="px-4 grid grid-cols-3 gap-3">
+      <div className="px-4 grid grid-cols-3 gap-3 mt-3">
         {cards.map((c) => {
           const Icon = c.icon;
           return (

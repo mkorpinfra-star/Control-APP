@@ -511,6 +511,22 @@ export const servicosService = {
     if (error) throw error;
     return data;
   },
+  // Preços específicos de um contrato
+  getPrecosContrato: async (contrato_id) => {
+    const { data, error } = await supabase.from('precos_servico').select('*').eq('contrato_id', contrato_id);
+    if (error) return [];
+    return data;
+  },
+  setPrecoContrato: async (tipo_servico_id, contrato_id, valor) => {
+    if (valor == null || valor === '') {
+      // remove override → volta pro valor padrão
+      await supabase.from('precos_servico').delete().eq('tipo_servico_id', tipo_servico_id).eq('contrato_id', contrato_id);
+      return;
+    }
+    const { error } = await supabase.from('precos_servico')
+      .upsert({ tipo_servico_id, contrato_id, valor: Number(valor) }, { onConflict: 'tipo_servico_id,contrato_id' });
+    if (error) throw error;
+  },
   // Resolve preço: preço específico do contrato, senão valor_padrão
   getPreco: async (tipo_servico_id, contrato_id) => {
     if (contrato_id) {
@@ -610,10 +626,10 @@ export const dashboardService = {
   getResumo: async () => {
     const hoje = new Date().toISOString().split('T')[0];
     const [os, ponto, requisicoes, estoque] = await Promise.all([
-      supabase.from('ordens_servico').select('status, tipo_defeito, data_abertura'),
+      supabase.from('ordens_servico').select('status, tipo_defeito, data_abertura, prazo'),
       supabase.from('controle_ponto').select('hora_saida').eq('data', hoje),
       supabase.from('requisicoes').select('status').eq('status', 'pendente'),
-      supabase.from('almoxarifado_estoque').select('quantidade, almoxarifado_itens(estoque_minimo)'),
+      supabase.from('almoxarifado_estoque').select('quantidade, almoxarifado_itens(estoque_minimo, valor_unitario)'),
     ]);
     const osData = os.data ?? [];
     const pontoData = ponto.data ?? [];
@@ -649,6 +665,25 @@ export const dashboardService = {
       .sort((a, b) => b.total - a.total)
       .slice(0, 6);
 
+    // OS atrasadas: com prazo vencido e ainda não concluídas/canceladas
+    const os_atrasadas = osData.filter(o =>
+      o.prazo && o.prazo < hoje && o.status !== 'concluida' && o.status !== 'cancelada'
+    ).length;
+
+    // Valor do estoque
+    const valor_estoque = estData.reduce((s, e) => s + (Number(e.quantidade || 0) * Number(e.almoxarifado_itens?.valor_unitario || 0)), 0);
+
+    // Faturamento do mês (serviços executados em OS concluídas no mês)
+    const primeiroDia = `${hoje.slice(0, 8)}01`;
+    const { data: osServ } = await supabase
+      .from('ordens_servico')
+      .select('data_conclusao, os_servicos(valor_total)')
+      .eq('status', 'concluida')
+      .gte('data_conclusao', primeiroDia)
+      .lte('data_conclusao', hoje);
+    const faturamento_mes = (osServ ?? []).reduce((s, o) =>
+      s + (o.os_servicos ?? []).reduce((a, x) => a + Number(x.valor_total || 0), 0), 0);
+
     return {
       os_abertas:              osData.filter(o => o.status === 'aberta').length,
       os_em_andamento:         osData.filter(o => o.status === 'em_andamento').length,
@@ -656,6 +691,9 @@ export const dashboardService = {
       funcionarios_campo_hoje: pontoData.filter(p => !p.hora_saida).length,
       requisicoes_pendentes:   reqData.length,
       itens_estoque_critico:   estData.filter(e => e.quantidade <= (e.almoxarifado_itens?.estoque_minimo ?? 0)).length,
+      os_atrasadas,
+      valor_estoque,
+      faturamento_mes,
       os_por_tipo,
       os_por_dia,
     };
