@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { CARGO, ui } from '../lib/theme';
 import { IconSearch, IconPlus, IconUser, IconLoader2, IconCheck } from '@tabler/icons-react';
 import Modal from '../components/Modal';
+import { MODULOS, ACESSO_PADRAO } from '../lib/acessos';
 
 const CARGOS = ['eletricista', 'ajudante', 'motorista', 'almoxarife', 'supervisor', 'admin'];
 
@@ -229,8 +230,38 @@ export default function Funcionarios() {
             </div>
             <p className="text-[11px] text-[#454A54]">E-mail de login: {editando.email} (não editável)</p>
 
+            {/* Acesso individual (sobrepõe o padrão do papel) */}
+            {editando.cargo !== 'admin' && (
+              <div className="pt-2 border-t border-[#23262E]">
+                <div className="flex items-center justify-between mb-2">
+                  <label className={ui.label}>Acesso deste usuário</label>
+                  {editando.acessos && (
+                    <button onClick={() => setEditando(v => ({ ...v, acessos: null }))} className="text-[11px] text-[#5B8DEF]">Usar padrão do papel</button>
+                  )}
+                </div>
+                <p className="text-[11px] text-[#454A54] mb-2">Sobrepõe o padrão do papel só para esta pessoa. Valores (R$) continuam exclusivos do admin.</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {MODULOS.filter(m => m.key !== 'medicao').map(mod => {
+                    const efetivo = (editando.acessos && typeof editando.acessos[mod.key] === 'boolean')
+                      ? editando.acessos[mod.key]
+                      : (ACESSO_PADRAO[editando.cargo]?.[mod.key] ?? false);
+                    return (
+                      <button
+                        key={mod.key}
+                        onClick={() => setEditando(v => ({ ...v, acessos: { ...(v.acessos || {}), [mod.key]: !efetivo } }))}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${efetivo ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]' : 'bg-[#0A0B0D] border-[#30353F] text-[#6B7280]'}`}
+                      >
+                        {mod.label}
+                        <span className={`w-2 h-2 rounded-full ${efetivo ? 'bg-[#34D399]' : 'bg-[#454A54]'}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <button
-              onClick={() => editarMutation.mutate({ id: editando.id, dados: { nome: editando.nome, cargo: editando.cargo, matricula: editando.matricula || null, telefone: editando.telefone || null } })}
+              onClick={() => editarMutation.mutate({ id: editando.id, dados: { nome: editando.nome, cargo: editando.cargo, matricula: editando.matricula || null, telefone: editando.telefone || null, acessos: editando.acessos ?? null } })}
               disabled={editarMutation.isPending}
               className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >

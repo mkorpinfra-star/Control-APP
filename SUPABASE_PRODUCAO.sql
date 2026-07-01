@@ -90,6 +90,11 @@ begin
     alter table controle_ponto add column if not exists fechado_em timestamptz;
   end if;
 
+  -- override de acesso por usuário
+  if exists (select 1 from information_schema.tables where table_schema='public' and table_name='usuarios') then
+    alter table usuarios add column if not exists acessos jsonb;
+  end if;
+
   -- remove CHECK de cargo (para aceitar 'almoxarife')
   if exists (select 1 from information_schema.table_constraints
     where table_name='usuarios' and constraint_name='usuarios_cargo_check') then

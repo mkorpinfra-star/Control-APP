@@ -36,10 +36,14 @@ export const ACESSO_PADRAO = {
   motorista:   { ordens: false, contratos: false, almoxarifado: false, requisicoes: true, ponto_gestao: false, monitoramento: false, relatorios: false, medicao: false, aprovacoes: false },
 };
 
-// Resolve se um papel pode acessar um módulo (admin sempre pode)
-export function podeAcessarModulo(cargo, modulo, acessosConfig) {
+// Resolve acesso. Prioridade: admin > override do usuário > config do papel > padrão
+export function podeAcessarModulo(cargo, modulo, acessosConfig, overrideUsuario) {
   if (cargo === 'admin') return true;
+  // 1) override específico do usuário
+  if (overrideUsuario && typeof overrideUsuario[modulo] === 'boolean') return overrideUsuario[modulo];
+  // 2) config do papel
   const config = acessosConfig?.[cargo];
   if (config && typeof config[modulo] === 'boolean') return config[modulo];
+  // 3) padrão do papel
   return ACESSO_PADRAO[cargo]?.[modulo] ?? false;
 }

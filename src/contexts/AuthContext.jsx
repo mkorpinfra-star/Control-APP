@@ -64,8 +64,8 @@ export function AuthProvider({ children }) {
   const canGerenciarUsuarios = isAdmin;
   const podeVerValores       = isAdmin; // valores R$ só admin
 
-  // Acesso configurável por módulo (admin sempre pode)
-  const podeAcessar = (modulo) => podeAcessarModulo(cargo, modulo, acessos);
+  // Acesso configurável por módulo (admin sempre pode; override por usuário tem prioridade)
+  const podeAcessar = (modulo) => podeAcessarModulo(cargo, modulo, acessos, perfil?.acessos);
 
   return (
     <AuthContext.Provider value={{
