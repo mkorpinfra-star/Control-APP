@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { ordensServicoService } from '../services/supabase';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ordensServicoService, contratosService, usuariosService } from '../services/supabase';
 import { STATUS_OS, PRIORIDADE, ui } from '../lib/theme';
-import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle, IconLoader2 } from '@tabler/icons-react';
 import ComentariosOS from '../components/ComentariosOS';
+import Modal from '../components/Modal';
 
 const TIPO_DEFEITO_LABEL = {
   lampada_queimada: 'Lâmpada queimada',
@@ -17,15 +18,50 @@ const TIPO_DEFEITO_LABEL = {
   outro: 'Outro',
 };
 
+const TIPO_DEFEITO_OPTS = Object.entries(TIPO_DEFEITO_LABEL);
+
+const FORM_INICIAL = {
+  contrato_id: '', responsavel_id: '', tipo_defeito: 'lampada_queimada',
+  prioridade: 'normal', descricao: '', logradouro: '', bairro: '', numero_poste: '', status: 'aberta',
+};
+
 export default function OrdensServico() {
+  const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
   const [osSelecionada, setOsSelecionada] = useState(null);
+  const [modalAberto, setModalAberto] = useState(false);
+  const [form, setForm] = useState(FORM_INICIAL);
+  const [erroForm, setErroForm] = useState('');
 
   const { data: ordens = [], isLoading } = useQuery({
     queryKey: ['ordens-servico', filtroStatus],
     queryFn: () => ordensServicoService.getAll({ status: filtroStatus || undefined }),
   });
+
+  const { data: contratos = [] } = useQuery({ queryKey: ['contratos'], queryFn: contratosService.getAll });
+  const { data: responsaveis = [] } = useQuery({ queryKey: ['usuarios'], queryFn: () => usuariosService.getAll() });
+
+  const criarMutation = useMutation({
+    mutationFn: (dados) => ordensServicoService.create(dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ordens-servico'] });
+      setModalAberto(false);
+      setForm(FORM_INICIAL);
+      setErroForm('');
+    },
+    onError: (e) => setErroForm('Erro ao criar OS: ' + e.message),
+  });
+
+  const setCampo = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }));
+
+  const salvarOS = () => {
+    if (!form.contrato_id) return setErroForm('Selecione o contrato.');
+    if (!form.tipo_defeito) return setErroForm('Selecione o tipo de defeito.');
+    const dados = { ...form };
+    if (!dados.responsavel_id) delete dados.responsavel_id;
+    criarMutation.mutate(dados);
+  };
 
   const ordensFiltradas = ordens.filter(os =>
     os.numero?.toString().includes(busca) ||
@@ -122,6 +158,90 @@ export default function OrdensServico() {
           })
         )}
       </div>
+
+      {/* FAB Nova OS */}
+      <button
+        onClick={() => { setForm(FORM_INICIAL); setErroForm(''); setModalAberto(true); }}
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
+      >
+        <IconPlus size={24} className="text-white" />
+      </button>
+
+      {/* Modal Nova OS */}
+      <Modal aberto={modalAberto} onClose={() => setModalAberto(false)} titulo="Nova Ordem de Serviço">
+        <div className="space-y-4">
+          {erroForm && (
+            <div className="p-3 bg-[#F87171]/10 border border-[#F87171]/20 rounded-xl text-sm text-[#F87171]">{erroForm}</div>
+          )}
+
+          <div>
+            <label className={ui.label}>Contrato *</label>
+            <select value={form.contrato_id} onChange={e => setCampo('contrato_id', e.target.value)} className={ui.input}>
+              <option value="">Selecione o contrato</option>
+              {contratos.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className={ui.label}>Tipo de defeito *</label>
+            <select value={form.tipo_defeito} onChange={e => setCampo('tipo_defeito', e.target.value)} className={ui.input}>
+              {TIPO_DEFEITO_OPTS.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className={ui.label}>Prioridade</label>
+            <div className="grid grid-cols-4 gap-2">
+              {Object.entries(PRIORIDADE).map(([v, p]) => (
+                <button
+                  key={v}
+                  onClick={() => setCampo('prioridade', v)}
+                  className={`py-2 rounded-xl text-xs font-medium transition-colors ${form.prioridade === v ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#121419] text-[#A8ADB8] border border-[#30353F]'}`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className={ui.label}>Responsável</label>
+            <select value={form.responsavel_id} onChange={e => setCampo('responsavel_id', e.target.value)} className={ui.input}>
+              <option value="">Sem responsável (atribuir depois)</option>
+              {responsaveis.map(u => <option key={u.id} value={u.id}>{u.nome}</option>)}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Logradouro</label>
+              <input value={form.logradouro} onChange={e => setCampo('logradouro', e.target.value)} placeholder="Rua/Av." className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Bairro</label>
+              <input value={form.bairro} onChange={e => setCampo('bairro', e.target.value)} placeholder="Bairro" className={ui.input} />
+            </div>
+          </div>
+
+          <div>
+            <label className={ui.label}>Número do poste</label>
+            <input value={form.numero_poste} onChange={e => setCampo('numero_poste', e.target.value)} placeholder="Ex: 12345-A" className={ui.input} />
+          </div>
+
+          <div>
+            <label className={ui.label}>Descrição</label>
+            <textarea value={form.descricao} onChange={e => setCampo('descricao', e.target.value)} rows={3} placeholder="Detalhes da ocorrência..." className={`${ui.input} h-auto py-3 resize-none`} />
+          </div>
+
+          <button
+            onClick={salvarOS}
+            disabled={criarMutation.isPending}
+            className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {criarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Criando...</> : <><IconPlus size={16} /> Criar OS</>}
+          </button>
+        </div>
+      </Modal>
 
       {/* Drawer de detalhe + mensagens */}
       {osSelecionada && (

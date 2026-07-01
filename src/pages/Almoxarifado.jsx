@@ -1,24 +1,59 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { almoxarifadoService } from '../services/supabase';
 import { ui } from '../lib/theme';
-import { IconPlus, IconSearch, IconAlertTriangle, IconPackage, IconArrowUp, IconArrowDown, IconReceipt } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconAlertTriangle, IconPackage, IconArrowUp, IconArrowDown, IconReceipt, IconLoader2 } from '@tabler/icons-react';
+import Modal from '../components/Modal';
 
 const CATEGORIA_LABEL = {
   lampada: 'Lâmpada', reator: 'Reator', cabo: 'Cabo', rele_fotoeletrico: 'Relé fotoelétrico',
   braco: 'Braço', luminaria: 'Luminária', fusivel: 'Fusível', conector: 'Conector', outros: 'Outros',
 };
 
+const PRODUTO_INICIAL = { nome: '', categoria: 'lampada', unidade: 'un', estoque_minimo: 0, quantidade_inicial: 0 };
+
 export default function Almoxarifado() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
   const [aba, setAba] = useState('estoque');
+  const [modalAberto, setModalAberto] = useState(false);
+  const [produto, setProduto] = useState(PRODUTO_INICIAL);
+  const [erroForm, setErroForm] = useState('');
 
   const { data: estoque = [], isLoading } = useQuery({
     queryKey: ['almoxarifado-estoque'],
     queryFn: almoxarifadoService.getEstoque,
   });
+
+  const criarMutation = useMutation({
+    mutationFn: async (dados) => {
+      const item = await almoxarifadoService.criarItem({
+        nome: dados.nome, categoria: dados.categoria, unidade: dados.unidade,
+        estoque_minimo: Number(dados.estoque_minimo) || 0,
+      });
+      if (Number(dados.quantidade_inicial) > 0) {
+        await almoxarifadoService.entrada(item.id, Number(dados.quantidade_inicial), 'Estoque inicial');
+      }
+      return item;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['almoxarifado-estoque'] });
+      setModalAberto(false);
+      setProduto(PRODUTO_INICIAL);
+      setErroForm('');
+    },
+    onError: (e) => setErroForm('Erro ao criar produto: ' + e.message),
+  });
+
+  const setCampo = (campo, valor) => setProduto(p => ({ ...p, [campo]: valor }));
+
+  const salvarProduto = () => {
+    if (!produto.nome.trim()) return setErroForm('Informe o nome do produto.');
+    if (!produto.unidade.trim()) return setErroForm('Informe a unidade.');
+    criarMutation.mutate(produto);
+  };
 
   const { data: movimentacoes = [] } = useQuery({
     queryKey: ['movimentacoes-estoque'],
@@ -118,6 +153,59 @@ export default function Almoxarifado() {
           </div>
         </>
       )}
+
+      {/* FAB Adicionar produto */}
+      <button
+        onClick={() => { setProduto(PRODUTO_INICIAL); setErroForm(''); setModalAberto(true); }}
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
+      >
+        <IconPlus size={24} className="text-white" />
+      </button>
+
+      {/* Modal Adicionar produto */}
+      <Modal aberto={modalAberto} onClose={() => setModalAberto(false)} titulo="Adicionar produto">
+        <div className="space-y-4">
+          {erroForm && (
+            <div className="p-3 bg-[#F87171]/10 border border-[#F87171]/20 rounded-xl text-sm text-[#F87171]">{erroForm}</div>
+          )}
+
+          <div>
+            <label className={ui.label}>Nome do produto *</label>
+            <input value={produto.nome} onChange={e => setCampo('nome', e.target.value)} placeholder="Ex: Lâmpada LED 100W" className={ui.input} />
+          </div>
+
+          <div>
+            <label className={ui.label}>Categoria</label>
+            <select value={produto.categoria} onChange={e => setCampo('categoria', e.target.value)} className={ui.input}>
+              {Object.entries(CATEGORIA_LABEL).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Unidade *</label>
+              <input value={produto.unidade} onChange={e => setCampo('unidade', e.target.value)} placeholder="un, m, kg..." className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Estoque mínimo</label>
+              <input type="number" min="0" value={produto.estoque_minimo} onChange={e => setCampo('estoque_minimo', e.target.value)} className={ui.input} />
+            </div>
+          </div>
+
+          <div>
+            <label className={ui.label}>Quantidade inicial em estoque</label>
+            <input type="number" min="0" value={produto.quantidade_inicial} onChange={e => setCampo('quantidade_inicial', e.target.value)} className={ui.input} />
+          </div>
+
+          <button
+            onClick={salvarProduto}
+            disabled={criarMutation.isPending}
+            className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {criarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : <><IconPlus size={16} /> Adicionar produto</>}
+          </button>
+        </div>
+      </Modal>
 
       {aba === 'movimentacoes' && (
         <div className="px-4 space-y-2">
