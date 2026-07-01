@@ -8,4 +8,5 @@ jdk*
 *.iso
 *.aab
 *.jar
-openjdk*
+openjdk*android/keystore.properties
+*.keystore

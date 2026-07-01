@@ -16,6 +16,10 @@
       "splashImmersive": true
     }
   },
+  "server": {
+    "url": "https://app.mkorp.com.br",
+    "cleartext": false
+  },
   "android": {
     "allowMixedContent": true,
     "webContentsDebuggingEnabled": true
