@@ -6,6 +6,7 @@ import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList,
 import ComentariosOS from '../components/ComentariosOS';
 import ServicosOS from '../components/ServicosOS';
 import Modal from '../components/Modal';
+import InputDialog from '../components/InputDialog';
 
 const TIPO_DEFEITO_LABEL = {
   lampada_queimada: 'Lâmpada queimada',
@@ -127,12 +128,12 @@ export default function OrdensServico() {
     }
   };
 
-  // Mudar status; se cancelar, pede motivo
+  const [dialogCancelar, setDialogCancelar] = useState(false);
+
+  // Mudar status; se cancelar, abre diálogo de motivo
   const mudarStatus = (novoStatus) => {
     if (novoStatus === 'cancelada') {
-      const motivo = window.prompt('Motivo do cancelamento:');
-      if (!motivo) return;
-      updateMutation.mutate({ id: osSelecionada.id, dados: { status: 'cancelada', motivo_cancelamento: motivo } });
+      setDialogCancelar(true);
       return;
     }
     updateMutation.mutate({ id: osSelecionada.id, dados: { status: novoStatus, ...(novoStatus === 'concluida' ? { data_conclusao: new Date().toISOString().split('T')[0] } : {}) } });
@@ -241,6 +242,20 @@ export default function OrdensServico() {
       >
         <IconPlus size={24} className="text-white" />
       </button>
+
+      {/* Diálogo de cancelamento de OS */}
+      <InputDialog
+        aberto={dialogCancelar}
+        titulo="Cancelar OS"
+        label="Motivo do cancelamento"
+        placeholder="Descreva o motivo..."
+        confirmarLabel="Cancelar OS"
+        onClose={() => setDialogCancelar(false)}
+        onConfirmar={(motivo) => {
+          setDialogCancelar(false);
+          updateMutation.mutate({ id: osSelecionada.id, dados: { status: 'cancelada', motivo_cancelamento: motivo } });
+        }}
+      />
 
       {/* Modal Nova/Editar OS */}
       <Modal aberto={modalAberto} onClose={() => { setModalAberto(false); setEditandoId(null); }} titulo={editandoId ? 'Editar Ordem de Serviço' : 'Nova Ordem de Serviço'}>

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { STATUS_REQ, ui } from '../lib/theme';
 import { IconPackage, IconCheck, IconX, IconPlus, IconTrash, IconLoader2 } from '@tabler/icons-react';
 import Modal from '../components/Modal';
+import InputDialog from '../components/InputDialog';
 
 export default function Requisicoes() {
   const { isAdmin, isSupervisor, canAprovarRequisicao, perfil } = useAuth();
@@ -14,6 +15,7 @@ export default function Requisicoes() {
   const [osId, setOsId] = useState('');
   const [itens, setItens] = useState([{ item_id: '', quantidade: 1 }]);
   const [erroForm, setErroForm] = useState('');
+  const [reqRejeitar, setReqRejeitar] = useState(null);
 
   const { data: requisicoes = [], isLoading } = useQuery({
     queryKey: ['requisicoes', filtro],
@@ -151,10 +153,7 @@ export default function Requisicoes() {
                       <IconCheck size={14} /> Aprovar
                     </button>
                     <button
-                      onClick={() => {
-                        const motivo = window.prompt('Motivo da rejeição:');
-                        if (motivo) rejeitarMutation.mutate({ req: r, motivo });
-                      }}
+                      onClick={() => setReqRejeitar(r)}
                       className="flex-1 flex items-center justify-center gap-1 py-2 bg-[#F87171]/10 border border-[#F87171]/20 text-[#F87171] rounded-xl text-xs font-medium active:bg-[#F87171]/20 transition-colors"
                     >
                       <IconX size={14} /> Rejeitar
@@ -166,6 +165,17 @@ export default function Requisicoes() {
           })
         )}
       </div>
+
+      {/* Diálogo de rejeição */}
+      <InputDialog
+        aberto={!!reqRejeitar}
+        titulo="Rejeitar requisição"
+        label="Motivo da rejeição"
+        placeholder="Descreva o motivo..."
+        confirmarLabel="Rejeitar"
+        onClose={() => setReqRejeitar(null)}
+        onConfirmar={(motivo) => { rejeitarMutation.mutate({ req: reqRejeitar, motivo }); setReqRejeitar(null); }}
+      />
 
       {/* FAB Nova requisição */}
       <button

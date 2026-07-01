@@ -4,6 +4,7 @@ import { pontoService, notificacoesService } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { STATUS_PONTO, ui } from '../lib/theme';
 import { IconCheck, IconX, IconClock, IconLock, IconDownload, IconLoader2 } from '@tabler/icons-react';
+import InputDialog from '../components/InputDialog';
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -33,6 +34,7 @@ export default function ControlePonto() {
 
   const hoje = new Date();
   const [aba, setAba] = useState('aprovacoes'); // aprovacoes | fechamento
+  const [pontoRejeitar, setPontoRejeitar] = useState(null);
   const [mes, setMes] = useState(hoje.getMonth());
   const [ano, setAno] = useState(hoje.getFullYear());
 
@@ -116,6 +118,17 @@ export default function ControlePonto() {
 
   return (
     <div className="pb-32 bg-[#0A0B0D] min-h-full">
+      {/* Diálogo de rejeição de ponto */}
+      <InputDialog
+        aberto={!!pontoRejeitar}
+        titulo="Rejeitar ponto"
+        label="Motivo da rejeição"
+        placeholder="Descreva o motivo..."
+        confirmarLabel="Rejeitar"
+        onClose={() => setPontoRejeitar(null)}
+        onConfirmar={(motivo) => { rejeitarMut.mutate({ r: pontoRejeitar, motivo }); setPontoRejeitar(null); }}
+      />
+
       {/* Abas (só quem fecha vê a segunda) */}
       {canFecharPonto && (
         <div className="px-4 pt-4 pb-1 flex gap-2">
@@ -163,10 +176,7 @@ export default function ControlePonto() {
                       <IconCheck size={14} /> Aprovar
                     </button>
                     <button
-                      onClick={() => {
-                        const motivo = window.prompt('Motivo da rejeição:');
-                        if (motivo) rejeitarMut.mutate({ r, motivo });
-                      }}
+                      onClick={() => setPontoRejeitar(r)}
                       className="flex-1 flex items-center justify-center gap-1 py-2 bg-[#F87171]/10 border border-[#F87171]/20 text-[#F87171] rounded-xl text-xs font-medium active:bg-[#F87171]/20"
                     >
                       <IconX size={14} /> Rejeitar
