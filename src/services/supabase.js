@@ -10,6 +10,32 @@ const supabaseSignup = createClient(SUPABASE_URL, SUPABASE_ANON, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
+// ==================== AUDITORIA ====================
+export const auditService = {
+  // Registra ação crítica. Nunca bloqueia o fluxo principal.
+  log: async ({ acao, entidade = null, entidade_id = null, dados_antigos = null, dados_novos = null, motivo = null, contexto = 'app' }) => {
+    try {
+      let ator = null;
+      try { ator = JSON.parse(localStorage.getItem('mkorp_sessao') || 'null'); } catch { /* noop */ }
+      let uid = ator?.id;
+      if (!uid) { const { data } = await supabase.auth.getUser(); uid = data?.user?.id ?? null; }
+      await supabase.from('audit_log').insert({
+        usuario_id: uid, usuario_nome: ator?.nome ?? null,
+        acao, entidade, entidade_id: entidade_id != null ? String(entidade_id) : null,
+        dados_antigos, dados_novos, motivo, contexto,
+      });
+    } catch { /* auditoria não pode quebrar o app */ }
+  },
+  listar: async (filtros = {}) => {
+    let q = supabase.from('audit_log').select('*').order('criado_em', { ascending: false }).limit(200);
+    if (filtros.entidade) q = q.eq('entidade', filtros.entidade);
+    if (filtros.entidade_id) q = q.eq('entidade_id', String(filtros.entidade_id));
+    const { data, error } = await q;
+    if (error) return [];
+    return data;
+  },
+};
+
 // ==================== AUTH ====================
 export const authService = {
   login: async (email, senha) => {
@@ -62,18 +88,24 @@ export const configService = {
 
 // ==================== USUÁRIOS ====================
 export const usuariosService = {
+  // Listagens/dropdowns NUNCA trazem CPF (fica em usuarios_documentos)
   getAll: async (cargo = null, incluirInativos = false) => {
-    let q = supabase.from('usuarios').select('*');
+    let q = supabase.from('usuarios').select('id, nome, email, cargo, matricula, telefone, ativo, avatar_url, data_admissao, acessos');
     if (!incluirInativos) q = q.eq('ativo', true);
     if (cargo) q = q.eq('cargo', cargo);
     const { data, error } = await q;
     if (error) throw error;
     return data;
   },
+  // Detalhe (admin/edição): traz CPF da tabela protegida
   getById: async (id) => {
-    const { data, error } = await supabase.from('usuarios').select('*').eq('id', id).single();
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('id, nome, email, cargo, matricula, telefone, ativo, avatar_url, data_admissao, acessos')
+      .eq('id', id).single();
     if (error) return null;
-    return data;
+    const { data: doc } = await supabase.from('usuarios_documentos').select('cpf').eq('usuario_id', id).single();
+    return { ...data, cpf: doc?.cpf ?? '' };
   },
   create: async (dados) => {
     const { data, error } = await supabase.from('usuarios').insert({ ...dados, ativo: true }).select().single();
@@ -81,17 +113,24 @@ export const usuariosService = {
     return data;
   },
   update: async (id, dados) => {
-    const { data, error } = await supabase.from('usuarios').update(dados).eq('id', id).select().single();
+    // separa CPF (vai para tabela protegida)
+    const { cpf, ...resto } = dados;
+    if (cpf !== undefined) {
+      await supabase.from('usuarios_documentos').upsert({ usuario_id: id, cpf: cpf || null, atualizado_em: new Date().toISOString() }, { onConflict: 'usuario_id' });
+    }
+    const { data, error } = await supabase.from('usuarios').update(resto).eq('id', id).select().single();
     if (error) throw error;
     return data;
   },
   delete: async (id) => {
     const { error } = await supabase.from('usuarios').update({ ativo: false }).eq('id', id);
     if (error) throw error;
+    auditService.log({ acao: 'funcionario_desativado', entidade: 'usuarios', entidade_id: id });
   },
   reativar: async (id) => {
     const { error } = await supabase.from('usuarios').update({ ativo: true }).eq('id', id);
     if (error) throw error;
+    auditService.log({ acao: 'funcionario_reativado', entidade: 'usuarios', entidade_id: id });
   },
   // Admin redefine a senha na hora (via Edge Function)
   resetSenhaAdmin: async (user_id, nova_senha) => {
@@ -100,6 +139,7 @@ export const usuariosService = {
     });
     if (error) throw new Error(error.message || 'Erro ao redefinir senha');
     if (data?.error) throw new Error(data.error);
+    auditService.log({ acao: 'senha_resetada', entidade: 'usuarios', entidade_id: user_id });
     return true;
   },
   // Envia e-mail de redefinição de senha
@@ -132,9 +172,12 @@ export const usuariosService = {
     if (!novoId) throw new Error('Não foi possível criar a conta de acesso.');
     const { data, error } = await supabase.from('usuarios').insert({
       id: novoId, email, nome, cargo, matricula: matricula || null, telefone: telefone || null,
-      cpf: cpf || null, data_admissao: data_admissao || null, ativo: true,
+      data_admissao: data_admissao || null, ativo: true,
     }).select().single();
     if (error) throw new Error('Login criado, mas erro ao salvar perfil: ' + error.message);
+    // CPF vai para a tabela protegida
+    if (cpf) await supabase.from('usuarios_documentos').insert({ usuario_id: novoId, cpf });
+    auditService.log({ acao: 'funcionario_criado', entidade: 'usuarios', entidade_id: novoId, dados_novos: { nome, cargo, email } });
     return data;
   },
 };
@@ -154,11 +197,13 @@ export const contratosService = {
   create: async (dados) => {
     const { data, error } = await supabase.from('contratos').insert(dados).select().single();
     if (error) throw error;
+    auditService.log({ acao: 'contrato_criado', entidade: 'contratos', entidade_id: data.id, dados_novos: { nome: data.nome } });
     return data;
   },
   update: async (id, dados) => {
     const { data, error } = await supabase.from('contratos').update(dados).eq('id', id).select().single();
     if (error) throw error;
+    auditService.log({ acao: dados.status === 'encerrado' ? 'contrato_encerrado' : 'contrato_editado', entidade: 'contratos', entidade_id: id, dados_novos: dados });
     return data;
   },
   delete: async (id) => {
@@ -207,6 +252,7 @@ export const ordensServicoService = {
       .select('*, contratos(nome), usuarios(nome)')
       .single();
     if (error) throw error;
+    auditService.log({ acao: 'os_criada', entidade: 'ordens_servico', entidade_id: data.id, dados_novos: { numero: data.numero, tipo_defeito: data.tipo_defeito, contrato_id: data.contrato_id } });
     return data;
   },
   update: async (id, dados) => {
@@ -217,6 +263,10 @@ export const ordensServicoService = {
       .select('*, contratos(nome), usuarios(nome)')
       .single();
     if (error) throw error;
+    const acao = dados.status === 'cancelada' ? 'os_cancelada'
+      : dados.status === 'concluida' ? 'os_concluida'
+      : dados.status ? 'os_status_alterado' : 'os_editada';
+    auditService.log({ acao, entidade: 'ordens_servico', entidade_id: id, dados_novos: dados, motivo: dados.motivo_cancelamento || null });
     return data;
   },
   delete: async (id) => {
@@ -387,6 +437,7 @@ export const almoxarifadoService = {
     await supabase.from('movimentacoes_estoque').insert({
       item_id, tipo: 'entrada', quantidade, saldo_apos: saldoNovo, observacao,
     });
+    auditService.log({ acao: 'estoque_entrada', entidade: 'almoxarifado_itens', entidade_id: item_id, dados_novos: { quantidade, saldo_apos: saldoNovo, observacao } });
   },
   saida: async (item_id, quantidade, observacao = '') => {
     const { data: estoqueAtual } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item_id).single();
@@ -397,6 +448,7 @@ export const almoxarifadoService = {
     await supabase.from('movimentacoes_estoque').insert({
       item_id, tipo: 'saida_manual', quantidade, saldo_apos: saldoNovo, observacao,
     });
+    auditService.log({ acao: 'estoque_saida', entidade: 'almoxarifado_itens', entidade_id: item_id, dados_novos: { quantidade, saldo_apos: saldoNovo, observacao } });
   },
 };
 
@@ -451,6 +503,7 @@ export const requisicoesService = {
       .from('requisicoes')
       .update({ status: 'aprovada', aprovado_em: new Date().toISOString() })
       .eq('id', id);
+    auditService.log({ acao: 'requisicao_aprovada', entidade: 'requisicoes', entidade_id: id });
   },
   rejeitar: async (id, motivo) => {
     const { error } = await supabase
@@ -458,6 +511,7 @@ export const requisicoesService = {
       .update({ status: 'rejeitada', motivo_rejeicao: motivo })
       .eq('id', id);
     if (error) throw error;
+    auditService.log({ acao: 'requisicao_rejeitada', entidade: 'requisicoes', entidade_id: id, motivo });
   },
 };
 

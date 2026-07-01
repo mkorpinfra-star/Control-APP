@@ -133,7 +133,7 @@ export default function Funcionarios() {
           return (
             <Wrapper
               key={f.id}
-              onClick={isAdmin ? () => { setEditando({ ...f }); setNovaSenha(''); setMsgSenha(''); } : undefined}
+              onClick={isAdmin ? async () => { setNovaSenha(''); setMsgSenha(''); const full = await usuariosService.getById(f.id); setEditando(full || { ...f }); } : undefined}
               className={`w-full text-left bg-[#1A1D24] rounded-2xl px-4 py-3 border border-[#23262E] flex items-center gap-3 ${isAdmin ? 'active:bg-[#272B35] transition-colors' : ''} ${f.ativo === false ? 'opacity-50' : ''}`}
             >
               <div className="w-10 h-10 bg-[#22262F] rounded-full flex items-center justify-center shrink-0">
