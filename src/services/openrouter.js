@@ -9,7 +9,7 @@ async function chamarIA(messages, model = 'google/gemini-3-flash-preview') {
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://app.mkorp.com.br',
     },
-    body: JSON.stringify({ model, messages }),
+    body: JSON.stringify({ model, messages, max_tokens: 4000 }),
   });
   if (!res.ok) throw new Error('Erro ao chamar IA');
   const json = await res.json();
