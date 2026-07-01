@@ -119,14 +119,6 @@ export default function DynamicHeader() {
                   <p className="text-xs text-[#6B7280] mb-1">{config.subtitle}</p>
                   <p className="text-xl tracking-tight font-normal text-[#F5F5F0]">{config.title}</p>
                 </div>
-                {config.type === 'list' && config.addAction && (
-                  <button
-                    onClick={config.addAction}
-                    className="w-12 h-12 bg-[#F08020] text-[#0A0B0D] rounded-full hover:bg-[#D86E14] transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-[0_8px_24px_rgba(240,128,32,0.3)] ml-3 shrink-0"
-                  >
-                    <IconPlus stroke={2} size={24} />
-                  </button>
-                )}
               </div>
             </div>
           )}

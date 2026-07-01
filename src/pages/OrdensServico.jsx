@@ -53,6 +53,14 @@ export default function OrdensServico() {
     onError: (e) => setErroForm('Erro ao criar OS: ' + e.message),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, dados }) => ordensServicoService.update(id, dados),
+    onSuccess: (osAtualizada) => {
+      queryClient.invalidateQueries({ queryKey: ['ordens-servico'] });
+      setOsSelecionada(prev => prev ? { ...prev, ...osAtualizada } : prev);
+    },
+  });
+
   const setCampo = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }));
 
   const salvarOS = () => {
@@ -271,6 +279,36 @@ export default function OrdensServico() {
                 )}
                 {osSelecionada.numero_poste && <p className="text-xs text-[#6B7280]">Poste: {osSelecionada.numero_poste}</p>}
                 {osSelecionada.usuarios?.nome && <p className="text-xs text-[#6B7280]">Responsável: {osSelecionada.usuarios.nome}</p>}
+              </div>
+
+              {/* Gestão da OS */}
+              <div className="bg-[#121419] border border-[#23262E] rounded-2xl p-3 space-y-3">
+                <p className="text-xs font-semibold text-[#A8ADB8] uppercase tracking-wider">Gerenciar</p>
+                <div>
+                  <label className="text-xs text-[#6B7280] mb-1.5 block">Status</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(STATUS_OS).map(([v, s]) => (
+                      <button
+                        key={v}
+                        onClick={() => updateMutation.mutate({ id: osSelecionada.id, dados: { status: v, ...(v === 'concluida' ? { data_conclusao: new Date().toISOString().split('T')[0] } : {}) } })}
+                        className={`py-2 rounded-xl text-xs font-medium transition-colors ${osSelecionada.status === v ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#1A1D24] text-[#A8ADB8] border border-[#30353F]'}`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-[#6B7280] mb-1.5 block">Responsável</label>
+                  <select
+                    value={osSelecionada.responsavel_id || ''}
+                    onChange={e => updateMutation.mutate({ id: osSelecionada.id, dados: { responsavel_id: e.target.value || null } })}
+                    className={ui.input}
+                  >
+                    <option value="">Sem responsável</option>
+                    {responsaveis.map(u => <option key={u.id} value={u.id}>{u.nome}</option>)}
+                  </select>
+                </div>
               </div>
 
               {/* Feed de mensagens */}

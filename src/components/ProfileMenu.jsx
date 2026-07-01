@@ -1,9 +1,13 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { IconUser, IconLock, IconWorld, IconInfoCircle, IconLogout, IconX } from '@tabler/icons-react';
+import { IconUser, IconLock, IconSettings, IconInfoCircle, IconLogout, IconX } from '@tabler/icons-react';
 
 export default function ProfileMenu({ isOpen, onClose }) {
   const { perfil, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const irPara = (path) => { onClose(); navigate(path); };
 
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
@@ -71,9 +75,9 @@ export default function ProfileMenu({ isOpen, onClose }) {
         </div>
 
         <div className="p-4 space-y-1">
-          {item(IconLock, 'Alterar senha', 'Mantenha sua conta segura', () => alert('Disponível ao conectar o Supabase.'))}
-          {item(IconWorld, 'Idioma', 'Português (Brasil)', () => {})}
-          {item(IconInfoCircle, 'Sobre', 'Mkorp Control v1.0 · protótipo', () => alert('Mkorp Control\nGestão de iluminação pública\nv1.0 (protótipo)'))}
+          {item(IconLock, 'Alterar senha', 'Mantenha sua conta segura', () => irPara('/configuracoes'))}
+          {item(IconSettings, 'Configurações', 'Ajustes da conta', () => irPara('/configuracoes'))}
+          {item(IconInfoCircle, 'Sobre', 'Mkorp Control v1.0', () => alert('Mkorp Control\nGestão de iluminação pública\nv1.0'))}
 
           <div className="h-px bg-[#23262E] my-3" />
 
