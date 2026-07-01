@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordensServicoService, contratosService, usuariosService, notificacoesService, servicosService, osServicosService } from '../services/supabase';
 import { STATUS_OS, PRIORIDADE, ui } from '../lib/theme';
-import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle, IconLoader2 } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle, IconLoader2, IconPencil } from '@tabler/icons-react';
 import ComentariosOS from '../components/ComentariosOS';
 import ServicosOS from '../components/ServicosOS';
 import Modal from '../components/Modal';
@@ -23,7 +23,7 @@ const TIPO_DEFEITO_OPTS = Object.entries(TIPO_DEFEITO_LABEL);
 
 const FORM_INICIAL = {
   contrato_id: '', responsavel_id: '', tipo_defeito: 'lampada_queimada',
-  prioridade: 'normal', descricao: '', logradouro: '', bairro: '', numero_poste: '', status: 'aberta',
+  prioridade: 'normal', descricao: '', logradouro: '', bairro: '', numero_poste: '', status: 'aberta', prazo: '',
 };
 
 export default function OrdensServico() {
@@ -32,6 +32,7 @@ export default function OrdensServico() {
   const [filtroStatus, setFiltroStatus] = useState('');
   const [osSelecionada, setOsSelecionada] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
+  const [editandoId, setEditandoId] = useState(null); // id da OS em edição (null = criando)
   const [form, setForm] = useState(FORM_INICIAL);
   const [erroForm, setErroForm] = useState('');
 
@@ -84,14 +85,57 @@ export default function OrdensServico() {
     },
   });
 
+  // Salvar edição dos dados da OS
+  const editarDadosMutation = useMutation({
+    mutationFn: ({ id, dados }) => ordensServicoService.update(id, dados),
+    onSuccess: (osAtualizada) => {
+      queryClient.invalidateQueries({ queryKey: ['ordens-servico'] });
+      setOsSelecionada(prev => prev ? { ...prev, ...osAtualizada } : prev);
+      setModalAberto(false);
+      setEditandoId(null);
+      setForm(FORM_INICIAL);
+      setErroForm('');
+    },
+    onError: (e) => setErroForm('Erro ao salvar OS: ' + e.message),
+  });
+
   const setCampo = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }));
+
+  const abrirNovaOS = () => { setEditandoId(null); setForm(FORM_INICIAL); setErroForm(''); setModalAberto(true); };
+  const abrirEdicaoOS = (os) => {
+    setEditandoId(os.id);
+    setForm({
+      contrato_id: os.contrato_id || '', responsavel_id: os.responsavel_id || '',
+      tipo_defeito: os.tipo_defeito || 'lampada_queimada', prioridade: os.prioridade || 'normal',
+      descricao: os.descricao || '', logradouro: os.logradouro || '', bairro: os.bairro || '',
+      numero_poste: os.numero_poste || '', status: os.status || 'aberta', prazo: os.prazo || '',
+    });
+    setErroForm('');
+    setModalAberto(true);
+  };
 
   const salvarOS = () => {
     if (!form.contrato_id) return setErroForm('Selecione o contrato.');
     if (!form.tipo_defeito) return setErroForm('Selecione o tipo de defeito.');
     const dados = { ...form };
     if (!dados.responsavel_id) delete dados.responsavel_id;
-    criarMutation.mutate(dados);
+    if (!dados.prazo) delete dados.prazo;
+    if (editandoId) {
+      editarDadosMutation.mutate({ id: editandoId, dados });
+    } else {
+      criarMutation.mutate(dados);
+    }
+  };
+
+  // Mudar status; se cancelar, pede motivo
+  const mudarStatus = (novoStatus) => {
+    if (novoStatus === 'cancelada') {
+      const motivo = window.prompt('Motivo do cancelamento:');
+      if (!motivo) return;
+      updateMutation.mutate({ id: osSelecionada.id, dados: { status: 'cancelada', motivo_cancelamento: motivo } });
+      return;
+    }
+    updateMutation.mutate({ id: osSelecionada.id, dados: { status: novoStatus, ...(novoStatus === 'concluida' ? { data_conclusao: new Date().toISOString().split('T')[0] } : {}) } });
   };
 
   const ordensFiltradas = ordens.filter(os =>
@@ -192,14 +236,14 @@ export default function OrdensServico() {
 
       {/* FAB Nova OS */}
       <button
-        onClick={() => { setForm(FORM_INICIAL); setErroForm(''); setModalAberto(true); }}
+        onClick={abrirNovaOS}
         className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
       >
         <IconPlus size={24} className="text-white" />
       </button>
 
-      {/* Modal Nova OS */}
-      <Modal aberto={modalAberto} onClose={() => setModalAberto(false)} titulo="Nova Ordem de Serviço">
+      {/* Modal Nova/Editar OS */}
+      <Modal aberto={modalAberto} onClose={() => { setModalAberto(false); setEditandoId(null); }} titulo={editandoId ? 'Editar Ordem de Serviço' : 'Nova Ordem de Serviço'}>
         <div className="space-y-4">
           {erroForm && (
             <div className="p-3 bg-[#F87171]/10 border border-[#F87171]/20 rounded-xl text-sm text-[#F87171]">{erroForm}</div>
@@ -254,9 +298,15 @@ export default function OrdensServico() {
             </div>
           </div>
 
-          <div>
-            <label className={ui.label}>Número do poste</label>
-            <input value={form.numero_poste} onChange={e => setCampo('numero_poste', e.target.value)} placeholder="Ex: 12345-A" className={ui.input} />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Número do poste</label>
+              <input value={form.numero_poste} onChange={e => setCampo('numero_poste', e.target.value)} placeholder="Ex: 12345-A" className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Prazo (SLA)</label>
+              <input type="date" value={form.prazo || ''} onChange={e => setCampo('prazo', e.target.value)} className={`${ui.input} [color-scheme:dark]`} />
+            </div>
           </div>
 
           <div>
@@ -266,10 +316,10 @@ export default function OrdensServico() {
 
           <button
             onClick={salvarOS}
-            disabled={criarMutation.isPending}
+            disabled={criarMutation.isPending || editarDadosMutation.isPending}
             className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {criarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Criando...</> : <><IconPlus size={16} /> Criar OS</>}
+            {(criarMutation.isPending || editarDadosMutation.isPending) ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : <><IconPlus size={16} /> {editandoId ? 'Salvar alterações' : 'Criar OS'}</>}
           </button>
         </div>
       </Modal>
@@ -301,7 +351,14 @@ export default function OrdensServico() {
                   </div>
                 )}
                 {osSelecionada.numero_poste && <p className="text-xs text-[#6B7280]">Poste: {osSelecionada.numero_poste}</p>}
+                {osSelecionada.prazo && <p className="text-xs text-[#6B7280]">Prazo: {new Date(osSelecionada.prazo + 'T12:00:00').toLocaleDateString('pt-BR')}</p>}
                 {osSelecionada.usuarios?.nome && <p className="text-xs text-[#6B7280]">Responsável: {osSelecionada.usuarios.nome}</p>}
+                {osSelecionada.status === 'cancelada' && osSelecionada.motivo_cancelamento && (
+                  <p className="text-xs text-[#F87171]">Cancelada: {osSelecionada.motivo_cancelamento}</p>
+                )}
+                <button onClick={() => abrirEdicaoOS(osSelecionada)} className="mt-1 text-xs text-[#5B8DEF] flex items-center gap-1">
+                  <IconPencil size={13} /> Editar dados da OS
+                </button>
               </div>
 
               {/* Gestão da OS */}
@@ -313,7 +370,7 @@ export default function OrdensServico() {
                     {Object.entries(STATUS_OS).map(([v, s]) => (
                       <button
                         key={v}
-                        onClick={() => updateMutation.mutate({ id: osSelecionada.id, dados: { status: v, ...(v === 'concluida' ? { data_conclusao: new Date().toISOString().split('T')[0] } : {}) } })}
+                        onClick={() => mudarStatus(v)}
                         className={`py-2 rounded-xl text-xs font-medium transition-colors ${osSelecionada.status === v ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#1A1D24] text-[#A8ADB8] border border-[#30353F]'}`}
                       >
                         {s.label}

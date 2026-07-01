@@ -173,13 +173,16 @@ export const ordensServicoService = {
     return data;
   },
   create: async (dados) => {
-    const { data: maxData } = await supabase
-      .from('ordens_servico')
-      .select('numero')
-      .order('numero', { ascending: false })
-      .limit(1)
-      .single();
-    const numero = (maxData?.numero ?? 1000) + 1;
+    // Número atômico via sequence (fallback para max+1 se a função ainda não existir)
+    let numero;
+    const { data: prox, error: rpcErr } = await supabase.rpc('proximo_numero_os');
+    if (!rpcErr && prox != null) {
+      numero = prox;
+    } else {
+      const { data: maxData } = await supabase
+        .from('ordens_servico').select('numero').order('numero', { ascending: false }).limit(1).single();
+      numero = (maxData?.numero ?? 1000) + 1;
+    }
     const { data, error } = await supabase
       .from('ordens_servico')
       .insert({ ...dados, numero, data_abertura: new Date().toISOString().split('T')[0] })
