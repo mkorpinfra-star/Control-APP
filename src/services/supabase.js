@@ -1,9 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Client secundário para criar usuários SEM derrubar a sessão do admin
+const supabaseSignup = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 // ==================== AUTH ====================
 export const authService = {
@@ -30,6 +35,28 @@ export const authService = {
       .eq('id', session.user.id)
       .single();
     return { data: { session: perfil ? { user: session.user, perfil } : null } };
+  },
+  alterarSenha: async (novaSenha) => {
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
+    if (error) throw new Error(error.message);
+  },
+};
+
+// ==================== CONFIG DA EMPRESA ====================
+export const configService = {
+  get: async () => {
+    const { data, error } = await supabase.from('config_empresa').select('*').eq('id', 1).single();
+    if (error) return null;
+    return data;
+  },
+  update: async (dados) => {
+    const { data, error } = await supabase
+      .from('config_empresa')
+      .upsert({ id: 1, ...dados, atualizado_em: new Date().toISOString() })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
   },
 };
 
@@ -60,6 +87,24 @@ export const usuariosService = {
   delete: async (id) => {
     const { error } = await supabase.from('usuarios').update({ ativo: false }).eq('id', id);
     if (error) throw error;
+  },
+  reativar: async (id) => {
+    const { error } = await supabase.from('usuarios').update({ ativo: true }).eq('id', id);
+    if (error) throw error;
+  },
+  // Cria usuário COM login (auth + perfil), sem derrubar sessão do admin
+  criarComLogin: async ({ email, senha, nome, cargo, matricula, telefone }) => {
+    const { data: signup, error: signupError } = await supabaseSignup.auth.signUp({
+      email, password: senha,
+    });
+    if (signupError) throw new Error('Erro ao criar login: ' + signupError.message);
+    const novoId = signup.user?.id;
+    if (!novoId) throw new Error('Não foi possível criar a conta de acesso.');
+    const { data, error } = await supabase.from('usuarios').insert({
+      id: novoId, email, nome, cargo, matricula: matricula || null, telefone: telefone || null, ativo: true,
+    }).select().single();
+    if (error) throw new Error('Login criado, mas erro ao salvar perfil: ' + error.message);
+    return data;
   },
 };
 

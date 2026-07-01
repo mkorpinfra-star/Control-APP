@@ -1,18 +1,48 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contratosService } from '../services/supabase';
 import { STATUS_CONTRATO, ui } from '../lib/theme';
-import { IconPlus, IconSearch, IconBuilding, IconMapPin } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconBuilding, IconMapPin, IconLoader2 } from '@tabler/icons-react';
+import Modal from '../components/Modal';
 
 const STATUS_LABEL = { ativo: 'Ativo', encerrado: 'Encerrado', suspenso: 'Suspenso' };
 
+const FORM_INICIAL = {
+  nome: '', municipio: '', estado: '', responsavel: '', data_inicio: '', data_fim: '', status: 'ativo',
+};
+
 export default function Contratos() {
+  const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
+  const [modalAberto, setModalAberto] = useState(false);
+  const [form, setForm] = useState(FORM_INICIAL);
+  const [erroForm, setErroForm] = useState('');
 
   const { data: contratos = [], isLoading } = useQuery({
     queryKey: ['contratos'],
     queryFn: contratosService.getAll,
   });
+
+  const criarMutation = useMutation({
+    mutationFn: (dados) => contratosService.create(dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contratos'] });
+      setModalAberto(false);
+      setForm(FORM_INICIAL);
+      setErroForm('');
+    },
+    onError: (e) => setErroForm('Erro ao criar contrato: ' + e.message),
+  });
+
+  const setCampo = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }));
+
+  const salvar = () => {
+    if (!form.nome.trim()) return setErroForm('Informe o nome do contrato.');
+    const dados = { ...form };
+    if (!dados.data_inicio) delete dados.data_inicio;
+    if (!dados.data_fim) delete dados.data_fim;
+    criarMutation.mutate(dados);
+  };
 
   const filtrados = contratos.filter(c =>
     c.nome?.toLowerCase().includes(busca.toLowerCase()) ||
@@ -78,6 +108,77 @@ export default function Contratos() {
         )}
       </div>
 
+      {/* FAB Novo contrato */}
+      <button
+        onClick={() => { setForm(FORM_INICIAL); setErroForm(''); setModalAberto(true); }}
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
+      >
+        <IconPlus size={24} className="text-white" />
+      </button>
+
+      {/* Modal Novo contrato */}
+      <Modal aberto={modalAberto} onClose={() => setModalAberto(false)} titulo="Novo contrato">
+        <div className="space-y-4">
+          {erroForm && (
+            <div className="p-3 bg-[#F87171]/10 border border-[#F87171]/20 rounded-xl text-sm text-[#F87171]">{erroForm}</div>
+          )}
+
+          <div>
+            <label className={ui.label}>Nome do contrato *</label>
+            <input value={form.nome} onChange={e => setCampo('nome', e.target.value)} placeholder="Ex: Prefeitura de São Paulo" className={ui.input} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Município</label>
+              <input value={form.municipio} onChange={e => setCampo('municipio', e.target.value)} placeholder="Município" className={ui.input} />
+            </div>
+            <div>
+              <label className={ui.label}>Estado (UF)</label>
+              <input value={form.estado} onChange={e => setCampo('estado', e.target.value)} maxLength={2} placeholder="SP" className={ui.input} />
+            </div>
+          </div>
+
+          <div>
+            <label className={ui.label}>Responsável</label>
+            <input value={form.responsavel} onChange={e => setCampo('responsavel', e.target.value)} placeholder="Nome do responsável" className={ui.input} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Data início</label>
+              <input type="date" value={form.data_inicio} onChange={e => setCampo('data_inicio', e.target.value)} className={`${ui.input} [color-scheme:dark]`} />
+            </div>
+            <div>
+              <label className={ui.label}>Data fim</label>
+              <input type="date" value={form.data_fim} onChange={e => setCampo('data_fim', e.target.value)} className={`${ui.input} [color-scheme:dark]`} />
+            </div>
+          </div>
+
+          <div>
+            <label className={ui.label}>Status</label>
+            <div className="grid grid-cols-3 gap-2">
+              {Object.entries(STATUS_LABEL).map(([v, label]) => (
+                <button
+                  key={v}
+                  onClick={() => setCampo('status', v)}
+                  className={`py-2 rounded-xl text-xs font-medium transition-colors ${form.status === v ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#121419] text-[#A8ADB8] border border-[#30353F]'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={salvar}
+            disabled={criarMutation.isPending}
+            className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {criarMutation.isPending ? <><IconLoader2 size={16} className="animate-spin" /> Salvando...</> : <><IconPlus size={16} /> Criar contrato</>}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

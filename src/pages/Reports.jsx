@@ -2,14 +2,60 @@ import { useQuery } from '@tanstack/react-query';
 import { ordensServicoService } from '../services/supabase';
 import { IconFileText, IconDownload } from '@tabler/icons-react';
 
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function baixarCSV(linhas, nomeArquivo) {
+  const csv = linhas.map(l => l.map(c => {
+    const v = c == null ? '' : String(c);
+    return /[",;\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  }).join(';')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomeArquivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export default function Relatorios() {
   const { data: os = [] } = useQuery({
     queryKey: ['os-relatorio'],
     queryFn: () => ordensServicoService.getAll(),
   });
 
+  const agora = new Date();
+  const mesAtual = agora.getMonth();
+  const anoAtual = agora.getFullYear();
+
   const concluidas = os.filter(o => o.status === 'concluida');
   const abertas    = os.filter(o => o.status === 'aberta');
+
+  const exportarMedicao = () => {
+    const doMes = concluidas.filter(o => {
+      const d = o.data_conclusao ? new Date(o.data_conclusao) : null;
+      return d && d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
+    });
+    const cabecalho = ['OS', 'Contrato', 'Tipo', 'Prioridade', 'Logradouro', 'Bairro', 'Poste', 'Responsável', 'Abertura', 'Conclusão', 'Status'];
+    const linhas = doMes.map(o => [
+      o.numero, o.contratos?.nome, o.tipo_defeito, o.prioridade,
+      o.logradouro, o.bairro, o.numero_poste, o.usuarios?.nome,
+      o.data_abertura, o.data_conclusao, o.status,
+    ]);
+    baixarCSV([cabecalho, ...linhas], `medicao_${MESES[mesAtual]}_${anoAtual}.csv`);
+  };
+
+  const exportarTudo = () => {
+    const cabecalho = ['OS', 'Contrato', 'Tipo', 'Prioridade', 'Logradouro', 'Bairro', 'Poste', 'Responsável', 'Abertura', 'Conclusão', 'Status'];
+    const linhas = os.map(o => [
+      o.numero, o.contratos?.nome, o.tipo_defeito, o.prioridade,
+      o.logradouro, o.bairro, o.numero_poste, o.usuarios?.nome,
+      o.data_abertura, o.data_conclusao, o.status,
+    ]);
+    baixarCSV([cabecalho, ...linhas], `todas_ordens_${anoAtual}.csv`);
+  };
 
   const porContrato = os.reduce((acc, o) => {
     const nome = o.contratos?.nome || 'Sem contrato';
@@ -73,13 +119,17 @@ export default function Relatorios() {
           <div className="flex-1">
             <p className="text-sm font-medium text-[#F5F5F0]">Relatório de medição mensal</p>
             <p className="text-xs text-[#6B7280] mt-1">
-              Exporta o relatório de OS concluídas no mês para envio à prefeitura.
+              Exporta as OS concluídas no mês (planilha CSV) para envio à prefeitura.
             </p>
           </div>
         </div>
-        <button className="mt-3 w-full flex items-center justify-center gap-2 py-3 bg-[#F08020] text-[#F5F5F0] rounded-xl text-sm font-semibold active:bg-[#D86E14] transition-colors">
+        <button onClick={exportarMedicao} className="mt-3 w-full flex items-center justify-center gap-2 py-3 bg-[#F08020] text-[#F5F5F0] rounded-xl text-sm font-semibold active:bg-[#D86E14] transition-colors">
           <IconDownload size={16} />
-          Gerar relatório — Junho/2026
+          Gerar medição — {MESES[mesAtual]}/{anoAtual}
+        </button>
+        <button onClick={exportarTudo} className="mt-2 w-full flex items-center justify-center gap-2 py-3 border border-[#30353F] text-[#A8ADB8] rounded-xl text-sm font-medium active:bg-[#22262F] transition-colors">
+          <IconDownload size={16} />
+          Exportar todas as ordens
         </button>
       </div>
     </div>
