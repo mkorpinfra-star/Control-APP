@@ -8,6 +8,8 @@ import { ui } from '../lib/theme';
 import { IconUser, IconBuildingFactory2, IconShield, IconLoader2, IconCheck, IconChevronRight, IconLock } from '@tabler/icons-react';
 import Modal from '../components/Modal';
 import { MODULOS, PAPEIS_CONFIG, ACESSO_PADRAO } from '../lib/acessos';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 
 export default function Configuracoes() {
   const { perfil, isAdmin, logout, atualizarPerfil } = useAuth();
@@ -15,9 +17,7 @@ export default function Configuracoes() {
   const fotoRef = useRef(null);
   const [subindoFoto, setSubindoFoto] = useState(false);
 
-  const trocarFoto = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const enviarArquivo = async (file) => {
     setSubindoFoto(true);
     try {
       const url = await usuariosService.uploadAvatar(perfil.id, file);
@@ -26,8 +26,44 @@ export default function Configuracoes() {
       alert('Erro ao enviar foto: ' + err.message);
     } finally {
       setSubindoFoto(false);
-      e.target.value = '';
     }
+  };
+
+  // App nativo (Android/iOS): abre prompt "Câmera ou Galeria" do sistema
+  const trocarFotoNativo = async () => {
+    try {
+      const foto = await Camera.getPhoto({
+        quality: 80,
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Prompt,
+        promptLabelHeader: 'Foto de perfil',
+        promptLabelPhoto: 'Escolher da galeria',
+        promptLabelPicture: 'Tirar foto',
+      });
+      if (!foto?.webPath) return;
+      const resp = await fetch(foto.webPath);
+      const blob = await resp.blob();
+      const file = new File([blob], `avatar.${foto.format || 'jpg'}`, { type: blob.type || 'image/jpeg' });
+      await enviarArquivo(file);
+    } catch (err) {
+      // usuário cancelou o prompt — não é erro
+      if (!String(err?.message || err).toLowerCase().includes('cancel')) {
+        alert('Erro ao capturar foto: ' + (err?.message || err));
+      }
+    }
+  };
+
+  // Navegador (web): usa input file tradicional
+  const trocarFotoWeb = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await enviarArquivo(file);
+    e.target.value = '';
+  };
+
+  const abrirSelecaoFoto = () => {
+    if (Capacitor.isNativePlatform()) trocarFotoNativo();
+    else fotoRef.current?.click();
   };
 
   const [modalSenha, setModalSenha] = useState(false);
@@ -113,16 +149,16 @@ export default function Configuracoes() {
       {/* Perfil */}
       <div className="bg-[#1A1D24] rounded-2xl p-4 border border-[#23262E]">
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => fotoRef.current?.click()} className="relative group">
+          <button onClick={abrirSelecaoFoto} disabled={subindoFoto} className="relative group">
             <Avatar user={perfil} size="md" className="!bg-[#F08020]/12" />
             <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <IconCamera size={16} className="text-white" />
+              {subindoFoto ? <IconLoader2 size={16} className="text-white animate-spin" /> : <IconCamera size={16} className="text-white" />}
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-[#F08020] rounded-full flex items-center justify-center border-2 border-[#1A1D24]">
               <IconCamera size={10} className="text-white" />
             </span>
           </button>
-          <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={trocarFoto} />
+          <input ref={fotoRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={trocarFotoWeb} />
           <div>
             <p className="font-semibold text-[#F5F5F0]">{perfil?.nome}{subindoFoto && <span className="text-xs text-[#6B7280] ml-2">enviando foto...</span>}</p>
             <p className="text-xs text-[#6B7280] capitalize">{perfil?.cargo}{perfil?.matricula ? ` · ${perfil.matricula}` : ''}</p>
