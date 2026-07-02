@@ -8,7 +8,8 @@ jdk*
 *.iso
 *.aab
 *.jar
-openjdk*android/keystore.properties
+openjdk*
+android/keystore.properties
 *.keystore
 qa-runner.mjs
 test-results/
