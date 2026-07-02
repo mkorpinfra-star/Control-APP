@@ -8,10 +8,10 @@ if (keystorePropsFile.exists()) {
 }
 
 android {
-    namespace "br.com.mkorp.control"
+    namespace "br.com.mkorp.solutions"
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "br.com.mkorp.control"
+        applicationId "br.com.mkorp.solutions"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
