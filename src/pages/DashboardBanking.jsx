@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { dashboardService } from '../services/supabase';
-import { useAuth } from '../contexts/AuthContext';
 import { CHART } from '../lib/theme';
-
-const brl = (v) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 import {
   IconClipboardList, IconClipboardCheck, IconPackage,
   IconUsers, IconAlertTriangle, IconTool, IconArrowRight,
@@ -14,7 +11,6 @@ import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from 'recharts';
 
 export default function DashboardBanking() {
   const navigate = useNavigate();
-  const { podeVerValores } = useAuth();
 
   const { data: resumo, isLoading } = useQuery({
     queryKey: ['dashboard'],
@@ -41,18 +37,6 @@ export default function DashboardBanking() {
           {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
       </div>
-
-      {/* Card financeiro (admin) */}
-      {podeVerValores && (
-        <div className="mx-4 mt-2 mb-1 bg-gradient-to-br from-[#F08020]/15 to-[#1A1D24] rounded-2xl p-4 border border-[#F08020]/25">
-          <p className="text-xs text-[#A8ADB8]">Faturamento do mês (medição)</p>
-          <p className="text-2xl font-bold text-[#F5F5F0] tabular-nums">{brl(resumo.faturamento_mes)}</p>
-          <div className="flex gap-4 mt-2 pt-2 border-t border-[#F08020]/20 text-xs text-[#A8ADB8]">
-            <button onClick={() => navigate('/medicao')} className="text-[#F08020]">Ver medição →</button>
-            <span>Estoque: {brl(resumo.valor_estoque)}</span>
-          </div>
-        </div>
-      )}
 
       {/* Alerta OS atrasadas */}
       {resumo.os_atrasadas > 0 && (

@@ -62,7 +62,6 @@ export default function DynamicHeader() {
     { label: 'Ponto',             icon: IconClock,         path: '/controle-ponto' },
     { label: 'Aprovações',        icon: IconClipboardCheck,path: '/aprovacoes' },
     { label: 'Monitoramento',     icon: IconTruck,         path: '/monitoramento' },
-    { label: 'Medição',          icon: IconFileText,      path: '/medicao' },
     { label: 'Relatórios',        icon: IconChartBar,      path: '/relatorios' },
     { label: 'Auditoria',        icon: IconHistory,       path: '/auditoria' },
     { label: 'Config.',           icon: IconSettings,      path: '/configuracoes' },

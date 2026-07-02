@@ -16,7 +16,8 @@ export default function Monitoramento() {
     queryKey: ['monitoramento-os'],
     queryFn: () => ordensServicoService.getAll({}),
     refetchInterval: 20000,
-    select: (lista) => lista.filter(os => (os.status === 'aberta' || os.status === 'em_andamento') && os.latitude && os.longitude),
+    // Mostra toda OS aberta/em andamento — o mapa só aparece se tiver GPS registrado
+    select: (lista) => lista.filter(os => os.status === 'aberta' || os.status === 'em_andamento'),
   });
 
   const emCampo   = ponto.filter(p => p.hora_entrada && !p.hora_saida);
@@ -86,16 +87,20 @@ export default function Monitoramento() {
 
       {ordens.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2">OS georreferenciadas ({ordens.length})</p>
+          <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2">OS em campo ({ordens.length})</p>
           <div className="space-y-2">
             {ordens.map(os => {
               const st = STATUS_OS[os.status] || STATUS_OS.aberta;
+              const temGps = os.latitude && os.longitude;
+              const Wrapper = temGps ? 'a' : 'div';
+              const props = temGps
+                ? { href: `https://www.google.com/maps?q=${os.latitude},${os.longitude}`, target: '_blank', rel: 'noopener noreferrer' }
+                : {};
               return (
-                <a
+                <Wrapper
                   key={os.id}
-                  href={`https://www.google.com/maps?q=${os.latitude},${os.longitude}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="bg-[#1A1D24] rounded-2xl p-3 border border-[#23262E] flex items-center gap-3 active:bg-[#22262F] transition-colors"
+                  {...props}
+                  className={`bg-[#1A1D24] rounded-2xl p-3 border border-[#23262E] flex items-center gap-3 transition-colors ${temGps ? 'active:bg-[#22262F]' : ''}`}
                 >
                   <div className="w-8 h-8 bg-[#5B8DEF]/12 rounded-full flex items-center justify-center shrink-0">
                     <IconClipboardList size={14} className="text-[#5B8DEF]" />
@@ -105,8 +110,8 @@ export default function Monitoramento() {
                     <p className="text-xs text-[#6B7280] truncate">{os.bairro || os.logradouro || 'Sem endereço'}</p>
                   </div>
                   <span className={st.badge}>{st.label}</span>
-                  <IconMapPin size={16} className="text-[#5B8DEF] shrink-0" />
-                </a>
+                  <IconMapPin size={16} className={temGps ? 'text-[#5B8DEF] shrink-0' : 'text-[#5B8DEF]/30 shrink-0'} />
+                </Wrapper>
               );
             })}
           </div>
