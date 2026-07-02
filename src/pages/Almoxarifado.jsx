@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { almoxarifadoService } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ui } from '../lib/theme';
-import { IconPlus, IconSearch, IconAlertTriangle, IconPackage, IconArrowUp, IconArrowDown, IconReceipt, IconLoader2 } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconAlertTriangle, IconPackage, IconArrowUp, IconArrowDown, IconReceipt, IconLoader2, IconTrendingDown, IconShoppingCart } from '@tabler/icons-react';
 import Modal from '../components/Modal';
 
 const CATEGORIA_LABEL = {
@@ -12,7 +12,15 @@ const CATEGORIA_LABEL = {
   braco: 'Braço', luminaria: 'Luminária', fusivel: 'Fusível', conector: 'Conector', outros: 'Outros',
 };
 
-const PRODUTO_INICIAL = { nome: '', codigo: '', categoria: 'lampada', unidade: 'un', estoque_minimo: 0, quantidade_inicial: 0, fornecedor: '', localizacao: '', valor_unitario: '', descricao: '' };
+const PRODUTO_INICIAL = { nome: '', codigo: '', categoria: 'lampada', unidade: 'un', estoque_minimo: 0, quantidade_inicial: 0, fornecedor: '', localizacao: '', valor_unitario: '', descricao: '', consumo_medio_mensal: '' };
+
+// Estoque inteligente: quantos dias o saldo atual ainda dura, dado o consumo médio mensal
+function diasRestantes(saldo, consumoMensal) {
+  if (!consumoMensal || Number(consumoMensal) <= 0) return null;
+  const consumoDiario = Number(consumoMensal) / 30;
+  if (consumoDiario <= 0) return null;
+  return Math.floor(Number(saldo) / consumoDiario);
+}
 
 export default function Almoxarifado() {
   const navigate = useNavigate();
@@ -41,6 +49,7 @@ export default function Almoxarifado() {
         fornecedor: dados.fornecedor || null, localizacao: dados.localizacao || null,
         valor_unitario: dados.valor_unitario ? Number(dados.valor_unitario) : null,
         descricao: dados.descricao || null,
+        consumo_medio_mensal: dados.consumo_medio_mensal ? Number(dados.consumo_medio_mensal) : null,
       });
       if (Number(dados.quantidade_inicial) > 0) {
         await almoxarifadoService.entrada(item.id, Number(dados.quantidade_inicial), 'Estoque inicial');
@@ -111,6 +120,12 @@ export default function Almoxarifado() {
   const valorEstoque = estoque.reduce((s, e) => s + (Number(e.quantidade || 0) * Number(e.almoxarifado_itens?.valor_unitario || 0)), 0);
   const brl = (v) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+  // Estoque inteligente: itens que vão acabar em <=15 dias OU já abaixo do mínimo
+  const sugestoesCompra = estoque
+    .map(e => ({ ...e, dias: diasRestantes(e.quantidade, e.almoxarifado_itens?.consumo_medio_mensal) }))
+    .filter(e => (e.dias != null && e.dias <= 15) || e.quantidade <= (e.almoxarifado_itens?.estoque_minimo || 0))
+    .sort((a, b) => (a.dias ?? 999) - (b.dias ?? 999));
+
   if (isLoading) {
     return (
       <div className="p-4 space-y-3 bg-[#0A0B0D] min-h-full">
@@ -139,9 +154,9 @@ export default function Almoxarifado() {
       )}
 
       <div className="px-4 pt-4 pb-2 flex gap-2 flex-wrap">
-        {['estoque', 'movimentacoes'].map(a => (
+        {['estoque', 'movimentacoes', 'compras'].map(a => (
           <button key={a} onClick={() => setAba(a)} className={ui.chip(aba === a)}>
-            {a === 'estoque' ? 'Estoque atual' : 'Movimentações'}
+            {a === 'estoque' ? 'Estoque atual' : a === 'movimentacoes' ? 'Movimentações' : `Compras${sugestoesCompra.length > 0 ? ` (${sugestoesCompra.length})` : ''}`}
           </button>
         ))}
         {canGerenciarEstoque && (
@@ -179,6 +194,7 @@ export default function Almoxarifado() {
               estoqueFiltrado.map(e => {
                 const item = e.almoxarifado_itens;
                 const critico = e.quantidade <= (item?.estoque_minimo || 0);
+                const dias = diasRestantes(e.quantidade, item?.consumo_medio_mensal);
                 const Wrapper = canGerenciarEstoque ? 'button' : 'div';
                 return (
                   <Wrapper
@@ -205,12 +221,55 @@ export default function Almoxarifado() {
                         <span>Mínimo: {item?.estoque_minimo} {item?.unidade}</span>
                       </div>
                     )}
+                    {dias != null && (
+                      <div className={`mt-1 flex items-center gap-1 text-xs ${dias <= 15 ? 'text-[#FBBF24]' : 'text-[#6B7280]'}`}>
+                        <IconTrendingDown size={12} />
+                        <span>Dura ~{dias} dia{dias !== 1 ? 's' : ''} no ritmo atual</span>
+                      </div>
+                    )}
                   </Wrapper>
                 );
               })
             )}
           </div>
         </>
+      )}
+
+      {aba === 'compras' && (
+        <div className="px-4 space-y-2">
+          {sugestoesCompra.length === 0 ? (
+            <div className="text-center py-16 text-[#6B7280]">
+              <IconShoppingCart size={44} className="mx-auto mb-3 opacity-30" />
+              <p className="text-sm">Nenhuma compra sugerida no momento</p>
+              <p className="text-xs mt-1 text-[#454A54]">Preencha o "consumo médio mensal" dos produtos para ver previsões aqui.</p>
+            </div>
+          ) : (
+            sugestoesCompra.map(e => {
+              const item = e.almoxarifado_itens;
+              const sugestaoQtd = item?.consumo_medio_mensal ? Math.ceil(Number(item.consumo_medio_mensal) * 1.5) : Math.max((item?.estoque_minimo || 0) * 2, 1);
+              return (
+                <div key={e.id} className="bg-[#1A1D24] rounded-2xl p-4 border border-[#FBBF24]/25">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-[#F5F5F0] text-sm">{item?.nome}</p>
+                      <p className="text-xs text-[#6B7280] mt-0.5">Saldo atual: {e.quantidade} {item?.unidade}</p>
+                    </div>
+                    {e.dias != null ? (
+                      <span className={`text-xs px-2.5 py-1 rounded-full ${e.dias <= 5 ? 'bg-[#F87171]/12 text-[#F87171]' : 'bg-[#FBBF24]/12 text-[#FBBF24]'}`}>
+                        ~{e.dias}d restantes
+                      </span>
+                    ) : (
+                      <span className="text-xs px-2.5 py-1 rounded-full bg-[#FB8C3E]/12 text-[#FB8C3E]">Abaixo do mínimo</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-[#5B8DEF] mt-2 flex items-center gap-1">
+                    <IconShoppingCart size={12} /> Sugestão: comprar {sugestaoQtd} {item?.unidade}
+                  </p>
+                </div>
+              );
+            })
+          )}
+        </div>
       )}
 
       {/* FAB Adicionar produto */}
@@ -272,6 +331,10 @@ export default function Almoxarifado() {
               <input type="number" min="0" value={produto.quantidade_inicial} onChange={e => setCampo('quantidade_inicial', e.target.value)} className={ui.input} />
             </div>
             <div className="col-span-2">
+              <label className={ui.label}>Consumo médio mensal</label>
+              <input type="number" min="0" value={produto.consumo_medio_mensal} onChange={e => setCampo('consumo_medio_mensal', e.target.value)} placeholder="Ex: 20 (usado p/ prever quando vai faltar)" className={ui.input} />
+            </div>
+            <div className="col-span-2">
               <label className={ui.label}>Descrição</label>
               <textarea value={produto.descricao} onChange={e => setCampo('descricao', e.target.value)} rows={2} placeholder="Detalhes do material..." className={`${ui.input} h-auto py-2.5 resize-none`} />
             </div>
@@ -329,6 +392,13 @@ export default function Almoxarifado() {
                 </div>
               )}
               <div className="col-span-2">
+                <label className={ui.label}>Consumo médio mensal</label>
+                <input type="number" min="0" value={editando.consumo_medio_mensal ?? ''} onChange={e => setEditando(v => ({ ...v, consumo_medio_mensal: e.target.value }))} placeholder="Ex: 20 (usado p/ prever quando vai faltar)" className={ui.input} />
+                {(() => { const dr = diasRestantes(editando.quantidade, editando.consumo_medio_mensal); return dr != null ? (
+                  <p className={`text-[11px] mt-1 ${dr <= 15 ? 'text-[#FB8C3E]' : 'text-[#6B7280]'}`}>Com esse consumo, o estoque atual dura ~{dr} dias.</p>
+                ) : null; })()}
+              </div>
+              <div className="col-span-2">
                 <label className={ui.label}>Descrição</label>
                 <textarea value={editando.descricao || ''} onChange={e => setEditando(v => ({ ...v, descricao: e.target.value }))} rows={2} className={`${ui.input} h-auto py-2.5 resize-none`} />
               </div>
@@ -341,6 +411,7 @@ export default function Almoxarifado() {
                 fornecedor: editando.fornecedor || null, localizacao: editando.localizacao || null,
                 valor_unitario: editando.valor_unitario ? Number(editando.valor_unitario) : null,
                 descricao: editando.descricao || null,
+                consumo_medio_mensal: editando.consumo_medio_mensal ? Number(editando.consumo_medio_mensal) : null,
               } })}
               disabled={editarMutation.isPending}
               className="w-full py-3.5 bg-[#F08020] text-white rounded-xl font-semibold text-sm active:bg-[#D86E14] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"

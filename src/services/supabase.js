@@ -490,7 +490,8 @@ export const requisicoesService = {
       .select('*, requisicao_itens(*)')
       .eq('id', id)
       .single();
-    for (const item of req.requisicao_itens) {
+    // Itens de texto livre (sem vínculo no catálogo) não têm de onde baixar estoque — pulados aqui.
+    for (const item of req.requisicao_itens.filter(i => i.item_id)) {
       const { data: est } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item.item_id).single();
       if (!est || est.quantidade < item.quantidade) {
         throw new Error(`Estoque insuficiente para item ${item.item_id}`);
@@ -516,6 +517,14 @@ export const requisicoesService = {
       .eq('id', id);
     if (error) throw error;
     auditService.log({ acao: 'requisicao_rejeitada', entidade: 'requisicoes', entidade_id: id, motivo });
+  },
+  // Almoxarife responde um item digitado por texto livre (não cadastrado no catálogo)
+  responderItemLivre: async (itemReqId, { disponivel, resposta_almoxarife, previsao_data }) => {
+    const { error } = await supabase
+      .from('requisicao_itens')
+      .update({ disponivel, resposta_almoxarife, previsao_data: previsao_data || null })
+      .eq('id', itemReqId);
+    if (error) throw error;
   },
 };
 
