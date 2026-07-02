@@ -38,3 +38,34 @@ jobs:
           source: "dist/*"
           target: /www/wwwroot/app_mkorp_com_br
           strip_components: 1
+
+      - name: Health-check pós-deploy (confere se o bundle publicado bate com o buildado)
+        run: |
+          set -e
+
+          # Hash do bundle que acabou de ser buildado (é o que deveria estar no ar)
+          ESPERADO=$(grep -oE '/assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -1)
+          if [ -z "$ESPERADO" ]; then
+            echo "::error::Não encontrei referência ao bundle JS em dist/index.html — build inválido."
+            exit 1
+          fi
+          echo "Bundle esperado: $ESPERADO"
+
+          # Espera a propagação (nginx/VPS) e tenta algumas vezes
+          OK=0
+          for i in 1 2 3 4 5 6; do
+            sleep 10
+            PUBLICADO=$(curl -s --max-time 15 "https://app.mkorp.com.br/" | grep -oE '/assets/index-[A-Za-z0-9_-]+\.js' | head -1 || true)
+            echo "Tentativa $i — bundle publicado: ${PUBLICADO:-<vazio>}"
+            if [ "$PUBLICADO" = "$ESPERADO" ]; then
+              OK=1
+              break
+            fi
+          done
+
+          if [ "$OK" != "1" ]; then
+            echo "::error::Deploy não propagou! Produção está servindo '$PUBLICADO', esperado '$ESPERADO'. O site pode estar com uma versão antiga."
+            exit 1
+          fi
+
+          echo "✅ Health-check OK — produção está servindo o bundle correto."
