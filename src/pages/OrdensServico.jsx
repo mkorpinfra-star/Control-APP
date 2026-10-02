@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ordensServicoService, contratosService, usuariosService, notificacoesService, servicosService, osServicosService } from '../services/supabase';
+import { ordensServicoService, contratosService, usuariosService, notificacoesService } from '../services/supabase';
 import { STATUS_OS, PRIORIDADE, ui } from '../lib/theme';
+import { hojeISO } from '../lib/datas';
 import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle, IconLoader2, IconPencil } from '@tabler/icons-react';
 import ComentariosOS from '../components/ComentariosOS';
 import ServicosOS from '../components/ServicosOS';
@@ -136,7 +137,7 @@ export default function OrdensServico() {
       setDialogCancelar(true);
       return;
     }
-    updateMutation.mutate({ id: osSelecionada.id, dados: { status: novoStatus, ...(novoStatus === 'concluida' ? { data_conclusao: new Date().toISOString().split('T')[0] } : {}) } });
+    updateMutation.mutate({ id: osSelecionada.id, dados: { status: novoStatus, ...(novoStatus === 'concluida' ? { data_conclusao: hojeISO() } : {}) } });
   };
 
   const ordensFiltradas = ordens.filter(os =>
@@ -160,7 +161,7 @@ export default function OrdensServico() {
     <div className="pb-32 bg-[#0A0B0D] min-h-full">
       <div className="px-4 pt-4 pb-2 space-y-2">
         <div className="relative">
-          <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+          <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9198A3]" />
           <input
             type="text"
             placeholder="Buscar por OS, bairro, poste..."
@@ -179,12 +180,12 @@ export default function OrdensServico() {
       </div>
 
       <div className="px-4 py-2">
-        <p className="text-xs text-[#6B7280]">{ordensFiltradas.length} ordem{ordensFiltradas.length !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-[#9198A3]">{ordensFiltradas.length} ordem{ordensFiltradas.length !== 1 ? 's' : ''}</p>
       </div>
 
       <div className="px-4 space-y-3">
         {ordensFiltradas.length === 0 ? (
-          <div className="text-center py-16 text-[#6B7280]">
+          <div className="text-center py-16 text-[#9198A3]">
             <IconClipboardList size={48} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">Nenhuma ordem encontrada</p>
           </div>
@@ -201,7 +202,7 @@ export default function OrdensServico() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-[#6B7280]">OS #{os.numero}</span>
+                      <span className="text-xs font-mono text-[#9198A3]">OS #{os.numero}</span>
                       {os.prioridade === 'urgente' && <IconAlertTriangle size={14} className="text-[#FB8C3E]" />}
                     </div>
                     <p className="font-medium text-[#F5F5F0] text-sm mt-0.5">
@@ -213,20 +214,20 @@ export default function OrdensServico() {
 
                 {(os.bairro || os.logradouro) && (
                   <div className="flex items-center gap-1 text-xs text-[#A8ADB8] mb-1">
-                    <IconMapPin size={12} className="text-[#6B7280]" />
+                    <IconMapPin size={12} className="text-[#9198A3]" />
                     <span>{[os.logradouro, os.bairro].filter(Boolean).join(' — ')}</span>
                   </div>
                 )}
-                {os.numero_poste && <p className="text-xs text-[#6B7280]">Poste: {os.numero_poste}</p>}
+                {os.numero_poste && <p className="text-xs text-[#9198A3]">Poste: {os.numero_poste}</p>}
 
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#23262E]">
-                  <span className="text-xs text-[#6B7280]">{os.contratos?.nome || 'Sem contrato'}</span>
+                  <span className="text-xs text-[#9198A3]">{os.contratos?.nome || 'Sem contrato'}</span>
                   <div className="flex items-center gap-2">
                     {prio && <span className={prio.badge}><span className="w-1.5 h-1.5 rounded-full" style={{ background: prio.dot }} />{prio.label}</span>}
-                    <span className="text-xs text-[#6B7280]">
+                    <span className="text-xs text-[#9198A3]">
                       {os.data_abertura ? new Date(os.data_abertura).toLocaleDateString('pt-BR') : '—'}
                     </span>
-                    <IconMessageCircle size={13} className="text-[#454A54]" />
+                    <IconMessageCircle size={13} className="text-[#8A909C]" />
                   </div>
                 </div>
               </div>
@@ -238,6 +239,7 @@ export default function OrdensServico() {
       {/* FAB Nova OS */}
       <button
         onClick={abrirNovaOS}
+        aria-label="Nova ordem de serviço"
         className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
       >
         <IconPlus size={24} className="text-white" />
@@ -347,10 +349,10 @@ export default function OrdensServico() {
             {/* Handle */}
             <div className="sticky top-0 bg-[#0E0F13] pt-3 pb-2 px-4 border-b border-[#23262E] flex items-center justify-between z-10">
               <div>
-                <span className="text-xs font-mono text-[#6B7280]">OS #{osSelecionada.numero}</span>
+                <span className="text-xs font-mono text-[#9198A3]">OS #{osSelecionada.numero}</span>
                 <p className="font-semibold text-[#F5F5F0] text-sm">{TIPO_DEFEITO_LABEL[osSelecionada.tipo_defeito] || osSelecionada.tipo_defeito}</p>
               </div>
-              <button onClick={() => setOsSelecionada(null)} className="text-[#6B7280] hover:text-[#F5F5F0]">
+              <button onClick={() => setOsSelecionada(null)} className="text-[#9198A3] hover:text-[#F5F5F0]">
                 <IconX size={20} />
               </button>
             </div>
@@ -360,14 +362,14 @@ export default function OrdensServico() {
               <div className="bg-[#121419] border border-[#23262E] rounded-2xl p-3 space-y-1.5 text-sm">
                 {osSelecionada.descricao && <p className="text-[#A8ADB8]">{osSelecionada.descricao}</p>}
                 {(osSelecionada.logradouro || osSelecionada.bairro) && (
-                  <div className="flex items-center gap-1 text-xs text-[#6B7280]">
+                  <div className="flex items-center gap-1 text-xs text-[#9198A3]">
                     <IconMapPin size={12} />
                     {[osSelecionada.logradouro, osSelecionada.bairro].filter(Boolean).join(' — ')}
                   </div>
                 )}
-                {osSelecionada.numero_poste && <p className="text-xs text-[#6B7280]">Poste: {osSelecionada.numero_poste}</p>}
-                {osSelecionada.prazo && <p className="text-xs text-[#6B7280]">Prazo: {new Date(osSelecionada.prazo + 'T12:00:00').toLocaleDateString('pt-BR')}</p>}
-                {osSelecionada.usuarios?.nome && <p className="text-xs text-[#6B7280]">Responsável: {osSelecionada.usuarios.nome}</p>}
+                {osSelecionada.numero_poste && <p className="text-xs text-[#9198A3]">Poste: {osSelecionada.numero_poste}</p>}
+                {osSelecionada.prazo && <p className="text-xs text-[#9198A3]">Prazo: {new Date(osSelecionada.prazo + 'T12:00:00').toLocaleDateString('pt-BR')}</p>}
+                {osSelecionada.usuarios?.nome && <p className="text-xs text-[#9198A3]">Responsável: {osSelecionada.usuarios.nome}</p>}
                 {osSelecionada.status === 'cancelada' && osSelecionada.motivo_cancelamento && (
                   <p className="text-xs text-[#F87171]">Cancelada: {osSelecionada.motivo_cancelamento}</p>
                 )}
@@ -380,7 +382,7 @@ export default function OrdensServico() {
               <div className="bg-[#121419] border border-[#23262E] rounded-2xl p-3 space-y-3">
                 <p className="text-xs font-semibold text-[#A8ADB8] uppercase tracking-wider">Gerenciar</p>
                 <div>
-                  <label className="text-xs text-[#6B7280] mb-1.5 block">Status</label>
+                  <label className="text-xs text-[#9198A3] mb-1.5 block">Status</label>
                   <div className="grid grid-cols-2 gap-2">
                     {Object.entries(STATUS_OS).map(([v, s]) => (
                       <button
@@ -394,7 +396,7 @@ export default function OrdensServico() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-[#6B7280] mb-1.5 block">Responsável</label>
+                  <label className="text-xs text-[#9198A3] mb-1.5 block">Responsável</label>
                   <select
                     value={osSelecionada.responsavel_id || ''}
                     onChange={e => updateMutation.mutate({ id: osSelecionada.id, dados: { responsavel_id: e.target.value || null }, notificar: !!e.target.value })}

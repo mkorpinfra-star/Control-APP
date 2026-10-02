@@ -77,7 +77,7 @@ export default function Funcionarios() {
   const salvar = () => {
     if (!form.nome.trim()) return setErroForm('Informe o nome.');
     if (!form.email.trim()) return setErroForm('Informe o e-mail.');
-    if (form.senha.length < 6) return setErroForm('A senha deve ter ao menos 6 caracteres.');
+    if (form.senha.length < 8) return setErroForm('A senha deve ter ao menos 8 caracteres.');
     criarMutation.mutate(form);
   };
 
@@ -100,7 +100,7 @@ export default function Funcionarios() {
     <div className="pb-32 bg-[#0A0B0D] min-h-full">
       <div className="px-4 pt-4 pb-2 space-y-2">
         <div className="relative">
-          <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+          <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9198A3]" />
           <input
             type="text"
             placeholder="Buscar por nome ou matrícula..."
@@ -124,7 +124,7 @@ export default function Funcionarios() {
       </div>
 
       <div className="px-4 py-2">
-        <p className="text-xs text-[#6B7280]">{filtrados.length} funcionário{filtrados.length !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-[#9198A3]">{filtrados.length} funcionário{filtrados.length !== 1 ? 's' : ''}</p>
       </div>
 
       <div className="px-4 space-y-2">
@@ -137,13 +137,13 @@ export default function Funcionarios() {
               className={`w-full text-left bg-[#1A1D24] rounded-2xl px-4 py-3 border border-[#23262E] flex items-center gap-3 ${isAdmin ? 'active:bg-[#272B35] transition-colors' : ''} ${f.ativo === false ? 'opacity-50' : ''}`}
             >
               <div className="w-10 h-10 bg-[#22262F] rounded-full flex items-center justify-center shrink-0">
-                <IconUser size={18} className="text-[#6B7280]" />
+                <IconUser size={18} className="text-[#9198A3]" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-[#F5F5F0] text-sm truncate">
                   {f.nome} {f.ativo === false && <span className="text-[10px] text-[#F87171]">(inativo)</span>}
                 </p>
-                <p className="text-xs text-[#6B7280] truncate">{f.matricula ? `${f.matricula} · ` : ''}{f.email}</p>
+                <p className="text-xs text-[#9198A3] truncate">{f.matricula ? `${f.matricula} · ` : ''}{f.email}</p>
               </div>
               <span className={CARGO[f.cargo]?.badge}>{CARGO[f.cargo]?.label}</span>
             </Wrapper>
@@ -155,7 +155,8 @@ export default function Funcionarios() {
       {isAdmin && (
         <button
           onClick={() => { setForm(FORM_INICIAL); setErroForm(''); setSucesso(''); setModalAberto(true); }}
-          className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
+          aria-label="Novo funcionário"
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
         >
           <IconPlus size={24} className="text-white" />
         </button>
@@ -185,8 +186,8 @@ export default function Funcionarios() {
 
           <div>
             <label className={ui.label}>Senha inicial *</label>
-            <input type="text" value={form.senha} onChange={e => setCampo('senha', e.target.value)} placeholder="Mínimo 6 caracteres" className={ui.input} />
-            <p className="text-[11px] text-[#454A54] mt-1">O funcionário poderá alterar depois em Configurações.</p>
+            <input type="text" value={form.senha} onChange={e => setCampo('senha', e.target.value)} placeholder="Mínimo 8 caracteres" className={ui.input} />
+            <p className="text-[11px] text-[#8A909C] mt-1">O funcionário poderá alterar depois em Configurações.</p>
           </div>
 
           <div>
@@ -257,16 +258,16 @@ export default function Funcionarios() {
                 <input type="date" value={editando.data_admissao || ''} onChange={e => setEditando(v => ({ ...v, data_admissao: e.target.value }))} className={`${ui.input} [color-scheme:dark]`} />
               </div>
             </div>
-            <p className="text-[11px] text-[#454A54]">E-mail de login: {editando.email} (não editável)</p>
+            <p className="text-[11px] text-[#8A909C]">E-mail de login: {editando.email} (não editável)</p>
 
             {/* Redefinir senha (admin) */}
             <div className="pt-2 border-t border-[#23262E]">
               <label className={ui.label}>Redefinir senha</label>
               {msgSenha && <div className={`p-2 rounded-lg text-xs mb-2 ${msgSenha.startsWith('Erro') ? 'bg-[#F87171]/10 text-[#F87171]' : 'bg-[#34D399]/10 text-[#34D399]'}`}>{msgSenha}</div>}
               <div className="flex gap-2">
-                <input type="text" value={novaSenha} onChange={e => { setNovaSenha(e.target.value); setMsgSenha(''); }} placeholder="Nova senha (mín. 6)" className={`${ui.input} flex-1`} />
+                <input type="text" value={novaSenha} onChange={e => { setNovaSenha(e.target.value); setMsgSenha(''); }} placeholder="Nova senha (mín. 8)" className={`${ui.input} flex-1`} />
                 <button
-                  onClick={() => novaSenha.length >= 6 ? resetSenhaMut.mutate({ id: editando.id, senha: novaSenha }) : setMsgSenha('Erro: mínimo 6 caracteres')}
+                  onClick={() => novaSenha.length >= 8 ? resetSenhaMut.mutate({ id: editando.id, senha: novaSenha }) : setMsgSenha('Erro: mínimo 8 caracteres')}
                   disabled={resetSenhaMut.isPending}
                   className="px-4 bg-[#F08020] text-white rounded-xl text-sm font-medium disabled:opacity-40"
                 >
@@ -291,7 +292,7 @@ export default function Funcionarios() {
                     <button onClick={() => setEditando(v => ({ ...v, acessos: null }))} className="text-[11px] text-[#5B8DEF]">Usar padrão do papel</button>
                   )}
                 </div>
-                <p className="text-[11px] text-[#454A54] mb-2">Sobrepõe o padrão do papel só para esta pessoa. Valores (R$) continuam exclusivos do admin.</p>
+                <p className="text-[11px] text-[#8A909C] mb-2">Sobrepõe o padrão do papel só para esta pessoa. Valores (R$) continuam exclusivos do admin.</p>
                 <div className="grid grid-cols-2 gap-2">
                   {MODULOS.filter(m => m.key !== 'medicao').map(mod => {
                     const efetivo = (editando.acessos && typeof editando.acessos[mod.key] === 'boolean')
@@ -301,7 +302,7 @@ export default function Funcionarios() {
                       <button
                         key={mod.key}
                         onClick={() => setEditando(v => ({ ...v, acessos: { ...(v.acessos || {}), [mod.key]: !efetivo } }))}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${efetivo ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]' : 'bg-[#0A0B0D] border-[#30353F] text-[#6B7280]'}`}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${efetivo ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]' : 'bg-[#0A0B0D] border-[#30353F] text-[#9198A3]'}`}
                       >
                         {mod.label}
                         <span className={`w-2 h-2 rounded-full ${efetivo ? 'bg-[#34D399]' : 'bg-[#454A54]'}`} />

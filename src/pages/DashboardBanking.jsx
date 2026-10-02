@@ -32,7 +32,7 @@ export default function DashboardBanking() {
   return (
     <div className="pb-32 bg-[#0A0B0D] min-h-full">
       <div className="px-4 pt-5 pb-2">
-        <p className="text-xs text-[#6B7280] font-medium uppercase tracking-wider">Visão geral</p>
+        <p className="text-xs text-[#9198A3] font-medium uppercase tracking-wider">Visão geral</p>
         <p className="text-sm text-[#A8ADB8] mt-0.5 capitalize">
           {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
@@ -66,7 +66,7 @@ export default function DashboardBanking() {
               <p className={`text-2xl font-bold tabular-nums ${c.urgente ? 'text-[#FB8C3E]' : 'text-[#F5F5F0]'}`}>
                 {c.valor}
               </p>
-              <p className="text-[11px] text-[#6B7280] leading-tight mt-0.5">{c.label}</p>
+              <p className="text-[11px] text-[#9198A3] leading-tight mt-0.5">{c.label}</p>
             </button>
           );
         })}
@@ -76,7 +76,7 @@ export default function DashboardBanking() {
       <div className="mx-4 mt-4 bg-[#1A1D24] rounded-2xl p-4 border border-[#23262E]">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold text-[#F5F5F0]">OS abertas por dia</p>
-          <span className="text-xs text-[#6B7280]">últimos 7 dias</span>
+          <span className="text-xs text-[#9198A3]">últimos 7 dias</span>
         </div>
         <ResponsiveContainer width="100%" height={80}>
           <BarChart data={resumo.os_por_dia} barSize={18}>
@@ -129,10 +129,10 @@ export default function DashboardBanking() {
               className={`w-full flex items-center justify-between px-4 py-3 active:bg-[#272B35] transition-colors ${i < arr.length - 1 ? 'border-b border-[#23262E]' : ''}`}
             >
               <div className="flex items-center gap-3">
-                <Icon size={16} className="text-[#6B7280]" stroke={1.6} />
+                <Icon size={16} className="text-[#9198A3]" stroke={1.6} />
                 <span className="text-sm text-[#A8ADB8]">{item.label}</span>
               </div>
-              <IconArrowRight size={14} className="text-[#454A54]" />
+              <IconArrowRight size={14} className="text-[#8A909C]" />
             </button>
           );
         })}

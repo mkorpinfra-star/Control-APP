@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -5,26 +6,26 @@ import { useAuth } from '../contexts/AuthContext';
 import Login from '../pages/Login';
 
 // Funcionário de campo
-import BaterPonto from '../pages/BaterPonto';
-import RegistroCampo from '../pages/RegistroCampo';
+const BaterPonto = lazy(() => import('../pages/BaterPonto'));
+const RegistroCampo = lazy(() => import('../pages/RegistroCampo'));
 
 // Supervisor + Admin
-import Aprovacoes from '../pages/Approvals';
-import Monitoramento from '../pages/Monitoramento';
+const Aprovacoes = lazy(() => import('../pages/Approvals'));
+const Monitoramento = lazy(() => import('../pages/Monitoramento'));
 
 // Admin
-import Dashboard from '../pages/DashboardBanking';
-import OrdensServico from '../pages/OrdensServico';
-import Contratos from '../pages/Contratos';
-import Funcionarios from '../pages/Employees';
-import Almoxarifado from '../pages/Almoxarifado';
-import EntradaNF from '../pages/EntradaNF';
-import Requisicoes from '../pages/Requisicoes';
-import ControlePonto from '../pages/Timesheet';
-import Relatorios from '../pages/Reports';
-import Medicao from '../pages/Medicao';
-import Auditoria from '../pages/Auditoria';
-import Configuracoes from '../pages/Settings';
+const Dashboard = lazy(() => import('../pages/DashboardBanking'));
+const OrdensServico = lazy(() => import('../pages/OrdensServico'));
+const Contratos = lazy(() => import('../pages/Contratos'));
+const Funcionarios = lazy(() => import('../pages/Employees'));
+const Almoxarifado = lazy(() => import('../pages/Almoxarifado'));
+const EntradaNF = lazy(() => import('../pages/EntradaNF'));
+const Requisicoes = lazy(() => import('../pages/Requisicoes'));
+const ControlePonto = lazy(() => import('../pages/Timesheet'));
+const Relatorios = lazy(() => import('../pages/Reports'));
+const Medicao = lazy(() => import('../pages/Medicao'));
+const Auditoria = lazy(() => import('../pages/Auditoria'));
+const Configuracoes = lazy(() => import('../pages/Settings'));
 
 // Layout
 import BankingLayout from '../components/BankingLayout';
@@ -70,7 +71,7 @@ const REGRAS = {
 };
 
 export default function TenantRoutes() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
@@ -81,6 +82,7 @@ export default function TenantRoutes() {
   }
 
   return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#0A0B0D]"><div className="loading-spinner" /></div>}>
     <Routes>
       <Route path="/" element={isAuthenticated ? <HomeRouter /> : <Navigate to="/login" replace />} />
       <Route path="/login" element={isAuthenticated ? <HomeRouter /> : <Login />} />
@@ -115,5 +117,6 @@ export default function TenantRoutes() {
 
       <Route path="*" element={isAuthenticated ? <HomeRouter /> : <Navigate to="/login" replace />} />
     </Routes>
+    </Suspense>
   );
 }

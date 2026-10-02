@@ -12,7 +12,6 @@ export default function EntradaNF() {
 
   const [etapa, setEtapa] = useState('foto'); // foto | processando | revisao | confirmando | concluido
   const [fotoUrl, setFotoUrl] = useState(null);
-  const [fotoBase64, setFotoBase64] = useState(null);
   const [itensDaNF, setItensDaNF] = useState([]);
   const [erro, setErro] = useState('');
 
@@ -23,7 +22,6 @@ export default function EntradaNF() {
 
   const handleFoto = async ({ base64, url }) => {
     setFotoUrl(url);
-    setFotoBase64(base64);
     setEtapa('processando');
     setErro('');
     try {
@@ -62,8 +60,11 @@ export default function EntradaNF() {
   };
 
   const confirmar = async () => {
-    const validos = itensDaNF.filter(it => it.item_id && it.quantidade > 0);
-    if (validos.length === 0) {
+    // Itens já lançados numa tentativa anterior são pulados (evita entrada em dobro ao repetir após erro)
+    const validos = itensDaNF
+      .map((it, idx) => ({ ...it, idx }))
+      .filter(it => it.item_id && Number(it.quantidade) > 0 && !it.lancado);
+    if (validos.length === 0 && !itensDaNF.some(it => it.lancado)) {
       setErro('Selecione ao menos um item cadastrado no estoque.');
       return;
     }
@@ -71,11 +72,13 @@ export default function EntradaNF() {
     try {
       for (const item of validos) {
         await almoxarifadoService.entrada(item.item_id, Number(item.quantidade), `Entrada via NF (foto)`);
+        setItensDaNF(prev => prev.map((it, i) => i === item.idx ? { ...it, lancado: true } : it));
       }
       qc.invalidateQueries({ queryKey: ['almoxarifado-estoque'] });
       setEtapa('concluido');
-    } catch {
-      setErro('Erro ao registrar entrada. Tente novamente.');
+    } catch (e) {
+      qc.invalidateQueries({ queryKey: ['almoxarifado-estoque'] });
+      setErro('Erro ao registrar entrada (' + (e?.message || 'conexão') + '). Os itens já lançados foram marcados e não serão lançados de novo.');
       setEtapa('revisao');
     }
   };
@@ -84,7 +87,7 @@ export default function EntradaNF() {
     <div className="min-h-full bg-[#0A0B0D] pb-32">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-[#23262E]">
-        <button onClick={() => navigate(-1)} className="text-[#6B7280] hover:text-[#F5F5F0] transition-colors">
+        <button onClick={() => navigate(-1)} className="text-[#9198A3] hover:text-[#F5F5F0] transition-colors">
           <IconArrowLeft size={20} />
         </button>
         <h1 className="text-base font-semibold text-[#F5F5F0]">Entrada por Nota Fiscal</h1>
@@ -100,7 +103,7 @@ export default function EntradaNF() {
             </div>
             <div className="text-center space-y-1">
               <p className="text-[#F5F5F0] font-semibold">Fotografe a Nota Fiscal</p>
-              <p className="text-sm text-[#6B7280]">A IA vai identificar os itens automaticamente</p>
+              <p className="text-sm text-[#9198A3]">A IA vai identificar os itens automaticamente</p>
             </div>
             {erro && (
               <div className="w-full p-3 bg-[#F87171]/10 border border-[#F87171]/20 rounded-xl text-sm text-[#F87171] flex gap-2">
@@ -129,7 +132,7 @@ export default function EntradaNF() {
                 <img src={fotoUrl} alt="NF" className="w-16 h-20 object-cover rounded-xl border border-[#23262E] shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-[#F5F5F0]">{itensDaNF.length} item(s) identificado(s)</p>
-                  <p className="text-xs text-[#6B7280] mt-1">Revise e vincule cada item ao estoque</p>
+                  <p className="text-xs text-[#9198A3] mt-1">Revise e vincule cada item ao estoque</p>
                 </div>
               </div>
             )}
@@ -143,13 +146,13 @@ export default function EntradaNF() {
                 <div key={idx} className="bg-[#121419] border border-[#23262E] rounded-2xl p-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm text-[#A8ADB8] font-medium">{item.nome || `Item ${idx + 1}`}</p>
-                    <button onClick={() => removerItem(idx)} className="text-[#454A54] hover:text-[#F87171] transition-colors shrink-0">
+                    <button onClick={() => removerItem(idx)} className="text-[#8A909C] hover:text-[#F87171] transition-colors shrink-0">
                       <IconTrash size={14} />
                     </button>
                   </div>
 
                   <div>
-                    <label className="text-xs text-[#6B7280] mb-1 block">Vincular ao estoque *</label>
+                    <label className="text-xs text-[#9198A3] mb-1 block">Vincular ao estoque *</label>
                     <select
                       value={item.item_id}
                       onChange={e => atualizarItem(idx, 'item_id', e.target.value)}
@@ -164,7 +167,7 @@ export default function EntradaNF() {
 
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <label className="text-xs text-[#6B7280] mb-1 block">Quantidade</label>
+                      <label className="text-xs text-[#9198A3] mb-1 block">Quantidade</label>
                       <input
                         type="number"
                         min="1"
@@ -174,7 +177,7 @@ export default function EntradaNF() {
                       />
                     </div>
                     <div className="w-20">
-                      <label className="text-xs text-[#6B7280] mb-1 block">Unidade</label>
+                      <label className="text-xs text-[#9198A3] mb-1 block">Unidade</label>
                       <input
                         type="text"
                         value={item.unidade}
@@ -189,7 +192,7 @@ export default function EntradaNF() {
 
             <button
               onClick={adicionarItem}
-              className="w-full py-2.5 border border-dashed border-[#30353F] rounded-2xl text-sm text-[#6B7280] hover:border-[#F08020] hover:text-[#F08020] flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-2.5 border border-dashed border-[#30353F] rounded-2xl text-sm text-[#9198A3] hover:border-[#F08020] hover:text-[#F08020] flex items-center justify-center gap-2 transition-colors"
             >
               <IconPlus size={14} /> Adicionar item manualmente
             </button>
@@ -202,7 +205,7 @@ export default function EntradaNF() {
               {etapa === 'confirmando' ? <><IconLoader2 size={16} className="animate-spin" /> Registrando...</> : <><IconCheck size={16} /> Confirmar entrada</>}
             </button>
 
-            <button onClick={() => { setEtapa('foto'); setFotoUrl(null); setItensDaNF([]); setErro(''); }} className="w-full py-2.5 text-sm text-[#6B7280] hover:text-[#A8ADB8] transition-colors">
+            <button onClick={() => { setEtapa('foto'); setFotoUrl(null); setItensDaNF([]); setErro(''); }} className="w-full py-2.5 text-sm text-[#9198A3] hover:text-[#A8ADB8] transition-colors">
               Fotografar outra nota
             </button>
           </>
@@ -216,12 +219,12 @@ export default function EntradaNF() {
             </div>
             <div>
               <p className="text-[#F5F5F0] font-semibold text-lg">Entrada registrada!</p>
-              <p className="text-sm text-[#6B7280] mt-1">O estoque foi atualizado com sucesso</p>
+              <p className="text-sm text-[#9198A3] mt-1">O estoque foi atualizado com sucesso</p>
             </div>
             <button onClick={() => navigate('/almoxarifado')} className="px-6 py-3 bg-[#F08020] text-white rounded-2xl font-semibold text-sm hover:bg-[#D86E14] transition-colors">
               Ver estoque
             </button>
-            <button onClick={() => { setEtapa('foto'); setFotoUrl(null); setItensDaNF([]); setErro(''); }} className="text-sm text-[#6B7280] hover:text-[#A8ADB8] transition-colors">
+            <button onClick={() => { setEtapa('foto'); setFotoUrl(null); setItensDaNF([]); setErro(''); }} className="text-sm text-[#9198A3] hover:text-[#A8ADB8] transition-colors">
               Nova entrada por NF
             </button>
           </div>

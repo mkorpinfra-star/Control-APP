@@ -36,7 +36,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
       </div>
       <div className="flex-1">
         <p className={`font-semibold text-sm ${danger ? 'text-[#F87171]' : 'text-[#F5F5F0]'}`}>{titulo}</p>
-        {sub && <p className="text-xs text-[#6B7280]">{sub}</p>}
+        {sub && <p className="text-xs text-[#9198A3]">{sub}</p>}
       </div>
     </button>
   );
@@ -66,7 +66,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
             </div>
             <div>
               <p className="text-lg font-bold text-[#F5F5F0]">{perfil?.nome}</p>
-              <p className="text-xs text-[#6B7280]">{perfil?.email}</p>
+              <p className="text-xs text-[#9198A3]">{perfil?.email}</p>
               <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-[#F08020]/15 text-[#5B8DEF]">
                 {CARGO_LABEL[perfil?.cargo] || perfil?.cargo}
               </span>

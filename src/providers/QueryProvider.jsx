@@ -13,8 +13,8 @@ const queryClient = new QueryClient({
       // Cache por 5 minutos (dados ainda válidos)
       staleTime: 5 * 60 * 1000,
 
-      // Manter em cache por 10 minutos
-      cacheTime: 10 * 60 * 1000,
+      // Manter em cache por 10 minutos (v5: gcTime; `cacheTime` era ignorado)
+      gcTime: 10 * 60 * 1000,
 
       // Retry automático em caso de erro (3 tentativas)
       retry: 1,
@@ -22,6 +22,12 @@ const queryClient = new QueryClient({
       // Não refetch automaticamente em background por padrão
       // (economiza bateria)
       refetchInterval: false,
+    },
+    mutations: {
+      // Sem modo offline: falhar na hora (com mensagem) em vez de ficar "Salvando..."
+      // pausado em memória e perder a operação se o app for fechado.
+      networkMode: 'always',
+      retry: 0,
     },
   },
 });

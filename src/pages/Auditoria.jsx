@@ -52,7 +52,7 @@ export default function Auditoria() {
     <div className="pb-32 bg-[#0A0B0D] min-h-full px-4 pt-4 space-y-3">
       {/* Filtros */}
       <div className="bg-[#1A1D24] border border-[#23262E] rounded-2xl p-3 space-y-2">
-        <div className="flex items-center gap-2 text-xs text-[#6B7280]"><IconFilter size={13} /> Filtros</div>
+        <div className="flex items-center gap-2 text-xs text-[#9198A3]"><IconFilter size={13} /> Filtros</div>
         <div className="grid grid-cols-2 gap-2">
           <select value={entidade} onChange={e => setFiltro(() => setEntidade(e.target.value))} className={`${ui.input} h-10`}>
             {ENTIDADES.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
@@ -66,13 +66,13 @@ export default function Auditoria() {
         </div>
       </div>
 
-      <p className="text-xs text-[#6B7280]">{total} registro{total !== 1 ? 's' : ''}</p>
+      <p className="text-xs text-[#9198A3]">{total} registro{total !== 1 ? 's' : ''}</p>
 
       {/* Lista */}
       {isLoading ? (
         <div className="space-y-2">{[...Array(6)].map((_, i) => <div key={i} className="h-16 bg-[#1A1D24] rounded-2xl animate-pulse" />)}</div>
       ) : itens.length === 0 ? (
-        <div className="text-center py-16 text-[#6B7280]">
+        <div className="text-center py-16 text-[#9198A3]">
           <IconHistory size={44} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">Nenhum registro de auditoria</p>
         </div>
@@ -88,20 +88,20 @@ export default function Auditoria() {
                   <span className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: cor }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[#F5F5F0]">{ACAO_LABEL[log.acao] || log.acao}</p>
-                    <div className="flex items-center gap-2 text-xs text-[#6B7280] mt-0.5">
+                    <div className="flex items-center gap-2 text-xs text-[#9198A3] mt-0.5">
                       <IconUser size={11} /> {log.usuario_nome || '—'}
-                      {log.entidade_id && <span className="text-[#454A54]">· #{String(log.entidade_id).slice(0, 8)}</span>}
+                      {log.entidade_id && <span className="text-[#8A909C]">· #{String(log.entidade_id).slice(0, 8)}</span>}
                     </div>
                     {log.motivo && <p className="text-xs text-[#FB8C3E] mt-1">Motivo: {log.motivo}</p>}
                   </div>
-                  <span className="text-[10px] text-[#454A54] shrink-0 text-right">
+                  <span className="text-[10px] text-[#8A909C] shrink-0 text-right">
                     {new Date(log.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}<br />
                     {new Date(log.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </button>
                 {aberto && temDetalhe && (
                   <div className="mt-2 pt-2 border-t border-[#23262E] space-y-1.5">
-                    {log.dados_antigos && <pre className="text-[10px] text-[#6B7280] bg-[#0A0B0D] rounded-lg p-2 overflow-x-auto">antes: {JSON.stringify(log.dados_antigos)}</pre>}
+                    {log.dados_antigos && <pre className="text-[10px] text-[#9198A3] bg-[#0A0B0D] rounded-lg p-2 overflow-x-auto">antes: {JSON.stringify(log.dados_antigos)}</pre>}
                     {log.dados_novos && <pre className="text-[10px] text-[#A8ADB8] bg-[#0A0B0D] rounded-lg p-2 overflow-x-auto">depois: {JSON.stringify(log.dados_novos)}</pre>}
                   </div>
                 )}
@@ -117,7 +117,7 @@ export default function Auditoria() {
           <button onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={pagina === 0} className="flex items-center gap-1 px-3 py-2 bg-[#1A1D24] border border-[#30353F] rounded-xl text-xs text-[#A8ADB8] disabled:opacity-40">
             <IconChevronLeft size={14} /> Anterior
           </button>
-          <span className="text-xs text-[#6B7280]">{pagina + 1} / {totalPaginas}</span>
+          <span className="text-xs text-[#9198A3]">{pagina + 1} / {totalPaginas}</span>
           <button onClick={() => setPagina(p => Math.min(totalPaginas - 1, p + 1))} disabled={pagina >= totalPaginas - 1} className="flex items-center gap-1 px-3 py-2 bg-[#1A1D24] border border-[#30353F] rounded-xl text-xs text-[#A8ADB8] disabled:opacity-40">
             Próxima <IconChevronRight size={14} />
           </button>

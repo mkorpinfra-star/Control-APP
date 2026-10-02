@@ -1,0 +1,29 @@
+  ✓   1 [mobile] › tests/e2e-local/fluxos.spec.js:23:1 › L1 login inválido mostra erro (1.4s)
+  ✘   2 [mobile] › tests/e2e-local/fluxos.spec.js:32:1 › L2 usuário desativado não entra (10.8s)
+  ✘   3 [mobile] › tests/e2e-local/fluxos.spec.js:41:1 › L3 sessão expirada/inválida volta ao login com aviso (antes o app "fingia" estar logado) (11.2s)
+  ✓   4 [mobile] › tests/e2e-local/fluxos.spec.js:50:1 › L4 funcionário não abre telas de admin pela URL (2.7s)
+  ✘   5 [mobile] › tests/e2e-local/fluxos.spec.js:58:1 › P1 ponto: iniciar/encerrar com GPS e enviar; servidor guarda trilha (11.5s)
+  ✘   6 [mobile] › tests/e2e-local/fluxos.spec.js:78:1 › P2 GPS negado: marca o ponto e AVISA que ficou sem localização (22.0s)
+  ✘   7 [mobile] › tests/e2e-local/fluxos.spec.js:88:1 › P3 sem conexão: erro visível, nada é perdido em silêncio (12.1s)
+  ✘   8 [mobile] › tests/e2e-local/fluxos.spec.js:99:1 › P4 supervisor aprova o ponto enviado (e não vê botão para o próprio) (1.0m)
+  ✘   9 [mobile] › tests/e2e-local/fluxos.spec.js:108:1 › R1 funcionário cria requisição pela tela (14.2s)
+  ✘  10 [mobile] › tests/e2e-local/fluxos.spec.js:122:1 › R2 almoxarife VÊ a requisição de outro funcionário e aprova uma única vez (12.1s)
+  ✘  11 [mobile] › tests/e2e-local/fluxos.spec.js:136:1 › C1 registro de campo com foto grava UM registro com a foto e conclui a OS (11.5s)
+  ✘  12 [mobile] › tests/e2e-local/fluxos.spec.js:152:1 › A1 admin percorre todas as telas sem erro de página (17.2s)
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(page).toHaveURL(expected) failed
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toBeVisible() failed
+  10 failed
+  2 passed (3.3m)
+
+# Estado do banco local após rodar a suíte contra o código ORIGINAL (branch main, schema do repositório):
+#  controle_ponto: 0 linhas  -> "Iniciar/Encerrar expediente" mostrou 17:42—17:42 na tela, mas NADA foi gravado
+#                               (PostgREST: invalid input syntax for type time: ""), sem nenhuma mensagem ao usuário
+#  registros_campo: 1 linha com 0 fotos -> foto perdida; usuário recebeu "Erro ao enviar registro"
+#  requisicoes: 1 linha criada, mas a lista mostra "Nenhuma requisição encontrada" (PGRST201: embed usuarios ambíguo)
+#  almoxarife: não vê requisições de outros funcionários (filtro por usuario_id)

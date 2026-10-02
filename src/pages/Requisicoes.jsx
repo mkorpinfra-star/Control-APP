@@ -10,7 +10,7 @@ import InputDialog from '../components/InputDialog';
 const ITEM_INICIAL = { modo: 'catalogo', item_id: '', nome_livre: '', quantidade: 1 };
 
 export default function Requisicoes() {
-  const { isAdmin, isSupervisor, canAprovarRequisicao, perfil } = useAuth();
+  const { canAprovarRequisicao, perfil } = useAuth();
   const queryClient = useQueryClient();
   const [filtro, setFiltro] = useState('pendente');
   const [modalAberto, setModalAberto] = useState(false);
@@ -21,10 +21,12 @@ export default function Requisicoes() {
   const [respondendoItem, setRespondendoItem] = useState(null); // item da requisição sendo respondido
 
   const { data: requisicoes = [], isLoading } = useQuery({
-    queryKey: ['requisicoes', filtro],
+    queryKey: ['requisicoes', filtro, canAprovarRequisicao],
     queryFn: () => requisicoesService.getAll({
       status: filtro || undefined,
-      usuario_id: (!isAdmin && !isSupervisor) ? perfil?.id : undefined,
+      // quem aprova (admin, supervisor e ALMOXARIFE) vê todas; os demais só as próprias.
+      // Antes o almoxarife caía no filtro "só as minhas" e não via nada para aprovar.
+      usuario_id: canAprovarRequisicao ? undefined : perfil?.id,
     }),
   });
 
@@ -78,7 +80,12 @@ export default function Requisicoes() {
       });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['requisicoes'] }),
-    onError: (e) => alert('Erro ao aprovar: ' + e.message),
+    onError: (e) => { queryClient.invalidateQueries({ queryKey: ['requisicoes'] }); alert('Erro ao aprovar: ' + e.message); },
+  });
+  const cancelarMutation = useMutation({
+    mutationFn: (req) => requisicoesService.cancelar(req.id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['requisicoes'] }),
+    onError: (e) => alert('Erro ao cancelar: ' + e.message),
   });
   const rejeitarMutation = useMutation({
     mutationFn: async ({ req, motivo }) => {
@@ -91,6 +98,7 @@ export default function Requisicoes() {
       });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['requisicoes'] }),
+    onError: (e) => alert('Erro ao rejeitar: ' + e.message),
   });
 
   const responderMutation = useMutation({
@@ -120,7 +128,7 @@ export default function Requisicoes() {
   return (
     <div className="pb-32 bg-[#0A0B0D] min-h-full">
       <div className="px-4 pt-4 pb-2 flex gap-2 overflow-x-auto hide-scrollbar">
-        {['pendente', 'aprovada', 'rejeitada', ''].map(s => (
+        {['pendente', 'aprovada', 'rejeitada', 'cancelada', ''].map(s => (
           <button key={s} onClick={() => setFiltro(s)} className={ui.chip(filtro === s)}>
             {s === '' ? 'Todas' : STATUS_REQ[s]?.label}
           </button>
@@ -129,7 +137,7 @@ export default function Requisicoes() {
 
       <div className="px-4 space-y-3 mt-2">
         {requisicoes.length === 0 ? (
-          <div className="text-center py-16 text-[#6B7280]">
+          <div className="text-center py-16 text-[#9198A3]">
             <IconPackage size={48} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">Nenhuma requisição encontrada</p>
           </div>
@@ -142,7 +150,7 @@ export default function Requisicoes() {
                   <div>
                     <p className="font-medium text-[#F5F5F0] text-sm">{r.usuarios?.nome}</p>
                     {r.ordens_servico && (
-                      <p className="text-xs text-[#6B7280]">OS #{r.ordens_servico.numero} — {r.ordens_servico.descricao}</p>
+                      <p className="text-xs text-[#9198A3]">OS #{r.ordens_servico.numero} — {r.ordens_servico.descricao}</p>
                     )}
                   </div>
                   <span className={st.badge}>{st.label}</span>
@@ -172,7 +180,7 @@ export default function Requisicoes() {
                                 <IconClockHour4 size={11} /> Responder disponibilidade
                               </button>
                             ) : (
-                              <p className="text-[11px] text-[#454A54]">Aguardando resposta do almoxarifado</p>
+                              <p className="text-[11px] text-[#8A909C]">Aguardando resposta do almoxarifado</p>
                             )}
                           </div>
                         )}
@@ -185,15 +193,28 @@ export default function Requisicoes() {
                   <p className="text-xs text-[#F87171] mb-2">Motivo: {r.motivo_rejeicao}</p>
                 )}
 
-                <p className="text-xs text-[#454A54] mb-2">
+                <p className="text-xs text-[#8A909C] mb-2">
                   {new Date(r.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </p>
+
+                {r.status === 'pendente' && r.usuario_id === perfil?.id && !canAprovarRequisicao && (
+                  <div className="pt-2 border-t border-[#23262E]">
+                    <button
+                      onClick={() => { if (window.confirm('Cancelar esta requisição?')) cancelarMutation.mutate(r); }}
+                      disabled={cancelarMutation.isPending}
+                      className="w-full min-h-[44px] flex items-center justify-center gap-1 py-2 border border-[#30353F] text-[#A8ADB8] rounded-xl text-xs font-medium disabled:opacity-50"
+                    >
+                      <IconX size={14} /> Cancelar requisição
+                    </button>
+                  </div>
+                )}
 
                 {r.status === 'pendente' && canAprovarRequisicao && (
                   <div className="flex gap-2 pt-2 border-t border-[#23262E]">
                     <button
                       onClick={() => aprovarMutation.mutate(r)}
-                      className="flex-1 flex items-center justify-center gap-1 py-2 bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] rounded-xl text-xs font-medium active:bg-[#34D399]/20 transition-colors"
+                      disabled={aprovarMutation.isPending}
+                      className="disabled:opacity-50 flex-1 flex items-center justify-center gap-1 py-2 bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] rounded-xl text-xs font-medium active:bg-[#34D399]/20 transition-colors"
                     >
                       <IconCheck size={14} /> Aprovar
                     </button>
@@ -234,6 +255,7 @@ export default function Requisicoes() {
       {/* FAB Nova requisição */}
       <button
         onClick={() => { setOsId(''); setItens([{ ...ITEM_INICIAL }]); setErroForm(''); setModalAberto(true); }}
+        aria-label="Nova requisição"
         className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
       >
         <IconPlus size={24} className="text-white" />
@@ -263,19 +285,19 @@ export default function Requisicoes() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => setItemCampo(idx, 'modo', 'catalogo')}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${item.modo === 'catalogo' ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#1A1D24] text-[#6B7280] border border-[#30353F]'}`}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${item.modo === 'catalogo' ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#1A1D24] text-[#9198A3] border border-[#30353F]'}`}
                       >
                         Do estoque
                       </button>
                       <button
                         onClick={() => setItemCampo(idx, 'modo', 'livre')}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${item.modo === 'livre' ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#1A1D24] text-[#6B7280] border border-[#30353F]'}`}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${item.modo === 'livre' ? 'bg-[#F08020] text-[#0A0B0D]' : 'bg-[#1A1D24] text-[#9198A3] border border-[#30353F]'}`}
                       >
                         Não sei se tem
                       </button>
                     </div>
                     {itens.length > 1 && (
-                      <button onClick={() => removeItem(idx)} className="text-[#454A54] hover:text-[#F87171] transition-colors shrink-0">
+                      <button onClick={() => removeItem(idx)} className="text-[#8A909C] hover:text-[#F87171] transition-colors shrink-0">
                         <IconTrash size={14} />
                       </button>
                     )}
@@ -297,12 +319,12 @@ export default function Requisicoes() {
                     <input type="number" min="1" value={item.quantidade} onChange={e => setItemCampo(idx, 'quantidade', e.target.value)} className={`${ui.input} w-16 h-11`} />
                   </div>
                   {item.modo === 'livre' && (
-                    <p className="text-[10px] text-[#454A54]">O almoxarife vai verificar e te avisar se tem ou quando vai ter.</p>
+                    <p className="text-[10px] text-[#8A909C]">O almoxarife vai verificar e te avisar se tem ou quando vai ter.</p>
                   )}
                 </div>
               ))}
             </div>
-            <button onClick={addItem} className="mt-2 w-full py-2.5 border border-dashed border-[#30353F] rounded-xl text-sm text-[#6B7280] hover:border-[#F08020] hover:text-[#F08020] flex items-center justify-center gap-2 transition-colors">
+            <button onClick={addItem} className="mt-2 w-full py-2.5 border border-dashed border-[#30353F] rounded-xl text-sm text-[#9198A3] hover:border-[#F08020] hover:text-[#F08020] flex items-center justify-center gap-2 transition-colors">
               <IconPlus size={14} /> Adicionar item
             </button>
           </div>
@@ -333,10 +355,10 @@ function RespostaItemModal({ aberto, onClose, dados, onEnviar, enviando }) {
           <p className="text-sm text-[#A8ADB8]">Material: <strong className="text-[#F5F5F0]">{dados.item.nome_livre}</strong> ({dados.item.quantidade} un.)</p>
 
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setDisponivel(true)} className={`py-2.5 rounded-xl text-sm font-medium transition-colors ${disponivel ? 'bg-[#34D399]/15 border border-[#34D399]/40 text-[#34D399]' : 'bg-[#121419] border border-[#30353F] text-[#6B7280]'}`}>
+            <button onClick={() => setDisponivel(true)} className={`py-2.5 rounded-xl text-sm font-medium transition-colors ${disponivel ? 'bg-[#34D399]/15 border border-[#34D399]/40 text-[#34D399]' : 'bg-[#121419] border border-[#30353F] text-[#9198A3]'}`}>
               Temos / vamos ter
             </button>
-            <button onClick={() => setDisponivel(false)} className={`py-2.5 rounded-xl text-sm font-medium transition-colors ${!disponivel ? 'bg-[#F87171]/15 border border-[#F87171]/40 text-[#F87171]' : 'bg-[#121419] border border-[#30353F] text-[#6B7280]'}`}>
+            <button onClick={() => setDisponivel(false)} className={`py-2.5 rounded-xl text-sm font-medium transition-colors ${!disponivel ? 'bg-[#F87171]/15 border border-[#F87171]/40 text-[#F87171]' : 'bg-[#121419] border border-[#30353F] text-[#9198A3]'}`}>
               Não temos
             </button>
           </div>

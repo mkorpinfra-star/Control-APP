@@ -27,12 +27,12 @@ Deno.serve(async (req) => {
 
     // Confirma que é admin
     const admin = createClient(url, serviceKey)
-    const { data: perfil } = await admin.from('usuarios').select('cargo').eq('id', user.id).single()
-    if (perfil?.cargo !== 'admin') return json({ error: 'Apenas administradores' }, 403)
+    const { data: perfil } = await admin.from('usuarios').select('cargo, ativo').eq('id', user.id).single()
+    if (perfil?.cargo !== 'admin' || perfil?.ativo === false) return json({ error: 'Apenas administradores' }, 403)
 
     const { user_id, nova_senha } = await req.json()
-    if (!user_id || !nova_senha || String(nova_senha).length < 6)
-      return json({ error: 'Informe o usuário e uma senha com ao menos 6 caracteres.' }, 400)
+    if (!user_id || !nova_senha || String(nova_senha).length < 8)
+      return json({ error: 'Informe o usuário e uma senha com ao menos 8 caracteres.' }, 400)
 
     const { error } = await admin.auth.admin.updateUserById(user_id, { password: nova_senha })
     if (error) return json({ error: error.message }, 400)

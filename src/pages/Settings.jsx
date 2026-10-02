@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, configService, usuariosService } from '../services/supabase';
+import { authService, configService, usuariosService, notificacoesService, auditService } from '../services/supabase';
 import Avatar from '../components/Avatar';
 import { IconCamera } from '@tabler/icons-react';
 import { ui } from '../lib/theme';
-import { IconUser, IconBuildingFactory2, IconShield, IconLoader2, IconCheck, IconChevronRight, IconLock } from '@tabler/icons-react';
+import { IconUser, IconBuildingFactory2, IconShield, IconLoader2, IconCheck, IconChevronRight, IconLock, IconFileText, IconUserX } from '@tabler/icons-react';
 import Modal from '../components/Modal';
 import { MODULOS, PAPEIS_CONFIG, ACESSO_PADRAO } from '../lib/acessos';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -85,7 +85,7 @@ export default function Configuracoes() {
     onError: (e) => setErroSenha(e.message),
   });
   const salvarSenha = () => {
-    if (senha.length < 6) return setErroSenha('A senha deve ter ao menos 6 caracteres.');
+    if (senha.length < 8) return setErroSenha('A senha deve ter ao menos 8 caracteres.');
     if (senha !== senha2) return setErroSenha('As senhas não coincidem.');
     senhaMut.mutate(senha);
   };
@@ -136,8 +136,27 @@ export default function Configuracoes() {
   };
   const toggle = (papel, modulo) => setMatriz(m => ({ ...m, [papel]: { ...m[papel], [modulo]: !m[papel][modulo] } }));
 
+  // Exclusão de conta (exigência da Google Play): registra o pedido e avisa os administradores.
+  // Registros de ponto podem ter guarda obrigatória por lei — a exclusão é concluída pelo admin/RH.
+  const solicitarExclusao = async () => {
+    if (!window.confirm('Solicitar a exclusão da sua conta e dos seus dados pessoais? O administrador será avisado e concluirá o pedido. Registros com guarda obrigatória por lei (ex.: ponto) podem ser mantidos pelo prazo legal.')) return;
+    try {
+      await notificacoesService.notificarCargos(['admin'], {
+        titulo: 'Pedido de exclusão de conta',
+        mensagem: `${perfil?.nome} (${perfil?.email}) solicitou a exclusão da conta e dos dados pessoais.`,
+        tipo: 'alerta', link: '/funcionarios',
+      });
+      await auditService.log({ acao: 'exclusao_conta_solicitada', entidade: 'usuarios', entidade_id: perfil?.id });
+      alert('Pedido enviado. O administrador vai concluir a exclusão e confirmar com você.');
+    } catch (e) {
+      alert('Não foi possível enviar o pedido: ' + e.message);
+    }
+  };
+
   const linhas = [
     { icon: IconShield, label: 'Segurança', sub: 'Alterar minha senha', onClick: () => { setSenha(''); setSenha2(''); setErroSenha(''); setOkSenha(''); setModalSenha(true); } },
+    { icon: IconFileText, label: 'Política de privacidade', sub: 'Como usamos localização, fotos e dados', onClick: () => window.open('/privacidade.html', '_blank') },
+    { icon: IconUserX, label: 'Excluir minha conta', sub: 'Solicitar exclusão da conta e dos dados', onClick: solicitarExclusao },
     ...(isAdmin ? [
       { icon: IconBuildingFactory2, label: 'Dados da empresa', sub: config?.nome || 'Configurar razão social, CNPJ...', onClick: abrirEmpresa },
       { icon: IconLock, label: 'Controle de acesso', sub: 'Definir o que cada papel vê', onClick: abrirAcesso },
@@ -160,8 +179,8 @@ export default function Configuracoes() {
           </button>
           <input ref={fotoRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={trocarFotoWeb} />
           <div>
-            <p className="font-semibold text-[#F5F5F0]">{perfil?.nome}{subindoFoto && <span className="text-xs text-[#6B7280] ml-2">enviando foto...</span>}</p>
-            <p className="text-xs text-[#6B7280] capitalize">{perfil?.cargo}{perfil?.matricula ? ` · ${perfil.matricula}` : ''}</p>
+            <p className="font-semibold text-[#F5F5F0]">{perfil?.nome}{subindoFoto && <span className="text-xs text-[#9198A3] ml-2">enviando foto...</span>}</p>
+            <p className="text-xs text-[#9198A3] capitalize">{perfil?.cargo}{perfil?.matricula ? ` · ${perfil.matricula}` : ''}</p>
           </div>
         </div>
         <div className="space-y-1 text-sm text-[#A8ADB8]">
@@ -185,9 +204,9 @@ export default function Configuracoes() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[#F5F5F0]">{item.label}</p>
-                <p className="text-xs text-[#6B7280] truncate">{item.sub}</p>
+                <p className="text-xs text-[#9198A3] truncate">{item.sub}</p>
               </div>
-              <IconChevronRight size={16} className="text-[#454A54]" />
+              <IconChevronRight size={16} className="text-[#8A909C]" />
             </button>
           );
         })}
@@ -200,7 +219,7 @@ export default function Configuracoes() {
         Sair da conta
       </button>
 
-      <p className="text-center text-[#2E3240] text-xs pt-2">Mkorp Control © {new Date().getFullYear()}</p>
+      <p className="text-center text-[#8A909C] text-xs pt-2">Mkorp Control © {new Date().getFullYear()}</p>
 
       {/* Modal alterar senha */}
       <Modal aberto={modalSenha} onClose={() => setModalSenha(false)} titulo="Alterar senha">
@@ -209,7 +228,7 @@ export default function Configuracoes() {
           {erroSenha && <div className="p-3 bg-[#F87171]/10 border border-[#F87171]/20 rounded-xl text-sm text-[#F87171]">{erroSenha}</div>}
           <div>
             <label className={ui.label}>Nova senha</label>
-            <input type="password" value={senha} onChange={e => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" className={ui.input} />
+            <input type="password" value={senha} onChange={e => setSenha(e.target.value)} placeholder="Mínimo 8 caracteres" className={ui.input} />
           </div>
           <div>
             <label className={ui.label}>Confirmar nova senha</label>
@@ -226,7 +245,7 @@ export default function Configuracoes() {
         {matriz && (
           <div className="space-y-4">
             {okAcesso && <div className="p-3 bg-[#34D399]/10 border border-[#34D399]/20 rounded-xl text-sm text-[#34D399] flex items-center gap-2"><IconCheck size={16} /> {okAcesso}</div>}
-            <p className="text-xs text-[#6B7280]">Marque o que cada papel pode acessar. O <strong>admin</strong> tem acesso total sempre. Valores (R$) são exclusivos do admin.</p>
+            <p className="text-xs text-[#9198A3]">Marque o que cada papel pode acessar. O <strong>admin</strong> tem acesso total sempre. Valores (R$) são exclusivos do admin.</p>
 
             {PAPEIS_CONFIG.map(papel => (
               <div key={papel.key} className="bg-[#121419] border border-[#23262E] rounded-2xl p-3">
@@ -238,7 +257,7 @@ export default function Configuracoes() {
                       <button
                         key={mod.key}
                         onClick={() => toggle(papel.key, mod.key)}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${on ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]' : 'bg-[#0A0B0D] border-[#30353F] text-[#6B7280]'}`}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${on ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]' : 'bg-[#0A0B0D] border-[#30353F] text-[#9198A3]'}`}
                       >
                         {mod.label}
                         <span className={`w-2 h-2 rounded-full ${on ? 'bg-[#34D399]' : 'bg-[#454A54]'}`} />

@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import DynamicHeader from './DynamicHeader';
 import BottomNav from './BottomNav';
+import AvisoConexao from './AvisoConexao';
 
 // Transição estilo Nubank - Slide horizontal suave
 const pageVariants = {
@@ -36,6 +38,7 @@ export default function BankingLayout() {
     <div className="h-screen flex flex-col bg-[#0A0B0D] overflow-hidden">
       {/* Header Fixo */}
       <DynamicHeader />
+      <AvisoConexao />
 
       {/* Main Content Scrollável com transição Nubank */}
       <main className="flex-1 overflow-hidden relative">
@@ -51,7 +54,9 @@ export default function BankingLayout() {
               WebkitOverflowScrolling: 'touch'
             }}
           >
-            <Outlet />
+            <Suspense fallback={<div className="p-8 flex justify-center"><div className="loading-spinner" /></div>}>
+              <Outlet />
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>

@@ -1,22 +1,60 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authService, configService } from '../services/supabase';
+import { authService, configService, supabase } from '../services/supabase';
 import { podeAcessarModulo } from '../lib/acessos';
 
 const AuthContext = createContext(null);
+const CHAVE = 'mkorp_sessao';
+
+function lerCache() {
+  try { return JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch { return null; }
+}
+function limparCache() {
+  try { localStorage.removeItem(CHAVE); } catch { /* noop */ }
+}
 
 export function AuthProvider({ children }) {
   const [perfil, setPerfil]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [acessos, setAcessos] = useState(null); // matriz configurada pelo admin
+  const [avisoSessao, setAvisoSessao] = useState('');
 
-  // Restaura sessão do localStorage ao recarregar
+  // Restaura a sessão validando o token real do Supabase (antes confiava só no localStorage:
+  // com o token expirado/revogado o app "parecia logado" e as telas vinham vazias).
   useEffect(() => {
-    try {
-      const salvo = localStorage.getItem('mkorp_sessao');
-      if (salvo) setPerfil(JSON.parse(salvo));
-    } finally {
-      setLoading(false);
-    }
+    let ativo = true;
+    (async () => {
+      const cache = lerCache();
+      try {
+        const { data, error } = await authService.getSession();
+        if (!ativo) return;
+        const sessao = data?.session;
+        if (sessao?.perfil) {
+          if (sessao.perfil.ativo === false) {
+            await authService.logout();
+            limparCache(); setPerfil(null);
+            setAvisoSessao('Seu acesso foi desativado. Procure o administrador.');
+          } else {
+            setPerfil(sessao.perfil);
+            localStorage.setItem(CHAVE, JSON.stringify(sessao.perfil));
+          }
+        } else if (error && cache) {
+          // falha de rede: mantém o perfil em cache; as telas mostram erro de conexão
+          setPerfil(cache);
+        } else {
+          limparCache(); setPerfil(null);
+          if (cache) setAvisoSessao('Sua sessão expirou. Entre novamente.');
+        }
+      } catch {
+        if (ativo && cache) setPerfil(cache);
+      } finally {
+        if (ativo) setLoading(false);
+      }
+    })();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((evento) => {
+      if (evento === 'SIGNED_OUT') { limparCache(); setPerfil(null); }
+    });
+    return () => { ativo = false; sub?.subscription?.unsubscribe(); };
   }, []);
 
   // Carrega a matriz de acessos configurada
@@ -29,7 +67,8 @@ export function AuthProvider({ children }) {
     try {
       const sessao = await authService.login(email, senha);
       setPerfil(sessao.perfil);
-      localStorage.setItem('mkorp_sessao', JSON.stringify(sessao.perfil));
+      setAvisoSessao('');
+      localStorage.setItem(CHAVE, JSON.stringify(sessao.perfil));
       return { success: true };
     } catch (err) {
       return { success: false, message: err.message };
@@ -39,13 +78,13 @@ export function AuthProvider({ children }) {
   const logout = () => {
     authService.logout();
     setPerfil(null);
-    localStorage.removeItem('mkorp_sessao');
+    limparCache();
   };
 
   const atualizarPerfil = (atualizacoes) => {
     const novo = { ...perfil, ...atualizacoes };
     setPerfil(novo);
-    localStorage.setItem('mkorp_sessao', JSON.stringify(novo));
+    localStorage.setItem(CHAVE, JSON.stringify(novo));
   };
 
   // Helpers de cargo
@@ -71,6 +110,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       perfil,
       loading,
+      avisoSessao,
       login,
       logout,
       atualizarPerfil,

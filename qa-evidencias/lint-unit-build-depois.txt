@@ -1,0 +1,12 @@
+## lint
+
+✖ 5 problems (0 errors, 5 warnings)
+
+## unit
+# pass 6
+# fail 0
+## build
+dist/assets/index-2xMsVOQg.js                0.35 kB │ gzip:   0.24 kB
+dist/assets/index-DRnIFlwN.js                8.58 kB │ gzip:   3.42 kB
+dist/assets/index-DiAgew5F.js              664.67 kB │ gzip: 198.21 kB
+✓ built in 9.29s

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// URL do app: por padrão a produção; troque com BASE_URL=http://localhost:5173
-const baseURL = process.env.BASE_URL || 'https://app.mkorp.com.br';
+// URL do app: por padrão o ambiente LOCAL. Testes E2E criam dados — não rode contra produção.
+const baseURL = process.env.BASE_URL || 'http://localhost:5173';
 
 export default defineConfig({
   testDir: './tests/e2e',

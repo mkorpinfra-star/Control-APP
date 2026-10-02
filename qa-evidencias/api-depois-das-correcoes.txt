@@ -1,0 +1,34 @@
+ok 1 - F1 admin lista funcionários (inclusive inativos) e lê CPF
+ok 2 - F2 admin altera cargo e acessos de um funcionário
+ok 3 - F3 funcionário lê o próprio perfil e altera o próprio telefone
+ok 4 - F4 usuário inativo consegue ler o próprio perfil (para o app avisar que está desativado)
+ok 5 - F5 ciclo do ponto: rascunho → enviado → aprovado pelo supervisor → fechado pelo admin
+ok 6 - F6 ponto rejeitado pode ser corrigido e reenviado
+ok 7 - F7 almoxarife: cadastra item (saldo criado automaticamente), dá entrada e saída
+ok 8 - F8 requisição: funcionário cria (catálogo + texto livre), almoxarife responde e aprova
+ok 9 - F9 funcionário cancela a própria requisição pendente
+ok 10 - F10 responsável em campo: vê sua OS, inicia, registra execução e comenta
+ok 11 - F11 supervisor cria OS e contrato; admin lê auditoria
+ok 12 - F12 notificações: qualquer ativo notifica gestores; cada um só lê as suas
+ok 13 - S1 funcionário NÃO consegue se promover a admin
+ok 14 - S2 funcionário NÃO lê CPF de outros (usuarios_documentos)
+ok 15 - S3 funcionário NÃO altera ponto de outro funcionário
+ok 16 - S4 funcionário NÃO aprova o próprio ponto
+ok 17 - S5 funcionário NÃO altera saldo de estoque direto na tabela
+ok 18 - S6 funcionário NÃO lança movimentação de estoque
+ok 19 - S7 trilha de auditoria: funcionário não lê e ninguém apaga/edita
+ok 20 - S8 funcionário NÃO altera matriz de acessos da empresa
+ok 21 - S9 conta criada por auto-cadastro (sem perfil) não lê nada
+ok 22 - S10 usuário desativado não acessa dados
+ok 23 - S11 funcionário NÃO apaga OS nem contrato
+ok 24 - S12 funcionário vê só as próprias requisições
+ok 25 - B1 aprovar a mesma requisição 2x baixa o estoque uma única vez
+ok 26 - B2 aprovações concorrentes não deixam saldo negativo
+ok 27 - B3 quantidades inválidas são rejeitadas
+ok 28 - B4 funcionário não aprova requisição nem lança entrada
+ok 29 - B5 requisição rejeitada não pode ser aprovada depois
+ok 30 - P1 ponto enviado não pode ser alterado pelo funcionário
+ok 31 - P2 toda alteração de horário fica registrada com hora do servidor
+ok 32 - P3 supervisor aprova; ponto fechado não volta a ser editado
+# pass 32
+# fail 0

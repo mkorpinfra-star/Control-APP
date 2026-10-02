@@ -40,7 +40,7 @@ export default function AnimatedSplash({ onComplete }) {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5, duration: 0.6, ease: 'easeOut' }}
-        className="text-sm text-[#6B7280] relative z-10"
+        className="text-sm text-[#9198A3] relative z-10"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         Gestão de iluminação pública

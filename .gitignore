@@ -1,6 +1,8 @@
 node_modules
 dist
 .env
+.env.*
+!.env.example
 nul
 jdk*
 *.zip
@@ -16,3 +18,9 @@ test-results/
 playwright-report/
 qa-cleanup.mjs
 qa-check-schema.mjs
+qa-evidencias/screens/*.tmp
+tests/local/stack/postgrest
+tests/local/stack/auth
+tests/local/stack/gotrue
+tests/local/stack/migrations/
+.env.local

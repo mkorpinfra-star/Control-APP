@@ -72,20 +72,20 @@ export default function Relatorios() {
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center">
             <p className="text-2xl font-bold text-[#F5F5F0] tabular-nums">{os.length}</p>
-            <p className="text-xs text-[#6B7280]">Total</p>
+            <p className="text-xs text-[#9198A3]">Total</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-[#34D399] tabular-nums">{concluidas.length}</p>
-            <p className="text-xs text-[#6B7280]">Concluídas</p>
+            <p className="text-xs text-[#9198A3]">Concluídas</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-[#5B8DEF] tabular-nums">{abertas.length}</p>
-            <p className="text-xs text-[#6B7280]">Abertas</p>
+            <p className="text-xs text-[#9198A3]">Abertas</p>
           </div>
         </div>
         {os.length > 0 && (
           <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-[#6B7280] mb-1">
+            <div className="flex items-center justify-between text-xs text-[#9198A3] mb-1">
               <span>Taxa de conclusão</span>
               <span className="font-medium text-[#F5F5F0]">{Math.round((concluidas.length / os.length) * 100)}%</span>
             </div>
@@ -103,7 +103,7 @@ export default function Relatorios() {
             <div key={nome}>
               <div className="flex items-center justify-between mb-1">
                 <p className="text-xs text-[#A8ADB8] truncate flex-1 mr-2">{nome}</p>
-                <p className="text-xs text-[#6B7280] shrink-0">{dados.concluidas}/{dados.total}</p>
+                <p className="text-xs text-[#9198A3] shrink-0">{dados.concluidas}/{dados.total}</p>
               </div>
               <div className="h-1.5 bg-[#0A0B0D] rounded-full">
                 <div className="h-1.5 bg-[#F08020] rounded-full" style={{ width: `${(dados.concluidas / dados.total) * 100}%` }} />
@@ -118,7 +118,7 @@ export default function Relatorios() {
           <IconFileText size={20} className="text-[#5B8DEF] shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-sm font-medium text-[#F5F5F0]">Relatório de medição mensal</p>
-            <p className="text-xs text-[#6B7280] mt-1">
+            <p className="text-xs text-[#9198A3] mt-1">
               Exporta as OS concluídas no mês (planilha CSV) para envio à prefeitura.
             </p>
           </div>

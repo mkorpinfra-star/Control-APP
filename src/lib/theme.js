@@ -72,6 +72,7 @@ export const STATUS_REQ = {
   aprovada:  { label: 'Aprovada',  badge: `${ui.badge} bg-[#34D399]/12 text-[#34D399]` },
   rejeitada: { label: 'Rejeitada', badge: `${ui.badge} bg-[#F87171]/12 text-[#F87171]` },
   entregue:  { label: 'Entregue',  badge: `${ui.badge} bg-[#5B8DEF]/12 text-[#5B8DEF]` },
+  cancelada: { label: 'Cancelada', badge: `${ui.badge} bg-[#8A909C]/12 text-[#8A909C]` },
 };
 
 export const PRIORIDADE = {

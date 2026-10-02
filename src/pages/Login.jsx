@@ -4,7 +4,7 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, avisoSessao } = useAuth();
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -40,7 +40,7 @@ export default function Login() {
           className="mb-10 text-center"
         >
           <img src="/logo-mkorp.png" alt="Mkorp" className="h-9 w-auto mx-auto mb-4" />
-          <p className="text-[#6B7280] text-sm tracking-wide">Gestão de iluminação pública</p>
+          <p className="text-[#9198A3] text-sm tracking-wide">Gestão de iluminação pública</p>
         </motion.div>
 
         {/* Card */}
@@ -59,8 +59,13 @@ export default function Login() {
           <div className="absolute top-0 left-8 right-8 h-px rounded-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(240,128,32,0.4), transparent)' }} />
 
           <h2 className="text-xl font-semibold text-[#F5F5F0] mb-1">Entrar</h2>
-          <p className="text-sm text-[#4B5260] mb-6">Acesse com seu e-mail e senha</p>
+          <p className="text-sm text-[#8A909C] mb-6">Acesse com seu e-mail e senha</p>
 
+          {!erro && avisoSessao && (
+            <div role="status" className="mb-5 p-3 rounded-xl text-sm text-[#FBBF24] bg-[#FBBF24]/10 border border-[#FBBF24]/20">
+              {avisoSessao}
+            </div>
+          )}
           {erro && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -73,7 +78,7 @@ export default function Login() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#6B7280] mb-1.5">E-mail</label>
+              <label className="block text-xs font-medium text-[#9198A3] mb-1.5">E-mail</label>
               <input
                 type="email"
                 value={email}
@@ -91,7 +96,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#6B7280] mb-1.5">Senha</label>
+              <label className="block text-xs font-medium text-[#9198A3] mb-1.5">Senha</label>
               <div className="relative">
                 <input
                   type={mostrarSenha ? 'text' : 'password'}
@@ -110,7 +115,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setMostrarSenha(v => !v)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#454A54] hover:text-[#A8ADB8] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A909C] hover:text-[#A8ADB8] transition-colors"
                   tabIndex={-1}
                 >
                   {mostrarSenha ? <IconEyeOff size={17} /> : <IconEye size={17} />}

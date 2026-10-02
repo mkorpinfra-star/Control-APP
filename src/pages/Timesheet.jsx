@@ -29,7 +29,7 @@ function baixarCSV(linhas, nome) {
 }
 
 export default function ControlePonto() {
-  const { isAdmin, isSupervisor, canAprovarPonto, canFecharPonto } = useAuth();
+  const { isAdmin, perfil, canAprovarPonto, canFecharPonto } = useAuth();
   const queryClient = useQueryClient();
 
   const hoje = new Date();
@@ -53,6 +53,7 @@ export default function ControlePonto() {
       });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['todos-ponto'] }),
+    onError: (e) => { queryClient.invalidateQueries({ queryKey: ['todos-ponto'] }); alert('Erro ao aprovar: ' + e.message); },
   });
   const rejeitarMut = useMutation({
     mutationFn: async ({ r, motivo }) => {
@@ -64,6 +65,7 @@ export default function ControlePonto() {
       });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['todos-ponto'] }),
+    onError: (e) => alert('Erro ao rejeitar: ' + e.message),
   });
 
   // ----- Fechamento mensal -----
@@ -143,7 +145,7 @@ export default function ControlePonto() {
           {isLoading ? (
             [...Array(4)].map((_, i) => <div key={i} className="bg-[#1A1D24] border border-[#23262E] rounded-2xl p-4 h-24 animate-pulse" />)
           ) : registros.length === 0 ? (
-            <div className="text-center py-16 text-[#6B7280]">
+            <div className="text-center py-16 text-[#9198A3]">
               <IconClock size={48} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm">Nenhum registro de ponto</p>
             </div>
@@ -154,24 +156,25 @@ export default function ControlePonto() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="font-medium text-[#F5F5F0] text-sm">{r.usuarios?.nome}</p>
-                    <p className="text-xs text-[#6B7280] capitalize">{r.usuarios?.cargo}</p>
+                    <p className="text-xs text-[#9198A3] capitalize">{r.usuarios?.cargo}</p>
                   </div>
                   <span className={st.badge}>{st.label}</span>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-[#A8ADB8] mb-1">
                   <span>{new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
-                  {r.hora_entrada && <span>{r.hora_entrada}{r.hora_saida ? ` – ${r.hora_saida}` : ''}</span>}
+                  {r.hora_entrada && <span>{r.hora_entrada.slice(0, 5)}{r.hora_saida ? ` – ${r.hora_saida.slice(0, 5)}` : ''}</span>}
                 </div>
                 {(r.horas_normais > 0 || r.horas_extras > 0) && (
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-[#9198A3]">
                     {r.horas_normais}h normais{r.horas_extras > 0 ? ` + ${r.horas_extras}h extras` : ''}
                   </p>
                 )}
-                {r.status === 'enviado' && canAprovarPonto && (
+                {r.status === 'enviado' && canAprovarPonto && (isAdmin || r.usuario_id !== perfil?.id) && (
                   <div className="flex gap-2 mt-3 pt-3 border-t border-[#23262E]">
                     <button
                       onClick={() => aprovarMut.mutate(r)}
-                      className="flex-1 flex items-center justify-center gap-1 py-2 bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] rounded-xl text-xs font-medium active:bg-[#34D399]/20"
+                      disabled={aprovarMut.isPending}
+                      className="disabled:opacity-50 flex-1 flex items-center justify-center gap-1 py-2 bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] rounded-xl text-xs font-medium active:bg-[#34D399]/20"
                     >
                       <IconCheck size={14} /> Aprovar
                     </button>
@@ -209,15 +212,15 @@ export default function ControlePonto() {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-[#1A1D24] rounded-2xl p-3 text-center border border-[#23262E]">
               <p className="text-xl font-bold text-[#F5F5F0] tabular-nums">{pontosMes.length}</p>
-              <p className="text-[11px] text-[#6B7280]">Registros</p>
+              <p className="text-[11px] text-[#9198A3]">Registros</p>
             </div>
             <div className="bg-[#1A1D24] rounded-2xl p-3 text-center border border-[#34D399]/20">
               <p className="text-xl font-bold text-[#34D399] tabular-nums">{totalAprovados}</p>
-              <p className="text-[11px] text-[#6B7280]">Aprovados</p>
+              <p className="text-[11px] text-[#9198A3]">Aprovados</p>
             </div>
             <div className="bg-[#1A1D24] rounded-2xl p-3 text-center border border-[#5B8DEF]/20">
               <p className="text-xl font-bold text-[#5B8DEF] tabular-nums">{totalPendentes}</p>
-              <p className="text-[11px] text-[#6B7280]">Pendentes</p>
+              <p className="text-[11px] text-[#9198A3]">Pendentes</p>
             </div>
           </div>
 
@@ -225,12 +228,12 @@ export default function ControlePonto() {
           <div className="bg-[#1A1D24] rounded-2xl border border-[#23262E] overflow-hidden">
             <p className="text-sm font-semibold text-[#F5F5F0] px-4 pt-4 pb-2">Horas por funcionário</p>
             {resumoPorFuncionario.length === 0 ? (
-              <p className="text-sm text-[#6B7280] text-center py-8">Sem registros neste mês</p>
+              <p className="text-sm text-[#9198A3] text-center py-8">Sem registros neste mês</p>
             ) : resumoPorFuncionario.map((r, i, arr) => (
               <div key={r.nome} className={`px-4 py-3 flex items-center justify-between ${i < arr.length - 1 ? 'border-b border-[#23262E]' : ''}`}>
                 <div>
                   <p className="text-sm text-[#F5F5F0]">{r.nome}</p>
-                  <p className="text-xs text-[#6B7280]">{r.dias} dia(s){r.pendentes > 0 ? ` · ${r.pendentes} pendente(s)` : ''}</p>
+                  <p className="text-xs text-[#9198A3]">{r.dias} dia(s){r.pendentes > 0 ? ` · ${r.pendentes} pendente(s)` : ''}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-[#F5F5F0] tabular-nums">{r.normais.toFixed(1)}h</p>
@@ -252,7 +255,7 @@ export default function ControlePonto() {
             {fecharMut.isPending ? <IconLoader2 size={16} className="animate-spin" /> : <IconLock size={16} />}
             Fechar {MESES[mes]}/{ano} ({totalAprovados} aprovados)
           </button>
-          <p className="text-[11px] text-[#454A54] text-center">Só pontos aprovados são consolidados. Pendentes precisam ser aprovados antes.</p>
+          <p className="text-[11px] text-[#8A909C] text-center">Só pontos aprovados são consolidados. Pendentes precisam ser aprovados antes.</p>
         </div>
       )}
     </div>

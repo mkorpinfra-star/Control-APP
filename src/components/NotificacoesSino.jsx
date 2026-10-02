@@ -100,7 +100,7 @@ export default function NotificacoesSino() {
 
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
                 {lista.length === 0 ? (
-                  <div className="text-center py-16 text-[#6B7280]">
+                  <div className="text-center py-16 text-[#9198A3]">
                     <IconBell size={40} className="mx-auto mb-3 opacity-30" />
                     <p className="text-sm">Nenhuma notificação</p>
                   </div>
@@ -114,15 +114,15 @@ export default function NotificacoesSino() {
                         className={`w-full text-left rounded-2xl p-3 border flex gap-3 transition-colors ${n.lida ? 'bg-[#121419] border-[#23262E]' : 'bg-[#F08020]/8 border-[#F08020]/25'}`}
                       >
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${n.lida ? 'bg-[#22262F]' : 'bg-[#F08020]/15'}`}>
-                          <Icon size={17} className={n.lida ? 'text-[#6B7280]' : 'text-[#F08020]'} />
+                          <Icon size={17} className={n.lida ? 'text-[#9198A3]' : 'text-[#F08020]'} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p className={`text-sm font-medium ${n.lida ? 'text-[#A8ADB8]' : 'text-[#F5F5F0]'}`}>{n.titulo}</p>
                             {!n.lida && <span className="w-2 h-2 rounded-full bg-[#F08020] shrink-0 mt-1.5" />}
                           </div>
-                          {n.mensagem && <p className="text-xs text-[#6B7280] mt-0.5">{n.mensagem}</p>}
-                          <p className="text-[10px] text-[#454A54] mt-1">{tempoRelativo(n.criado_em)}</p>
+                          {n.mensagem && <p className="text-xs text-[#9198A3] mt-0.5">{n.mensagem}</p>}
+                          <p className="text-[10px] text-[#8A909C] mt-1">{tempoRelativo(n.criado_em)}</p>
                         </div>
                       </button>
                     );

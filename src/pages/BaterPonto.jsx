@@ -6,25 +6,13 @@ import { STATUS_PONTO } from '../lib/theme';
 import { IconClock, IconCheck, IconSend, IconAlertCircle, IconPlayerPlay, IconPlayerStop, IconMapPin, IconPencil, IconCoffee, IconCalendar } from '@tabler/icons-react';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+import { hojeISO, addDias, segundaDaSemana as getSegunda, horaAgoraHHMM } from '../lib/datas';
 
 const DIAS    = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
 const DIAS_PT = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const DIAS_SH = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MESES   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-function getSegunda(date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().split('T')[0];
-}
-function addDias(dateStr, n) {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  const dt = new Date(y, m - 1, d);
-  dt.setDate(dt.getDate() + n);
-  return dt.toISOString().split('T')[0];
-}
 function calcHoras(entrada, saida, almSaida, almVolta) {
   if (!entrada || !saida) return { normais: 0, extras: 0 };
   const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
@@ -36,33 +24,38 @@ function calcHoras(entrada, saida, almSaida, almVolta) {
   return { normais: parseFloat(normais.toFixed(2)), extras: parseFloat(extras.toFixed(2)) };
 }
 function horaAgora() {
-  return new Date().toTimeString().slice(0, 5);
+  return horaAgoraHHMM();
 }
 
-// Captura localização (nativo com fallback web), não bloqueia o ponto se falhar
+// Captura localização (nativo com fallback web). Não bloqueia o ponto se falhar,
+// mas devolve o motivo para o app avisar que a marcação ficou sem GPS.
 async function capturarLocalizacao() {
   try {
     if (Capacitor.isNativePlatform()) {
       const perm = await Geolocation.checkPermissions();
       if (perm.location !== 'granted') {
         const req = await Geolocation.requestPermissions();
-        if (req.location !== 'granted') return null;
+        if (req.location !== 'granted') return { erro: 'permissao' };
       }
-      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 10000 });
-      return { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+      return { lat: pos.coords.latitude, lng: pos.coords.longitude, precisao: pos.coords.accuracy };
     }
-    if (!('geolocation' in navigator)) return null;
+    if (!('geolocation' in navigator)) return { erro: 'indisponivel' };
     return await new Promise(resolve => {
       navigator.geolocation.getCurrentPosition(
-        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => resolve(null),
-        { enableHighAccuracy: true, timeout: 8000 }
+        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, precisao: pos.coords.accuracy }),
+        (err) => resolve({ erro: err?.code === 1 ? 'permissao' : 'indisponivel' }),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
     });
   } catch {
-    return null;
+    return { erro: 'indisponivel' };
   }
 }
+const AVISO_GPS = {
+  permissao: 'Marcação salva SEM localização: permissão de localização negada. Ative em Configurações > Apps > Mkorp Control > Permissões.',
+  indisponivel: 'Marcação salva SEM localização: GPS indisponível ou sem sinal.',
+};
 
 export default function BaterPonto() {
   const { perfil } = useAuth();
@@ -79,6 +72,7 @@ export default function BaterPonto() {
   const [editandoManual, setEditandoManual] = useState(false);
   const [capturando, setCapturando] = useState(null); // 'entrada' | 'saida' | 'almoco_saida' | 'almoco_volta'
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
+  const [aviso, setAviso] = useState(null); // { tipo: 'erro'|'alerta', texto }
   const [mesCalendario, setMesCalendario] = useState(() => { const d = new Date(); return { ano: d.getFullYear(), mes: d.getMonth() }; });
 
   const dataAtual = addDias(semanaInicio, diaIdx);
@@ -110,8 +104,9 @@ export default function BaterPonto() {
   useEffect(() => {
     if (pontoHoje) {
       setCampos({
-        hora_entrada: pontoHoje.hora_entrada || '', hora_saida: pontoHoje.hora_saida || '',
-        hora_almoco_saida: pontoHoje.hora_almoco_saida || '', hora_almoco_volta: pontoHoje.hora_almoco_volta || '',
+        // o banco devolve HH:MM:SS; a tela trabalha com HH:MM
+        hora_entrada: (pontoHoje.hora_entrada || '').slice(0, 5), hora_saida: (pontoHoje.hora_saida || '').slice(0, 5),
+        hora_almoco_saida: (pontoHoje.hora_almoco_saida || '').slice(0, 5), hora_almoco_volta: (pontoHoje.hora_almoco_volta || '').slice(0, 5),
       });
       setOsId(pontoHoje.os_id || '');
     } else {
@@ -128,6 +123,7 @@ export default function BaterPonto() {
       queryClient.invalidateQueries({ queryKey: ['minha-semana'] });
       queryClient.invalidateQueries({ queryKey: ['meu-ponto-mes'] });
     },
+    onError: (e) => setAviso({ tipo: 'erro', texto: 'Não foi possível salvar o ponto: ' + (e?.message || 'erro de conexão') + '. Tente novamente.' }),
   });
   const enviarMutation = useMutation({
     mutationFn: async (dados) => {
@@ -145,6 +141,7 @@ export default function BaterPonto() {
       queryClient.invalidateQueries({ queryKey: ['meu-ponto-mes'] });
       setShowConfirm(false);
     },
+    onError: (e) => { setShowConfirm(false); setAviso({ tipo: 'erro', texto: 'Não foi possível enviar o ponto: ' + (e?.message || 'erro de conexão') }); },
   });
 
   const { normais, extras } = calcHoras(campos.hora_entrada, campos.hora_saida, campos.hora_almoco_saida, campos.hora_almoco_volta);
@@ -154,17 +151,19 @@ export default function BaterPonto() {
     ...campos, horas_normais: normais, horas_extras: extras,
     status: pontoHoje?.status || 'rascunho',
   };
-  const bloqueado = pontoHoje?.status === 'enviado' || pontoHoje?.status === 'aprovado';
-  const ehHoje = dataAtual === new Date().toISOString().split('T')[0];
+  const bloqueado = ['enviado', 'aprovado', 'fechado'].includes(pontoHoje?.status);
+  const hojeStr = hojeISO();
+  const ehHoje = dataAtual === hojeStr;
   const getPontoDia = (idx) => semana.find(p => p.data === addDias(semanaInicio, idx));
-  const hojeStr = new Date().toISOString().split('T')[0];
 
   // Marca um momento (entrada/saída/almoço) com hora atual + GPS, salva na hora
   const marcarMomento = async (campo, coordCampo) => {
     setCapturando(campo);
+    setAviso(null);
     try {
       const hora = horaAgora();
-      const loc = await capturarLocalizacao();
+      const gps = await capturarLocalizacao();
+      const loc = gps && !gps.erro ? gps : null;
       const novosCampos = { ...campos, [campo]: hora };
       setCampos(novosCampos);
       const dados = {
@@ -175,10 +174,14 @@ export default function BaterPonto() {
       };
       const { normais: n2, extras: e2 } = calcHoras(dados.hora_entrada, dados.hora_saida, dados.hora_almoco_saida, dados.hora_almoco_volta);
       await salvarMutation.mutateAsync({ ...dados, horas_normais: n2, horas_extras: e2 });
+      if (gps?.erro && coordCampo) setAviso({ tipo: 'alerta', texto: AVISO_GPS[gps.erro] });
       // Ao iniciar expediente numa OS, também georreferencia a OS (visível no Monitoramento)
       if (campo === 'hora_entrada' && osId && loc) {
         ordensServicoService.update(osId, { latitude: loc.lat, longitude: loc.lng }).catch(() => {});
       }
+    } catch {
+      // erro já exibido pelo onError da mutation; restaura o estado salvo
+      queryClient.invalidateQueries({ queryKey: ['meu-ponto'] });
     } finally {
       setCapturando(null);
     }
@@ -215,7 +218,7 @@ export default function BaterPonto() {
                   }`}
                 >
                   <span className="text-[10px] font-medium">{DIAS_SH[i]}</span>
-                  <span className={`text-[10px] mt-0.5 ${isHoje && !isSelected ? 'text-[#5B8DEF] font-bold' : 'opacity-60'}`}>
+                  <span className={`text-[10px] mt-0.5 ${isHoje && !isSelected ? 'text-[#5B8DEF] font-bold' : 'opacity-80'}`}>
                     {new Date(addDias(semanaInicio, i) + 'T12:00:00').getDate()}
                   </span>
                   {p && (
@@ -251,7 +254,7 @@ export default function BaterPonto() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold text-[#F5F5F0]">{DIAS_PT[diaIdx]}</p>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-xs text-[#9198A3]">
                 {new Date(dataAtual + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
               </p>
             </div>
@@ -279,7 +282,7 @@ export default function BaterPonto() {
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-[#A8ADB8] uppercase tracking-wider">Jornada</p>
             {ehHoje && !bloqueado && (
-              <button onClick={() => setEditandoManual(v => !v)} className="text-[10px] text-[#5B8DEF] flex items-center gap-1">
+              <button onClick={() => setEditandoManual(v => !v)} className="text-xs text-[#5B8DEF] flex items-center gap-1 py-2 px-1 -my-2">
                 <IconPencil size={11} /> {editandoManual ? 'usar botões' : 'corrigir manualmente'}
               </button>
             )}
@@ -336,7 +339,7 @@ export default function BaterPonto() {
                       <IconCoffee size={14} /> Voltar do almoço
                     </button>
                   ) : (
-                    <div className="flex-1 text-center py-2.5 text-xs text-[#6B7280]">Almoço: {campos.hora_almoco_saida} – {campos.hora_almoco_volta}</div>
+                    <div className="flex-1 text-center py-2.5 text-xs text-[#9198A3]">Almoço: {campos.hora_almoco_saida} – {campos.hora_almoco_volta}</div>
                   )}
                 </div>
               )}
@@ -358,6 +361,14 @@ export default function BaterPonto() {
             </div>
           )}
         </div>
+
+        {aviso && (
+          <div role="alert" className={`rounded-2xl p-3 flex gap-2 border ${aviso.tipo === 'erro' ? 'bg-[#F87171]/10 border-[#F87171]/20 text-[#F87171]' : 'bg-[#FBBF24]/10 border-[#FBBF24]/20 text-[#FBBF24]'}`}>
+            <IconAlertCircle size={16} className="shrink-0 mt-0.5" />
+            <p className="text-xs flex-1">{aviso.texto}</p>
+            <button onClick={() => setAviso(null)} aria-label="Fechar aviso" className="text-xs px-1">✕</button>
+          </div>
+        )}
 
         {pontoHoje?.status === 'rejeitado' && pontoHoje.motivo_rejeicao && (
           <div className="bg-[#F87171]/10 border border-[#F87171]/20 rounded-2xl p-3 flex gap-2">
@@ -394,7 +405,7 @@ export default function BaterPonto() {
           <div className="bg-[#34D399]/10 border border-[#34D399]/20 rounded-2xl p-3 flex items-center gap-2">
             <IconCheck size={16} className="text-[#34D399]" />
             <p className="text-sm text-[#34D399] font-medium">
-              {pontoHoje?.status === 'aprovado' ? 'Ponto aprovado!' : 'Ponto enviado para aprovação.'}
+              {pontoHoje?.status === 'aprovado' ? 'Ponto aprovado!' : pontoHoje?.status === 'fechado' ? 'Ponto fechado no fechamento mensal.' : 'Ponto enviado para aprovação.'}
             </p>
           </div>
         )}
@@ -429,9 +440,9 @@ export default function BaterPonto() {
 function HorarioInput({ label, value, onChange, disabled }) {
   return (
     <div>
-      <label className="block text-xs text-[#6B7280] mb-1">{label}</label>
+      <label className="block text-xs text-[#9198A3] mb-1">{label}</label>
       <div className="relative">
-        <IconClock size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#454A54]" />
+        <IconClock size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8A909C]" />
         <input
           type="time"
           value={value}
@@ -448,7 +459,7 @@ function CalendarioMensal({ ano, mes, pontos, onMudarMes, onSelecionarDia }) {
   const primeiroDia = new Date(ano, mes, 1);
   const offset = (primeiroDia.getDay() + 6) % 7; // segunda=0
   const totalDias = new Date(ano, mes + 1, 0).getDate();
-  const hojeStr = new Date().toISOString().split('T')[0];
+  const hojeStr = hojeISO();
 
   const celulas = [];
   for (let i = 0; i < offset; i++) celulas.push(null);
@@ -462,12 +473,12 @@ function CalendarioMensal({ ano, mes, pontos, onMudarMes, onSelecionarDia }) {
   return (
     <div className="bg-[#1A1D24] border border-[#23262E] rounded-2xl p-3">
       <div className="flex items-center justify-between mb-2">
-        <button onClick={() => onMudarMes(-1)} className="text-[#6B7280] px-2">←</button>
+        <button onClick={() => onMudarMes(-1)} className="text-[#9198A3] px-2">←</button>
         <p className="text-sm font-semibold text-[#F5F5F0]">{MESES[mes]} {ano}</p>
-        <button onClick={() => onMudarMes(1)} className="text-[#6B7280] px-2">→</button>
+        <button onClick={() => onMudarMes(1)} className="text-[#9198A3] px-2">→</button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center mb-1">
-        {['S','T','Q','Q','S','S','D'].map((l, i) => <span key={i} className="text-[9px] text-[#454A54]">{l}</span>)}
+        {['S','T','Q','Q','S','S','D'].map((l, i) => <span key={i} className="text-[9px] text-[#8A909C]">{l}</span>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {celulas.map((d, i) => {
@@ -475,7 +486,7 @@ function CalendarioMensal({ ano, mes, pontos, onMudarMes, onSelecionarDia }) {
           const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const p = pontoDoDia(d);
           const isHoje = dataStr === hojeStr;
-          const isFimSemana = (offset + d - 1) % 7 >= 5;
+          const isFimSemana = (offset + d - 1) % 7 === 6; // domingo (a visão semanal vai de seg a sáb)
           return (
             <button
               key={i}
@@ -491,7 +502,7 @@ function CalendarioMensal({ ano, mes, pontos, onMudarMes, onSelecionarDia }) {
           );
         })}
       </div>
-      <div className="flex items-center gap-3 mt-3 pt-2 border-t border-[#23262E] text-[9px] text-[#6B7280]">
+      <div className="flex items-center gap-3 mt-3 pt-2 border-t border-[#23262E] text-[9px] text-[#9198A3]">
         <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" /> Aprovado</span>
         <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#5B8DEF]" /> Enviado</span>
         <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#F87171]" /> Rejeitado</span>

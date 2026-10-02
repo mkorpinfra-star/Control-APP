@@ -103,16 +103,16 @@ export default function Medicao() {
         {isLoading ? (
           <div className="p-4 space-y-2">{[1,2,3].map(i => <div key={i} className="h-10 bg-[#22262F] rounded-lg animate-pulse" />)}</div>
         ) : (medicao?.itens?.length ?? 0) === 0 ? (
-          <div className="text-center py-10 px-4 text-[#6B7280]">
+          <div className="text-center py-10 px-4 text-[#9198A3]">
             <p className="text-sm">Nenhum serviço medido neste período</p>
-            <p className="text-xs mt-1 text-[#454A54]">Registre os serviços executados nas OS concluídas (na tela de Ordens de Serviço).</p>
+            <p className="text-xs mt-1 text-[#8A909C]">Registre os serviços executados nas OS concluídas (na tela de Ordens de Serviço).</p>
           </div>
         ) : (
           medicao.itens.map((it, i, arr) => (
             <div key={it.nome} className={`px-4 py-3 flex items-center justify-between ${i < arr.length - 1 ? 'border-b border-[#23262E]' : ''}`}>
               <div>
                 <p className="text-sm text-[#F5F5F0]">{it.nome}</p>
-                <p className="text-xs text-[#6B7280]">{it.quantidade} {it.unidade}</p>
+                <p className="text-xs text-[#9198A3]">{it.quantidade} {it.unidade}</p>
               </div>
               <p className="text-sm font-medium text-[#F5F5F0] tabular-nums">{brl(it.valor)}</p>
             </div>
@@ -138,7 +138,7 @@ export default function Medicao() {
           </button>
         )
       )}
-      {!contratoId && <p className="text-[11px] text-[#454A54] text-center">Selecione um contrato para fechar a medição.</p>}
+      {!contratoId && <p className="text-[11px] text-[#8A909C] text-center">Selecione um contrato para fechar a medição.</p>}
 
       {/* Catálogo de serviços */}
       <CatalogoServicos aberto={modalCatalogo} onClose={() => setModalCatalogo(false)} />
@@ -180,7 +180,7 @@ function CatalogoServicos({ aberto, onClose }) {
   return (
     <Modal aberto={aberto} onClose={onClose} titulo="Catálogo de serviços">
       <div className="space-y-4">
-        <p className="text-xs text-[#6B7280]">Cadastre os serviços e o preço padrão. O valor é usado na medição.</p>
+        <p className="text-xs text-[#9198A3]">Cadastre os serviços e o preço padrão. O valor é usado na medição.</p>
 
         {/* Lista */}
         <div className="space-y-2">
@@ -188,12 +188,12 @@ function CatalogoServicos({ aberto, onClose }) {
             <div key={t.id} className="flex items-center justify-between bg-[#121419] border border-[#23262E] rounded-xl px-3 py-2.5">
               <div>
                 <p className="text-sm text-[#F5F5F0]">{t.nome}</p>
-                <p className="text-xs text-[#6B7280]">{(t.valor_padrao || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {t.unidade}</p>
+                <p className="text-xs text-[#9198A3]">{(t.valor_padrao || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {t.unidade}</p>
               </div>
-              <button onClick={() => desativar.mutate(t.id)} className="text-[#454A54] hover:text-[#F87171]"><IconX size={16} /></button>
+              <button onClick={() => desativar.mutate(t.id)} className="text-[#8A909C] hover:text-[#F87171]"><IconX size={16} /></button>
             </div>
           ))}
-          {tipos.length === 0 && <p className="text-sm text-[#454A54] text-center py-4">Nenhum serviço cadastrado</p>}
+          {tipos.length === 0 && <p className="text-sm text-[#8A909C] text-center py-4">Nenhum serviço cadastrado</p>}
         </div>
 
         {/* Novo */}
@@ -215,7 +215,7 @@ function CatalogoServicos({ aberto, onClose }) {
         {/* Preço por contrato (opcional) */}
         <div className="pt-3 border-t border-[#23262E] space-y-2">
           <label className={ui.label}>Preço por contrato (opcional)</label>
-          <p className="text-[11px] text-[#454A54]">Selecione um contrato para definir preços específicos. Em branco = usa o preço padrão.</p>
+          <p className="text-[11px] text-[#8A909C]">Selecione um contrato para definir preços específicos. Em branco = usa o preço padrão.</p>
           <select value={contratoSel} onChange={e => setContratoSel(e.target.value)} className={ui.input}>
             <option value="">Selecione um contrato...</option>
             {contratos.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}

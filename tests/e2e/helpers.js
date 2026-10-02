@@ -1,7 +1,9 @@
 import { expect } from '@playwright/test';
 
+// Credenciais SEMPRE via variável de ambiente (nunca versionar senha real).
+// Ambiente local de testes: admin@teste.local / Teste@12345 (tests/local/seed.mjs)
 export const CREDS = {
-  admin: { email: process.env.QA_EMAIL || 'felipe.garcia@mkorp.com.br', senha: process.env.QA_PASS || 'Mkorp2026' },
+  admin: { email: process.env.QA_EMAIL || 'admin@teste.local', senha: process.env.QA_PASS || 'Teste@12345' },
 };
 
 // Faz login pela tela inicial

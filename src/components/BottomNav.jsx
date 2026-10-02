@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isSupervisor, isFuncionario, isAlmoxarife, podeAcessar } = useAuth();
+  const { isSupervisor, isFuncionario, isAlmoxarife, podeAcessar } = useAuth();
 
   // path → módulo configurável (para filtrar itens bloqueados pelo admin)
   const MODULO_POR_PATH = {
@@ -75,9 +75,9 @@ export default function BottomNav() {
                 <Icon
                   size={22}
                   stroke={1.6}
-                  className={active ? 'text-[#F08020]' : 'text-[#6B7280]'}
+                  className={active ? 'text-[#F08020]' : 'text-[#9198A3]'}
                 />
-                <span className={`text-[10px] font-medium ${active ? 'text-[#F08020]' : 'text-[#6B7280]'}`}>
+                <span className={`text-[10px] font-medium ${active ? 'text-[#F08020]' : 'text-[#9198A3]'}`}>
                   {item.label}
                 </span>
               </button>

@@ -127,7 +127,7 @@ export default function DynamicHeader() {
             <div className="bg-[#1A1D24] backdrop-blur-md rounded-2xl p-4 border border-[#23262E]">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-[#6B7280] mb-1">{config.subtitle}</p>
+                  <p className="text-xs text-[#9198A3] mb-1">{config.subtitle}</p>
                   <p className="text-xl tracking-tight font-normal text-[#F5F5F0]">{config.title}</p>
                 </div>
               </div>

@@ -43,17 +43,17 @@ export default function ServicosOS({ osId, contratoId }) {
             <div key={s.id} className="flex items-center justify-between text-sm">
               <div className="flex-1">
                 <span className="text-[#F5F5F0]">{s.tipos_servico?.nome}</span>
-                <span className="text-xs text-[#6B7280]"> · {s.quantidade} {s.tipos_servico?.unidade}</span>
+                <span className="text-xs text-[#9198A3]"> · {s.quantidade} {s.tipos_servico?.unidade}</span>
               </div>
               {podeVerValores && <span className="text-[#A8ADB8] tabular-nums mr-2">{brl(s.valor_total)}</span>}
-              <button onClick={() => delMut.mutate(s.id)} className="text-[#454A54] hover:text-[#F87171]"><IconTrash size={13} /></button>
+              <button onClick={() => delMut.mutate(s.id)} className="text-[#8A909C] hover:text-[#F87171]"><IconTrash size={13} /></button>
             </div>
           ))}
         </div>
       )}
 
       {tipos.length === 0 ? (
-        <p className="text-xs text-[#454A54]">Cadastre serviços no catálogo (tela de Medição) para poder registrar aqui.</p>
+        <p className="text-xs text-[#8A909C]">Cadastre serviços no catálogo (tela de Medição) para poder registrar aqui.</p>
       ) : (
         <div className="flex gap-2">
           <select value={tipoId} onChange={e => setTipoId(e.target.value)} className={`${ui.input} flex-1 h-10`}>

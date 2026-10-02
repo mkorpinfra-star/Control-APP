@@ -22,7 +22,7 @@ export default function Modal({ aberto, onClose, titulo, children }) {
           >
             <div className="sticky top-0 bg-[#0E0F13] px-4 pt-4 pb-3 border-b border-[#23262E] flex items-center justify-between z-10">
               <h2 className="font-semibold text-[#F5F5F0] text-base">{titulo}</h2>
-              <button onClick={onClose} className="text-[#6B7280] hover:text-[#F5F5F0] transition-colors">
+              <button onClick={onClose} className="text-[#9198A3] hover:text-[#F5F5F0] transition-colors">
                 <IconX size={20} />
               </button>
             </div>

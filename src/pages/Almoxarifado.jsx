@@ -173,7 +173,7 @@ export default function Almoxarifado() {
         <>
           <div className="px-4 pb-2">
             <div className="relative">
-              <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+              <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9198A3]" />
               <input
                 type="text"
                 placeholder="Buscar material..."
@@ -186,7 +186,7 @@ export default function Almoxarifado() {
 
           <div className="px-4 space-y-2">
             {estoqueFiltrado.length === 0 ? (
-              <div className="text-center py-16 text-[#6B7280]">
+              <div className="text-center py-16 text-[#9198A3]">
                 <IconPackage size={48} className="mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Nenhum item cadastrado</p>
               </div>
@@ -205,14 +205,14 @@ export default function Almoxarifado() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-[#F5F5F0] text-sm">{item?.nome}</p>
-                        <p className="text-xs text-[#6B7280] mt-0.5">
+                        <p className="text-xs text-[#9198A3] mt-0.5">
                           {item?.codigo ? `${item.codigo} · ` : ''}{CATEGORIA_LABEL[item?.categoria] || item?.categoria}
                           {item?.localizacao ? ` · ${item.localizacao}` : ''}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className={`text-xl font-bold tabular-nums ${critico ? 'text-[#FB8C3E]' : 'text-[#F5F5F0]'}`}>{e.quantidade}</p>
-                        <p className="text-xs text-[#6B7280]">{item?.unidade}</p>
+                        <p className="text-xs text-[#9198A3]">{item?.unidade}</p>
                       </div>
                     </div>
                     {critico && (
@@ -222,7 +222,7 @@ export default function Almoxarifado() {
                       </div>
                     )}
                     {dias != null && (
-                      <div className={`mt-1 flex items-center gap-1 text-xs ${dias <= 15 ? 'text-[#FBBF24]' : 'text-[#6B7280]'}`}>
+                      <div className={`mt-1 flex items-center gap-1 text-xs ${dias <= 15 ? 'text-[#FBBF24]' : 'text-[#9198A3]'}`}>
                         <IconTrendingDown size={12} />
                         <span>Dura ~{dias} dia{dias !== 1 ? 's' : ''} no ritmo atual</span>
                       </div>
@@ -238,10 +238,10 @@ export default function Almoxarifado() {
       {aba === 'compras' && (
         <div className="px-4 space-y-2">
           {sugestoesCompra.length === 0 ? (
-            <div className="text-center py-16 text-[#6B7280]">
+            <div className="text-center py-16 text-[#9198A3]">
               <IconShoppingCart size={44} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm">Nenhuma compra sugerida no momento</p>
-              <p className="text-xs mt-1 text-[#454A54]">Preencha o "consumo médio mensal" dos produtos para ver previsões aqui.</p>
+              <p className="text-xs mt-1 text-[#8A909C]">Preencha o "consumo médio mensal" dos produtos para ver previsões aqui.</p>
             </div>
           ) : (
             sugestoesCompra.map(e => {
@@ -252,7 +252,7 @@ export default function Almoxarifado() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-[#F5F5F0] text-sm">{item?.nome}</p>
-                      <p className="text-xs text-[#6B7280] mt-0.5">Saldo atual: {e.quantidade} {item?.unidade}</p>
+                      <p className="text-xs text-[#9198A3] mt-0.5">Saldo atual: {e.quantidade} {item?.unidade}</p>
                     </div>
                     {e.dias != null ? (
                       <span className={`text-xs px-2.5 py-1 rounded-full ${e.dias <= 5 ? 'bg-[#F87171]/12 text-[#F87171]' : 'bg-[#FBBF24]/12 text-[#FBBF24]'}`}>
@@ -276,7 +276,8 @@ export default function Almoxarifado() {
       {canGerenciarEstoque && (
         <button
           onClick={() => { setProduto(PRODUTO_INICIAL); setErroForm(''); setModalAberto(true); }}
-          className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
+          aria-label="Novo produto"
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
         >
           <IconPlus size={24} className="text-white" />
         </button>
@@ -395,7 +396,7 @@ export default function Almoxarifado() {
                 <label className={ui.label}>Consumo médio mensal</label>
                 <input type="number" min="0" value={editando.consumo_medio_mensal ?? ''} onChange={e => setEditando(v => ({ ...v, consumo_medio_mensal: e.target.value }))} placeholder="Ex: 20 (usado p/ prever quando vai faltar)" className={ui.input} />
                 {(() => { const dr = diasRestantes(editando.quantidade, editando.consumo_medio_mensal); return dr != null ? (
-                  <p className={`text-[11px] mt-1 ${dr <= 15 ? 'text-[#FB8C3E]' : 'text-[#6B7280]'}`}>Com esse consumo, o estoque atual dura ~{dr} dias.</p>
+                  <p className={`text-[11px] mt-1 ${dr <= 15 ? 'text-[#FB8C3E]' : 'text-[#9198A3]'}`}>Com esse consumo, o estoque atual dura ~{dr} dias.</p>
                 ) : null; })()}
               </div>
               <div className="col-span-2">
@@ -421,7 +422,7 @@ export default function Almoxarifado() {
 
             {/* Movimentação de estoque */}
             <div className="pt-2 border-t border-[#23262E] space-y-3">
-              <p className="text-[11px] text-[#454A54]">Saldo atual: <strong className="text-[#A8ADB8]">{editando.quantidade} {editando.unidade}</strong></p>
+              <p className="text-[11px] text-[#8A909C]">Saldo atual: <strong className="text-[#A8ADB8]">{editando.quantidade} {editando.unidade}</strong></p>
 
               <div>
                 <label className={ui.label}>Entrada manual</label>
@@ -457,7 +458,7 @@ export default function Almoxarifado() {
             <div className="pt-2 border-t border-[#23262E]">
               <label className={ui.label}>Histórico de movimentação</label>
               {histItem.length === 0 ? (
-                <p className="text-xs text-[#454A54]">Nenhuma movimentação registrada.</p>
+                <p className="text-xs text-[#8A909C]">Nenhuma movimentação registrada.</p>
               ) : (
                 <div className="space-y-1.5 max-h-52 overflow-y-auto">
                   {histItem.map(m => (
@@ -466,12 +467,12 @@ export default function Almoxarifado() {
                         <span className={m.tipo === 'entrada' ? 'text-[#34D399]' : 'text-[#F87171]'}>
                           {m.tipo === 'entrada' ? '+' : '-'}{m.quantidade}
                         </span>
-                        <span className="text-[#6B7280]"> · {m.tipo === 'entrada' ? 'Entrada' : m.tipo === 'saida_requisicao' ? 'Saída (req.)' : 'Saída manual'}</span>
-                        {m.observacao && <span className="text-[#454A54] block truncate">{m.observacao}</span>}
+                        <span className="text-[#9198A3]"> · {m.tipo === 'entrada' ? 'Entrada' : m.tipo === 'saida_requisicao' ? 'Saída (req.)' : 'Saída manual'}</span>
+                        {m.observacao && <span className="text-[#8A909C] block truncate">{m.observacao}</span>}
                       </div>
                       <div className="text-right shrink-0 ml-2">
-                        <span className="text-[#6B7280]">saldo {m.saldo_apos}</span>
-                        <span className="text-[#454A54] block">{new Date(m.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</span>
+                        <span className="text-[#9198A3]">saldo {m.saldo_apos}</span>
+                        <span className="text-[#8A909C] block">{new Date(m.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</span>
                       </div>
                     </div>
                   ))}
@@ -493,24 +494,24 @@ export default function Almoxarifado() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#9198A3]">
                   {m.tipo === 'entrada' ? 'Entrada' : m.tipo === 'saida_requisicao' ? 'Saída (requisição)' : 'Saída manual'}
                   {m.ordens_servico && ` — OS #${m.ordens_servico.numero}`}
                 </p>
-                <p className="text-xs text-[#6B7280]">Saldo: {m.saldo_apos} {m.almoxarifado_itens?.unidade}</p>
+                <p className="text-xs text-[#9198A3]">Saldo: {m.saldo_apos} {m.almoxarifado_itens?.unidade}</p>
               </div>
               <div className="mt-2 pt-2 border-t border-[#23262E] space-y-1.5">
                 <div className="flex items-center gap-1.5">
                   <IconArrowUp size={12} className="text-[#34D399] shrink-0" />
-                  <span className="text-xs text-[#6B7280]">Entregou:</span>
+                  <span className="text-xs text-[#9198A3]">Entregou:</span>
                   <span className="text-xs text-[#A8ADB8] font-medium">{m.entregue_por?.nome || '—'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <IconArrowDown size={12} className="text-[#FB8C3E] shrink-0" />
-                  <span className="text-xs text-[#6B7280]">Retirou:</span>
+                  <span className="text-xs text-[#9198A3]">Retirou:</span>
                   <span className="text-xs text-[#A8ADB8] font-medium">{m.retirado_por?.nome || '—'}</span>
                 </div>
-                <p className="text-xs text-[#454A54] pt-0.5">
+                <p className="text-xs text-[#8A909C] pt-0.5">
                   {new Date(m.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { hojeISO, dataISO } from '../lib/datas';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -17,8 +18,9 @@ export const auditService = {
     try {
       let ator = null;
       try { ator = JSON.parse(localStorage.getItem('mkorp_sessao') || 'null'); } catch { /* noop */ }
-      let uid = ator?.id;
-      if (!uid) { const { data } = await supabase.auth.getUser(); uid = data?.user?.id ?? null; }
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess?.session?.user?.id ?? null;
+      if (!uid) return;
       await supabase.from('audit_log').insert({
         usuario_id: uid, usuario_nome: ator?.nome ?? null,
         acao, entidade, entidade_id: entidade_id != null ? String(entidade_id) : null,
@@ -43,14 +45,31 @@ export const auditService = {
 // ==================== AUTH ====================
 export const authService = {
   login: async (email, senha) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
-    if (error) throw new Error('E-mail ou senha incorretos.');
+    let data, error;
+    try {
+      ({ data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha }));
+    } catch {
+      throw new Error('Sem conexão com o servidor. Verifique a internet e tente novamente.');
+    }
+    if (error) {
+      if (error.status === 0 || /fetch|network/i.test(error.message || '')) {
+        throw new Error('Sem conexão com o servidor. Verifique a internet e tente novamente.');
+      }
+      throw new Error('E-mail ou senha incorretos.');
+    }
     const { data: perfil, error: perfilError } = await supabase
       .from('usuarios')
       .select('*')
       .eq('id', data.user.id)
       .single();
-    if (perfilError || !perfil) throw new Error('Usuário não encontrado no sistema.');
+    if (perfilError || !perfil) {
+      await supabase.auth.signOut();
+      throw new Error('Usuário não encontrado no sistema.');
+    }
+    if (perfil.ativo === false) {
+      await supabase.auth.signOut();
+      throw new Error('Usuário desativado. Procure o administrador.');
+    }
     return { user: data.user, perfil };
   },
   logout: async () => {
@@ -59,11 +78,12 @@ export const authService = {
   getSession: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return { data: { session: null } };
-    const { data: perfil } = await supabase
+    const { data: perfil, error } = await supabase
       .from('usuarios')
       .select('*')
       .eq('id', session.user.id)
       .single();
+    if (error && !perfil) return { data: { session: null }, error };
     return { data: { session: perfil ? { user: session.user, perfil } : null } };
   },
   alterarSenha: async (novaSenha) => {
@@ -108,7 +128,7 @@ export const usuariosService = {
       .select('id, nome, email, cargo, matricula, telefone, ativo, avatar_url, data_admissao, acessos')
       .eq('id', id).single();
     if (error) return null;
-    const { data: doc } = await supabase.from('usuarios_documentos').select('cpf').eq('usuario_id', id).single();
+    const { data: doc } = await supabase.from('usuarios_documentos').select('cpf').eq('usuario_id', id).maybeSingle();
     return { ...data, cpf: doc?.cpf ?? '' };
   },
   create: async (dados) => {
@@ -252,7 +272,7 @@ export const ordensServicoService = {
     }
     const { data, error } = await supabase
       .from('ordens_servico')
-      .insert({ ...dados, numero, data_abertura: new Date().toISOString().split('T')[0] })
+      .insert({ ...dados, numero, data_abertura: hojeISO() })
       .select('*, contratos(nome), usuarios(nome)')
       .single();
     if (error) throw error;
@@ -299,15 +319,16 @@ export const registrosCampoService = {
     if (error) throw error;
     // Se status_apos é resolvido, atualiza a OS
     if (dados.status_apos === 'resolvido') {
-      await supabase
+      const { error: osErr } = await supabase
         .from('ordens_servico')
-        .update({ status: 'concluida', data_conclusao: new Date().toISOString().split('T')[0] })
+        .update({ status: 'concluida', data_conclusao: hojeISO() })
         .eq('id', dados.os_id);
+      if (osErr) throw new Error('Registro salvo, mas não foi possível concluir a OS: ' + osErr.message);
     }
     return data;
   },
   uploadFoto: async (arquivo) => {
-    const nome = `${Date.now()}_${arquivo.name}`;
+    const nome = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${arquivo.name}`;
     const { data, error } = await supabase.storage
       .from('fotos-campo')
       .upload(nome, arquivo, { cacheControl: '3600', upsert: false });
@@ -325,7 +346,7 @@ export const pontoService = {
       .select('*')
       .eq('usuario_id', usuario_id)
       .eq('data', data)
-      .single();
+      .maybeSingle();
     return result || null;
   },
   getSemana: async (usuario_id, data_inicio, data_fim) => {
@@ -340,7 +361,7 @@ export const pontoService = {
     return data;
   },
   getTodos: async (filtros = {}) => {
-    let q = supabase.from('controle_ponto').select('*, usuarios(nome)').order('data', { ascending: false });
+    let q = supabase.from('controle_ponto').select('*, usuarios!usuario_id(nome)').order('data', { ascending: false });
     if (filtros.usuario_id) q = q.eq('usuario_id', filtros.usuario_id);
     if (filtros.data_inicio) q = q.gte('data', filtros.data_inicio);
     if (filtros.data_fim)    q = q.lte('data', filtros.data_fim);
@@ -349,19 +370,20 @@ export const pontoService = {
     if (error) throw error;
     return data;
   },
+  // upsert atômico por (usuario_id, data): dois toques rápidos não geram erro de duplicidade.
+  // O servidor recusa alteração de ponto enviado/aprovado/fechado (RLS + trigger).
   registrar: async (dados) => {
-    const { data: existente } = await supabase
-      .from('controle_ponto')
-      .select('id')
-      .eq('usuario_id', dados.usuario_id)
-      .eq('data', dados.data)
-      .single();
-    if (existente) {
-      const { data, error } = await supabase.from('controle_ponto').update(dados).eq('id', existente.id).select().single();
-      if (error) throw error;
-      return data;
+    // campos de horário vazios ('') viram NULL — '' é inválido para colunas `time`
+    // (antes: enviar o ponto sem almoço falhava com "invalid input syntax for type time")
+    const limpo = { ...dados };
+    for (const k of ['hora_entrada', 'hora_saida', 'hora_almoco_saida', 'hora_almoco_volta']) {
+      if (k in limpo && !limpo[k]) limpo[k] = null;
     }
-    const { data, error } = await supabase.from('controle_ponto').insert(dados).select().single();
+    const { data, error } = await supabase
+      .from('controle_ponto')
+      .upsert(limpo, { onConflict: 'usuario_id,data' })
+      .select()
+      .single();
     if (error) throw error;
     return data;
   },
@@ -424,9 +446,9 @@ export const almoxarifadoService = {
     return data;
   },
   criarItem: async (dados) => {
+    // a linha de saldo (quantidade 0) é criada por trigger no banco
     const { data: item, error } = await supabase.from('almoxarifado_itens').insert({ ...dados, ativo: true }).select().single();
     if (error) throw error;
-    await supabase.from('almoxarifado_estoque').insert({ item_id: item.id, quantidade: 0 });
     return item;
   },
   atualizarItem: async (id, dados) => {
@@ -434,25 +456,16 @@ export const almoxarifadoService = {
     if (error) throw error;
     return data;
   },
+  // Entrada/saída são transacionais no servidor (trava de saldo, validação e auditoria)
   entrada: async (item_id, quantidade, observacao = '') => {
-    const { data: estoqueAtual } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item_id).single();
-    const saldoNovo = (estoqueAtual?.quantidade ?? 0) + quantidade;
-    await supabase.from('almoxarifado_estoque').update({ quantidade: saldoNovo }).eq('item_id', item_id);
-    await supabase.from('movimentacoes_estoque').insert({
-      item_id, tipo: 'entrada', quantidade, saldo_apos: saldoNovo, observacao,
-    });
-    auditService.log({ acao: 'estoque_entrada', entidade: 'almoxarifado_itens', entidade_id: item_id, dados_novos: { quantidade, saldo_apos: saldoNovo, observacao } });
+    const { data, error } = await supabase.rpc('estoque_entrada', { p_item_id: item_id, p_quantidade: Number(quantidade), p_observacao: observacao });
+    if (error) throw new Error(error.message);
+    return data;
   },
   saida: async (item_id, quantidade, observacao = '') => {
-    const { data: estoqueAtual } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item_id).single();
-    const saldoAtual = estoqueAtual?.quantidade ?? 0;
-    if (quantidade > saldoAtual) throw new Error(`Estoque insuficiente (saldo: ${saldoAtual}).`);
-    const saldoNovo = saldoAtual - quantidade;
-    await supabase.from('almoxarifado_estoque').update({ quantidade: saldoNovo }).eq('item_id', item_id);
-    await supabase.from('movimentacoes_estoque').insert({
-      item_id, tipo: 'saida_manual', quantidade, saldo_apos: saldoNovo, observacao,
-    });
-    auditService.log({ acao: 'estoque_saida', entidade: 'almoxarifado_itens', entidade_id: item_id, dados_novos: { quantidade, saldo_apos: saldoNovo, observacao } });
+    const { data, error } = await supabase.rpc('estoque_saida', { p_item_id: item_id, p_quantidade: Number(quantidade), p_observacao: observacao });
+    if (error) throw new Error(error.message);
+    return data;
   },
 };
 
@@ -461,7 +474,7 @@ export const requisicoesService = {
   getAll: async (filtros = {}) => {
     let q = supabase
       .from('requisicoes')
-      .select('*, usuarios(nome), ordens_servico(numero, descricao), requisicao_itens(*, almoxarifado_itens(nome, unidade))')
+      .select('*, usuarios!usuario_id(nome), ordens_servico(numero, descricao), requisicao_itens(*, almoxarifado_itens(nome, unidade))')
       .order('criado_em', { ascending: false });
     if (filtros.status) q = q.eq('status', filtros.status);
     if (filtros.usuario_id) q = q.eq('usuario_id', filtros.usuario_id);
@@ -469,54 +482,28 @@ export const requisicoesService = {
     if (error) throw error;
     return data;
   },
+  // Criação atômica (requisição + itens) e aprovação idempotente no servidor
   create: async (dados, itens) => {
-    const { data: req, error } = await supabase
-      .from('requisicoes')
-      .insert({ ...dados, status: 'pendente' })
-      .select()
-      .single();
-    if (error) throw error;
-    await supabase.from('requisicao_itens').insert(itens.map(i => ({ ...i, requisicao_id: req.id })));
+    const { data: id, error } = await supabase.rpc('criar_requisicao', { p_os_id: dados.os_id || null, p_itens: itens });
+    if (error) throw new Error(error.message);
     const { data: completa } = await supabase
       .from('requisicoes')
-      .select('*, usuarios(nome), ordens_servico(numero, descricao), requisicao_itens(*, almoxarifado_itens(nome, unidade))')
-      .eq('id', req.id)
+      .select('*, usuarios!usuario_id(nome), ordens_servico(numero, descricao), requisicao_itens(*, almoxarifado_itens(nome, unidade))')
+      .eq('id', id)
       .single();
     return completa;
   },
   aprovar: async (id) => {
-    const { data: req } = await supabase
-      .from('requisicoes')
-      .select('*, requisicao_itens(*)')
-      .eq('id', id)
-      .single();
-    // Itens de texto livre (sem vínculo no catálogo) não têm de onde baixar estoque — pulados aqui.
-    for (const item of req.requisicao_itens.filter(i => i.item_id)) {
-      const { data: est } = await supabase.from('almoxarifado_estoque').select('quantidade').eq('item_id', item.item_id).single();
-      if (!est || est.quantidade < item.quantidade) {
-        throw new Error(`Estoque insuficiente para item ${item.item_id}`);
-      }
-      const saldoNovo = est.quantidade - item.quantidade;
-      await supabase.from('almoxarifado_estoque').update({ quantidade: saldoNovo }).eq('item_id', item.item_id);
-      await supabase.from('movimentacoes_estoque').insert({
-        item_id: item.item_id, tipo: 'saida_requisicao',
-        quantidade: item.quantidade, saldo_apos: saldoNovo,
-        observacao: `Requisição ${id}`,
-      });
-    }
-    await supabase
-      .from('requisicoes')
-      .update({ status: 'aprovada', aprovado_em: new Date().toISOString() })
-      .eq('id', id);
-    auditService.log({ acao: 'requisicao_aprovada', entidade: 'requisicoes', entidade_id: id });
+    const { error } = await supabase.rpc('aprovar_requisicao', { p_requisicao_id: id });
+    if (error) throw new Error(error.message);
   },
   rejeitar: async (id, motivo) => {
-    const { error } = await supabase
-      .from('requisicoes')
-      .update({ status: 'rejeitada', motivo_rejeicao: motivo })
-      .eq('id', id);
-    if (error) throw error;
-    auditService.log({ acao: 'requisicao_rejeitada', entidade: 'requisicoes', entidade_id: id, motivo });
+    const { error } = await supabase.rpc('rejeitar_requisicao', { p_requisicao_id: id, p_motivo: motivo });
+    if (error) throw new Error(error.message);
+  },
+  cancelar: async (id) => {
+    const { error } = await supabase.rpc('cancelar_requisicao', { p_requisicao_id: id });
+    if (error) throw new Error(error.message);
   },
   // Almoxarife responde um item digitado por texto livre (não cadastrado no catálogo)
   responderItemLivre: async (itemReqId, { disponivel, resposta_almoxarife, previsao_data }) => {
@@ -599,7 +586,7 @@ export const servicosService = {
     if (contrato_id) {
       const { data: esp } = await supabase
         .from('precos_servico').select('valor')
-        .eq('tipo_servico_id', tipo_servico_id).eq('contrato_id', contrato_id).single();
+        .eq('tipo_servico_id', tipo_servico_id).eq('contrato_id', contrato_id).maybeSingle();
       if (esp) return Number(esp.valor);
     }
     const { data: tipo } = await supabase.from('tipos_servico').select('valor_padrao').eq('id', tipo_servico_id).single();
@@ -683,7 +670,7 @@ export const medicaoService = {
   },
   getStatus: async (contrato_id, ano, mes) => {
     const { data } = await supabase.from('medicoes').select('*')
-      .eq('contrato_id', contrato_id).eq('ano', ano).eq('mes', mes).single();
+      .eq('contrato_id', contrato_id).eq('ano', ano).eq('mes', mes).maybeSingle();
     return data || null;
   },
 };
@@ -691,7 +678,7 @@ export const medicaoService = {
 // ==================== DASHBOARD ====================
 export const dashboardService = {
   getResumo: async () => {
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = hojeISO();
     const [os, ponto, requisicoes, estoque] = await Promise.all([
       supabase.from('ordens_servico').select('status, tipo_defeito, data_abertura, prazo'),
       supabase.from('controle_ponto').select('hora_saida').eq('data', hoje),
@@ -709,7 +696,7 @@ export const dashboardService = {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const iso = d.toISOString().split('T')[0];
+      const iso = dataISO(d);
       os_por_dia.push({
         dia: DIAS_SEMANA[d.getDay()],
         total: osData.filter(o => o.data_abertura === iso).length,

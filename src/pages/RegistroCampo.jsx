@@ -84,14 +84,16 @@ export default function RegistroCampo() {
     if (!osId || !descricao) return alert('Preencha a OS e a descrição.');
     setEnviando(true);
     try {
-      const registro = await registrosCampoService.create({
+      // Envia as fotos ANTES e grava o registro uma única vez.
+      // (antes: inseria o registro e depois tentava um 2º INSERT com o mesmo id para anexar as fotos,
+      //  o que falhava — o usuário via erro, as fotos se perdiam e o reenvio duplicava o registro)
+      const urls = fotos.length > 0
+        ? await Promise.all(fotos.map(f => registrosCampoService.uploadFoto(f)))
+        : [];
+      await registrosCampoService.create({
         os_id: osId, usuario_id: perfil.id, descricao, numero_poste: numeroPoste,
-        latitude: coordenadas?.lat, longitude: coordenadas?.lng, status_apos: statusApos, fotos: [],
+        latitude: coordenadas?.lat, longitude: coordenadas?.lng, status_apos: statusApos, fotos: urls,
       });
-      if (fotos.length > 0) {
-        const urls = await Promise.all(fotos.map(f => registrosCampoService.uploadFoto(f, registro.id)));
-        await registrosCampoService.create({ ...registro, fotos: urls });
-      }
       queryClient.invalidateQueries({ queryKey: ['ordens-servico'] });
       setSucesso(true);
       setDescricao(''); setNumeroPoste(''); setFotos([]); setCoordenadas(null); setOsId('');
@@ -193,7 +195,7 @@ export default function RegistroCampo() {
         <input type="file" ref={fileRef} accept="image/*" multiple capture="environment" onChange={handleFoto} className="hidden" />
         <button
           onClick={() => fileRef.current.click()}
-          className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-[#30353F] rounded-xl text-sm text-[#6B7280] active:bg-[#22262F] transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-[#30353F] rounded-xl text-sm text-[#9198A3] active:bg-[#22262F] transition-colors"
         >
           <IconCamera size={16} /> Tirar foto ou selecionar
         </button>

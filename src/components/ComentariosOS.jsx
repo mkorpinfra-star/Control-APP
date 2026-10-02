@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { comentariosService } from '../services/supabase';
 import { FotoCapturaGaleria } from './FotoCaptura';
@@ -53,7 +53,7 @@ export default function ComentariosOS({ osId }) {
           {[1, 2].map(i => <div key={i} className="h-14 bg-[#1A1D24] rounded-2xl animate-pulse" />)}
         </div>
       ) : comentarios.length === 0 ? (
-        <p className="text-sm text-[#454A54] text-center py-6">Nenhuma mensagem ainda</p>
+        <p className="text-sm text-[#8A909C] text-center py-6">Nenhuma mensagem ainda</p>
       ) : (
         <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
           {comentarios.map(c => {
@@ -64,7 +64,7 @@ export default function ComentariosOS({ osId }) {
                   {iniciais(c.usuarios?.nome)}
                 </div>
                 <div className={`max-w-[80%] ${ehMeu ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
-                  <span className="text-[10px] text-[#454A54]">{c.usuarios?.nome}</span>
+                  <span className="text-[10px] text-[#8A909C]">{c.usuarios?.nome}</span>
                   {c.foto_url && (
                     <img src={c.foto_url} alt="foto" className="rounded-xl max-w-full max-h-40 object-cover border border-[#23262E]" />
                   )}
@@ -73,7 +73,7 @@ export default function ComentariosOS({ osId }) {
                       {c.texto}
                     </div>
                   )}
-                  <span className="text-[9px] text-[#454A54]">
+                  <span className="text-[9px] text-[#8A909C]">
                     {new Date(c.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -100,7 +100,7 @@ export default function ComentariosOS({ osId }) {
             onKeyDown={handleKeyDown}
             placeholder="Escreva uma mensagem..."
             rows={1}
-            className="w-full bg-transparent text-sm text-[#F5F5F0] placeholder:text-[#454A54] resize-none focus:outline-none"
+            className="w-full bg-transparent text-sm text-[#F5F5F0] placeholder:text-[#8A909C] resize-none focus:outline-none"
           />
         </div>
         <FotoCapturaGaleria onFoto={setFoto} label="" />

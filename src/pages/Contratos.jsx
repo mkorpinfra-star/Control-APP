@@ -82,7 +82,7 @@ export default function Contratos() {
     <div className="pb-32 bg-[#0A0B0D] min-h-full">
       <div className="px-4 pt-4 pb-2">
         <div className="relative">
-          <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+          <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9198A3]" />
           <input
             type="text"
             placeholder="Buscar contrato ou município..."
@@ -94,12 +94,12 @@ export default function Contratos() {
       </div>
 
       <div className="px-4 py-2">
-        <p className="text-xs text-[#6B7280]">{filtrados.length} contrato{filtrados.length !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-[#9198A3]">{filtrados.length} contrato{filtrados.length !== 1 ? 's' : ''}</p>
       </div>
 
       <div className="px-4 space-y-3">
         {filtrados.length === 0 ? (
-          <div className="text-center py-16 text-[#6B7280]">
+          <div className="text-center py-16 text-[#9198A3]">
             <IconBuilding size={48} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">Nenhum contrato cadastrado</p>
           </div>
@@ -111,12 +111,12 @@ export default function Contratos() {
                 <span className={STATUS_CONTRATO[c.status]}>{STATUS_LABEL[c.status]}</span>
               </div>
               <div className="flex items-center gap-1 text-xs text-[#A8ADB8]">
-                <IconMapPin size={12} className="text-[#6B7280]" />
+                <IconMapPin size={12} className="text-[#9198A3]" />
                 <span>{c.municipio} — {c.estado}</span>
               </div>
-              {c.responsavel && <p className="text-xs text-[#6B7280] mt-1">Resp.: {c.responsavel}</p>}
+              {c.responsavel && <p className="text-xs text-[#9198A3] mt-1">Resp.: {c.responsavel}</p>}
               {(c.data_inicio || c.data_fim) && (
-                <p className="text-xs text-[#6B7280] mt-1">
+                <p className="text-xs text-[#9198A3] mt-1">
                   {c.data_inicio ? new Date(c.data_inicio).toLocaleDateString('pt-BR') : '—'}
                   {' → '}
                   {c.data_fim ? new Date(c.data_fim).toLocaleDateString('pt-BR') : 'Indeterminado'}
@@ -124,7 +124,7 @@ export default function Contratos() {
               )}
               <div className="flex items-center gap-3 mt-2 pt-2 border-t border-[#23262E] text-xs">
                 {podeVerValores && c.valor != null && <span className="text-[#34D399] font-medium">{brl(c.valor)}</span>}
-                {c.sla_horas != null && <span className="text-[#6B7280]">SLA: {c.sla_horas}h</span>}
+                {c.sla_horas != null && <span className="text-[#9198A3]">SLA: {c.sla_horas}h</span>}
               </div>
             </button>
           ))
@@ -134,6 +134,7 @@ export default function Contratos() {
       {/* FAB Novo contrato */}
       <button
         onClick={abrirNovo}
+        aria-label="Novo contrato"
         className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#F08020] shadow-[0_8px_24px_rgba(240,128,32,0.4)] flex items-center justify-center active:scale-95 transition-transform"
       >
         <IconPlus size={24} className="text-white" />
