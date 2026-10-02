@@ -98,8 +98,9 @@ button, a, [role="button"] {
 input:focus, select:focus, textarea:focus { outline: none; }
 
 /* Safe areas */
-.safe-area-top { padding-top: env(safe-area-inset-top); }
-.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+/* Android 15+ é edge-to-edge: env() (WebView >= 140) ou --safe-area-inset-* injetado pelo SystemBars do Capacitor 8 */
+.safe-area-top { padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px)); }
+.safe-area-bottom { padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)); }
 
 @media print {
   body { background: white; }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useFecharComVoltar } from '../lib/voltar';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,6 +23,7 @@ export default function NotificacoesSino() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [aberto, setAberto] = useState(false);
+  useFecharComVoltar(aberto, () => setAberto(false));
 
   const { data: naoLidas = 0 } = useQuery({
     queryKey: ['notif-count', perfil?.id],

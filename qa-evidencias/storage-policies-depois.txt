@@ -1,0 +1,5 @@
+OK  foto de campo permitida
+OK  outro bucket negado
+OK  avatar de outra pessoa negado
+OK  próprio avatar permitido
+OK  usuário inativo negado

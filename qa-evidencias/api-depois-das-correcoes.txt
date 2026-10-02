@@ -10,25 +10,30 @@ ok 9 - F9 funcionário cancela a própria requisição pendente
 ok 10 - F10 responsável em campo: vê sua OS, inicia, registra execução e comenta
 ok 11 - F11 supervisor cria OS e contrato; admin lê auditoria
 ok 12 - F12 notificações: qualquer ativo notifica gestores; cada um só lê as suas
-ok 13 - S1 funcionário NÃO consegue se promover a admin
-ok 14 - S2 funcionário NÃO lê CPF de outros (usuarios_documentos)
-ok 15 - S3 funcionário NÃO altera ponto de outro funcionário
-ok 16 - S4 funcionário NÃO aprova o próprio ponto
-ok 17 - S5 funcionário NÃO altera saldo de estoque direto na tabela
-ok 18 - S6 funcionário NÃO lança movimentação de estoque
-ok 19 - S7 trilha de auditoria: funcionário não lê e ninguém apaga/edita
-ok 20 - S8 funcionário NÃO altera matriz de acessos da empresa
-ok 21 - S9 conta criada por auto-cadastro (sem perfil) não lê nada
-ok 22 - S10 usuário desativado não acessa dados
-ok 23 - S11 funcionário NÃO apaga OS nem contrato
-ok 24 - S12 funcionário vê só as próprias requisições
-ok 25 - B1 aprovar a mesma requisição 2x baixa o estoque uma única vez
-ok 26 - B2 aprovações concorrentes não deixam saldo negativo
-ok 27 - B3 quantidades inválidas são rejeitadas
-ok 28 - B4 funcionário não aprova requisição nem lança entrada
-ok 29 - B5 requisição rejeitada não pode ser aprovada depois
-ok 30 - P1 ponto enviado não pode ser alterado pelo funcionário
-ok 31 - P2 toda alteração de horário fica registrada com hora do servidor
-ok 32 - P3 supervisor aprova; ponto fechado não volta a ser editado
-# pass 32
+ok 13 - E1 admin cria funcionário pela função: login + perfil + CPF + auditoria
+ok 14 - E2 funcionário NÃO cria usuário pela função
+ok 15 - E3 validações: cargo inválido, senha curta, e-mail inválido
+ok 16 - E4 reset de senha: admin pode, funcionário não, senha curta recusada
+ok 17 - E5 IA: funcionário de campo é bloqueado; sem token é 401
+ok 18 - S1 funcionário NÃO consegue se promover a admin
+ok 19 - S2 funcionário NÃO lê CPF de outros (usuarios_documentos)
+ok 20 - S3 funcionário NÃO altera ponto de outro funcionário
+ok 21 - S4 funcionário NÃO aprova o próprio ponto
+ok 22 - S5 funcionário NÃO altera saldo de estoque direto na tabela
+ok 23 - S6 funcionário NÃO lança movimentação de estoque
+ok 24 - S7 trilha de auditoria: funcionário não lê e ninguém apaga/edita
+ok 25 - S8 funcionário NÃO altera matriz de acessos da empresa
+ok 26 - S9 conta criada por auto-cadastro (sem perfil) não lê nada
+ok 27 - S10 usuário desativado não acessa dados
+ok 28 - S11 funcionário NÃO apaga OS nem contrato
+ok 29 - S12 funcionário vê só as próprias requisições
+ok 30 - B1 aprovar a mesma requisição 2x baixa o estoque uma única vez
+ok 31 - B2 aprovações concorrentes não deixam saldo negativo
+ok 32 - B3 quantidades inválidas são rejeitadas
+ok 33 - B4 funcionário não aprova requisição nem lança entrada
+ok 34 - B5 requisição rejeitada não pode ser aprovada depois
+ok 35 - P1 ponto enviado não pode ser alterado pelo funcionário
+ok 36 - P2 toda alteração de horário fica registrada com hora do servidor
+ok 37 - P3 supervisor aprova; ponto fechado não volta a ser editado
+# pass 37
 # fail 0

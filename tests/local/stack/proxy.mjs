@@ -24,6 +24,16 @@ http.createServer((req, res) => {
       res.end(JSON.stringify({ Key: path, Id: path, path: path.split('/').slice(1).join('/') }));
     }); return;
   }
-  if (req.url.startsWith('/functions/v1')) { res.writeHead(200, { ...cors, 'content-type': 'application/json' }); return res.end('{"ok":true}'); }
+  if (req.url.startsWith('/functions/v1/')) {
+    // FN_PORTS="admin-reset-senha=9101,admin-criar-usuario=9102,ia-imagem=9103" (Deno local, ver subir-funcoes.sh)
+    const nome = req.url.slice('/functions/v1/'.length).split(/[/?]/)[0];
+    const porta = Object.fromEntries((process.env.FN_PORTS || '').split(',').filter(Boolean).map(x => x.split('=')))[nome];
+    if (!porta) { res.writeHead(404, { ...cors, 'content-type': 'application/json' }); return res.end('{"error":"função não publicada localmente"}'); }
+    const p = http.request({ host: '127.0.0.1', port: Number(porta), path: '/', method: req.method, headers: req.headers }, r => {
+      res.writeHead(r.statusCode, { ...r.headers, ...cors }); r.pipe(res);
+    });
+    p.on('error', e => { res.writeHead(502, cors); res.end(String(e)); });
+    return req.pipe(p);
+  }
   res.writeHead(404, cors); res.end('not found');
 }).listen(54321, '127.0.0.1', () => console.log('gateway on 54321'));

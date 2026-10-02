@@ -6,23 +6,17 @@ import { STATUS_PONTO } from '../lib/theme';
 import { IconClock, IconCheck, IconSend, IconAlertCircle, IconPlayerPlay, IconPlayerStop, IconMapPin, IconPencil, IconCoffee, IconCalendar } from '@tabler/icons-react';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+import { useFecharComVoltar } from '../lib/voltar';
+import { calcHoras } from '../lib/jornada';
 import { hojeISO, addDias, segundaDaSemana as getSegunda, horaAgoraHHMM } from '../lib/datas';
 
-const DIAS    = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
-const DIAS_PT = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-const DIAS_SH = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const DIAS    = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+const DIAS_PT = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+const DIAS_SH = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+// índice seg=0 … dom=6 a partir de Date.getDay() (dom=0)
+const idxDia = (d) => (d.getDay() + 6) % 7;
 const MESES   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-function calcHoras(entrada, saida, almSaida, almVolta) {
-  if (!entrada || !saida) return { normais: 0, extras: 0 };
-  const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-  let total = toMin(saida) - toMin(entrada);
-  if (almSaida && almVolta) total -= (toMin(almVolta) - toMin(almSaida));
-  total = Math.max(0, total);
-  const normais = Math.min(total, 480) / 60;
-  const extras  = Math.max(0, total - 480) / 60;
-  return { normais: parseFloat(normais.toFixed(2)), extras: parseFloat(extras.toFixed(2)) };
-}
 function horaAgora() {
   return horaAgoraHHMM();
 }
@@ -62,13 +56,11 @@ export default function BaterPonto() {
   const queryClient = useQueryClient();
 
   const [semanaInicio, setSemanaInicio] = useState(getSegunda(new Date()));
-  const [diaIdx, setDiaIdx] = useState(() => {
-    const dow = new Date().getDay();
-    return dow === 0 ? 0 : Math.min(dow - 1, 5);
-  });
+  const [diaIdx, setDiaIdx] = useState(() => idxDia(new Date()));
   const [osId, setOsId] = useState('');
   const [campos, setCampos] = useState({ hora_entrada: '', hora_saida: '', hora_almoco_saida: '', hora_almoco_volta: '' });
   const [showConfirm, setShowConfirm] = useState(false);
+  useFecharComVoltar(showConfirm, () => setShowConfirm(false));
   const [editandoManual, setEditandoManual] = useState(false);
   const [capturando, setCapturando] = useState(null); // 'entrada' | 'saida' | 'almoco_saida' | 'almoco_volta'
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
@@ -87,9 +79,27 @@ export default function BaterPonto() {
     queryFn: () => pontoService.getMeuPonto(perfil?.id, dataAtual),
     enabled: !!perfil?.id,
   });
+  // Ao abrir o app depois da meia-noite com o expediente de ontem ainda aberto, mostra ontem para encerrar
+  const { data: pontoOntem } = useQuery({
+    queryKey: ['meu-ponto', perfil?.id, 'ontem', hojeISO()],
+    queryFn: () => pontoService.getMeuPonto(perfil?.id, addDias(hojeISO(), -1)),
+    enabled: !!perfil?.id,
+  });
+  const [checouOntem, setChecouOntem] = useState(false);
+  useEffect(() => {
+    if (checouOntem || pontoOntem === undefined) return;
+    setChecouOntem(true);
+    if (pontoOntem?.hora_entrada && !pontoOntem?.hora_saida && ['rascunho', 'rejeitado'].includes(pontoOntem.status)) {
+      const ontem = addDias(hojeISO(), -1);
+      setSemanaInicio(getSegunda(ontem));
+      setDiaIdx(idxDia(new Date(ontem + 'T12:00:00')));
+      setAviso({ tipo: 'alerta', texto: `Seu expediente de ontem (iniciado às ${pontoOntem.hora_entrada.slice(0, 5)}) ainda está aberto. Encerre-o abaixo.` });
+    }
+  }, [pontoOntem, checouOntem]);
+
   const { data: semana = [] } = useQuery({
     queryKey: ['minha-semana', perfil?.id, semanaInicio],
-    queryFn: () => pontoService.getSemana(perfil?.id, semanaInicio, addDias(semanaInicio, 5)),
+    queryFn: () => pontoService.getSemana(perfil?.id, semanaInicio, addDias(semanaInicio, 6)),
     enabled: !!perfil?.id,
   });
   const primeiroDiaMes = `${mesCalendario.ano}-${String(mesCalendario.mes + 1).padStart(2, '0')}-01`;
@@ -153,7 +163,11 @@ export default function BaterPonto() {
   };
   const bloqueado = ['enviado', 'aprovado', 'fechado'].includes(pontoHoje?.status);
   const hojeStr = hojeISO();
-  const ehHoje = dataAtual === hojeStr;
+  const ontemStr = addDias(hojeStr, -1);
+  // Jornada que passou da meia-noite: o expediente de ontem continua "em aberto" até ser encerrado
+  const emAbertoDeOntem = dataAtual === ontemStr && !!pontoHoje?.hora_entrada && !pontoHoje?.hora_saida
+    && ['rascunho', 'rejeitado', undefined].includes(pontoHoje?.status);
+  const ehHoje = dataAtual === hojeStr || emAbertoDeOntem;
   const getPontoDia = (idx) => semana.find(p => p.data === addDias(semanaInicio, idx));
 
   // Marca um momento (entrada/saída/almoço) com hora atual + GPS, salva na hora
@@ -204,7 +218,7 @@ export default function BaterPonto() {
         </div>
 
         {!mostrarCalendario ? (
-          <div className="grid grid-cols-6 gap-1">
+          <div className="grid grid-cols-7 gap-1">
             {DIAS.map((_, i) => {
               const p = getPontoDia(i);
               const isHoje = addDias(semanaInicio, i) === hojeStr;
@@ -239,9 +253,7 @@ export default function BaterPonto() {
             onMudarMes={(delta) => setMesCalendario(m => { const d = new Date(m.ano, m.mes + delta, 1); return { ano: d.getFullYear(), mes: d.getMonth() }; })}
             onSelecionarDia={(dataStr) => {
               setSemanaInicio(getSegunda(dataStr));
-              const d = new Date(dataStr + 'T12:00:00');
-              const dow = d.getDay();
-              setDiaIdx(dow === 0 ? 0 : Math.min(dow - 1, 5));
+              setDiaIdx(idxDia(new Date(dataStr + 'T12:00:00')));
               setMostrarCalendario(false);
             }}
           />
@@ -486,7 +498,7 @@ function CalendarioMensal({ ano, mes, pontos, onMudarMes, onSelecionarDia }) {
           const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const p = pontoDoDia(d);
           const isHoje = dataStr === hojeStr;
-          const isFimSemana = (offset + d - 1) % 7 === 6; // domingo (a visão semanal vai de seg a sáb)
+          const isFimSemana = false; // todos os dias podem ter marcação (equipes de campo trabalham em plantões)
           return (
             <button
               key={i}

@@ -67,10 +67,10 @@ export default function BankingLayout() {
       {/* Safe Area Styles + iOS Momentum Scroll */}
       <style jsx global>{`
         .safe-area-top {
-          padding-top: env(safe-area-inset-top);
+          padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
         }
         .safe-area-bottom {
-          padding-bottom: env(safe-area-inset-bottom);
+          padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
         }
         * {
           -webkit-tap-highlight-color: transparent;

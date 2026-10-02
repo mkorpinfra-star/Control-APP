@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useFecharComVoltar } from '../lib/voltar';
 import { IconUser, IconLock, IconSettings, IconInfoCircle, IconLogout, IconX } from '@tabler/icons-react';
 
 export default function ProfileMenu({ isOpen, onClose }) {
@@ -8,6 +9,7 @@ export default function ProfileMenu({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const irPara = (path) => { onClose(); navigate(path); };
+  useFecharComVoltar(isOpen, onClose);
 
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };

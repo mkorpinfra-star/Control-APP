@@ -47,6 +47,33 @@ test('L3 sessão expirada/inválida volta ao login com aviso (antes o app "fingi
   await shot(page, '02-sessao-expirada');
 });
 
+test('L5 esqueci minha senha: pedido pela tela e troca de senha pelo link', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByRole('button', { name: 'Esqueci minha senha' }).click();
+  await page.getByLabel('E-mail para recuperação').fill('eletricista2@teste.local');
+  await page.getByRole('button', { name: 'Enviar link' }).click();
+  await expect(page.getByText(/Se este e-mail estiver cadastrado/)).toBeVisible();
+  await shot(page, '12-recuperar-senha');
+  // o e-mail não é enviado no ambiente local: gera o mesmo link pela API admin
+  const { data, error } = await db.auth.admin.generateLink({ type: 'recovery', email: 'eletricista2@teste.local',
+    options: { redirectTo: new URL('/redefinir-senha', page.url()).href } });
+  if (error) throw error;
+  // GoTrue local monta o link sem o prefixo /auth/v1 do gateway
+  await page.goto(data.properties.action_link.replace(/\/verify\?/, '/auth/v1/verify?').replace(/^http:\/\/127\.0\.0\.1:54321\/auth\/v1\/auth\/v1/, 'http://127.0.0.1:54321/auth/v1'));
+  await page.getByLabel('Nova senha', { exact: true }).fill('Nova@12345');
+  await page.getByLabel('Repita a nova senha').fill('Nova@12345');
+  await page.getByRole('button', { name: 'Salvar nova senha' }).click();
+  await expect(page.getByText('Senha alterada')).toBeVisible();
+  await shot(page, '13-senha-redefinida');
+  await page.getByRole('link', { name: 'Ir para o login' }).click();
+  await page.getByPlaceholder('seu@email.com').fill('eletricista2@teste.local');
+  await page.getByPlaceholder('••••••••').fill('Nova@12345');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.waitForURL(/bater-ponto/);
+  const id = await uid('eletricista2@teste.local');
+  await db.auth.admin.updateUserById(id, { password: 'Teste@12345' });
+});
+
 test('L4 funcionário não abre telas de admin pela URL', async ({ page }) => {
   await entrar(page, 'eletricista');
   for (const rota of ['/funcionarios', '/dashboard', '/auditoria', '/medicao', '/almoxarifado']) {
@@ -94,6 +121,19 @@ test('P3 sem conexão: erro visível, nada é perdido em silêncio', async ({ pa
   await expect(page.getByText(/Não foi possível salvar o ponto/)).toBeVisible();
   await shot(page, '06-ponto-offline');
   await context.setOffline(false);
+});
+
+test('P5 expediente que passou da meia-noite: app abre o dia anterior para encerrar', async ({ page }) => {
+  const id = await uid('supervisor@teste.local');
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  const ontem = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  await db.from('controle_ponto').insert({ usuario_id: id, data: ontem, hora_entrada: '22:00', status: 'rascunho' });
+  await entrar(page, 'supervisor');
+  await page.goto('/bater-ponto');
+  await expect(page.getByText(/expediente de ontem .* ainda está aberto/)).toBeVisible();
+  await shot(page, '14-expediente-aberto-ontem');
+  await page.getByRole('button', { name: /Encerrar expediente/ }).click();
+  await expect.poll(async () => (await db.from('controle_ponto').select('hora_saida').eq('usuario_id', id).eq('data', ontem).single()).data.hora_saida).not.toBeNull();
 });
 
 test('P4 supervisor aprova o ponto enviado (e não vê botão para o próprio)', async ({ page }) => {
@@ -147,6 +187,21 @@ test('C1 registro de campo com foto grava UM registro com a foto e conclui a OS'
   expect(data[0].fotos).toHaveLength(1);
   const { data: os } = await db.from('ordens_servico').select('status').eq('id', data[0].os_id).single();
   expect(os.status).toBe('concluida');
+});
+
+test('U1 admin cadastra funcionário com login pela tela (Edge Function)', async ({ page }) => {
+  await entrar(page, 'admin');
+  await page.goto('/funcionarios');
+  await page.getByRole('button', { name: 'Novo funcionário' }).click();
+  const email = `ui${Date.now()}@teste.local`;
+  await page.getByPlaceholder('Nome do funcionário').fill('Cadastro Pela Tela');
+  await page.getByPlaceholder('email@mkorp.com.br').fill(email);
+  await page.getByPlaceholder('Mínimo 8 caracteres').fill('Senha@1234');
+  await page.getByRole('button', { name: /Criar funcionário/ }).click();
+  await expect(page.locator('main').getByText('Cadastro Pela Tela').first()).toBeVisible();
+  const { data } = await db.from('usuarios').select('cargo, ativo').eq('email', email).single();
+  expect(data.ativo).toBe(true);
+  await shot(page, '11-funcionario-criado');
 });
 
 test('A1 admin percorre todas as telas sem erro de página', async ({ page }) => {

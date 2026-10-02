@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordensServicoService, contratosService, usuariosService, notificacoesService } from '../services/supabase';
 import { STATUS_OS, PRIORIDADE, ui } from '../lib/theme';
 import { hojeISO } from '../lib/datas';
+import { useFecharComVoltar } from '../lib/voltar';
 import { IconPlus, IconSearch, IconMapPin, IconAlertTriangle, IconClipboardList, IconX, IconMessageCircle, IconLoader2, IconPencil } from '@tabler/icons-react';
 import ComentariosOS from '../components/ComentariosOS';
 import ServicosOS from '../components/ServicosOS';
@@ -33,6 +34,7 @@ export default function OrdensServico() {
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
   const [osSelecionada, setOsSelecionada] = useState(null);
+  useFecharComVoltar(!!osSelecionada, () => setOsSelecionada(null));
   const [modalAberto, setModalAberto] = useState(false);
   const [editandoId, setEditandoId] = useState(null); // id da OS em edição (null = criando)
   const [form, setForm] = useState(FORM_INICIAL);

@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
+import Modal from '../components/Modal';
+import { authService } from '../services/supabase';
+
+const EMAIL_SUPORTE = import.meta.env.VITE_EMAIL_SUPORTE || 'af.garcia@gmail.com';
 
 export default function Login() {
   const { login, avisoSessao } = useAuth();
@@ -12,6 +16,21 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
   const [pressed, setPressed] = useState(false);
+  const [recuperar, setRecuperar] = useState(false);
+  const [emailRec, setEmailRec] = useState('');
+  const [estadoRec, setEstadoRec] = useState(''); // '' | 'enviando' | 'ok' | mensagem de erro
+
+  const enviarRecuperacao = async (e) => {
+    e.preventDefault();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailRec.trim())) return setEstadoRec('Informe um e-mail válido.');
+    setEstadoRec('enviando');
+    try {
+      await authService.recuperarSenha(emailRec.trim());
+      setEstadoRec('ok');
+    } catch (err) {
+      setEstadoRec(err.message);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -115,8 +134,8 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setMostrarSenha(v => !v)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A909C] hover:text-[#A8ADB8] transition-colors"
-                  tabIndex={-1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-[#8A909C] hover:text-[#A8ADB8] transition-colors"
+                  aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {mostrarSenha ? <IconEyeOff size={17} /> : <IconEye size={17} />}
                 </button>
@@ -146,10 +165,17 @@ export default function Login() {
             </motion.button>
           </form>
 
-          <div className="mt-5 pt-4 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="mt-5 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <button
+              type="button"
+              onClick={() => { setEmailRec(email); setEstadoRec(''); setRecuperar(true); }}
+              className="text-[12px] text-[#A8ADB8] py-2"
+            >
+              Esqueci minha senha
+            </button>
             <a
-              href="mailto:af.garcia@gmail.com?subject=Solicitação de acesso — Mkorp Control&body=Olá, gostaria de solicitar acesso ao sistema Mkorp Control.%0A%0ANome: %0ACargo: %0AEmpresa: "
-              className="text-[12px] transition-colors"
+              href={`mailto:${EMAIL_SUPORTE}?subject=Solicitação de acesso — Mkorp Control&body=Olá, gostaria de solicitar acesso ao sistema Mkorp Control.%0A%0ANome: %0ACargo: %0AEmpresa: `}
+              className="text-[12px] transition-colors py-2"
               style={{ color: '#F08020' }}
             >
               Solicitar acesso
@@ -158,7 +184,31 @@ export default function Login() {
         </motion.div>
       </div>
 
-      <p className="text-center text-[#2E3240] text-xs pb-6 relative z-10">
+      <Modal aberto={recuperar} onClose={() => setRecuperar(false)} titulo="Recuperar senha">
+        {estadoRec === 'ok' ? (
+          <div className="space-y-4">
+            <p className="text-sm text-[#A8ADB8]">
+              Se este e-mail estiver cadastrado, você vai receber um link para criar uma nova senha. Confira também a caixa de spam.
+            </p>
+            <button onClick={() => setRecuperar(false)} className="w-full py-3 bg-[#F08020] text-[#0A0B0D] rounded-xl text-sm font-semibold">Entendi</button>
+          </div>
+        ) : (
+          <form onSubmit={enviarRecuperacao} className="space-y-4">
+            <p className="text-sm text-[#A8ADB8]">Informe o e-mail de acesso. Enviaremos um link para você criar uma nova senha.</p>
+            <input
+              type="email" value={emailRec} onChange={e => setEmailRec(e.target.value)} placeholder="seu@email.com" autoComplete="email"
+              aria-label="E-mail para recuperação"
+              className="w-full px-4 py-3 rounded-xl text-sm text-[#F5F5F0] bg-[#121419] border border-[#30353F] focus:outline-none focus:border-[#F08020]"
+            />
+            {estadoRec && estadoRec !== 'enviando' && <p role="alert" className="text-sm text-[#F87171]">{estadoRec}</p>}
+            <button type="submit" disabled={estadoRec === 'enviando'} className="w-full py-3 bg-[#F08020] text-[#0A0B0D] rounded-xl text-sm font-semibold disabled:opacity-60">
+              {estadoRec === 'enviando' ? 'Enviando...' : 'Enviar link'}
+            </button>
+          </form>
+        )}
+      </Modal>
+
+      <p className="text-center text-[#8A909C] text-xs pb-6 relative z-10">
         Mkorp Control © {new Date().getFullYear()}
       </p>
     </div>

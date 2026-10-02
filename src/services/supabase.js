@@ -6,10 +6,6 @@ const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Client secundário para criar usuários SEM derrubar a sessão do admin
-const supabaseSignup = createClient(SUPABASE_URL, SUPABASE_ANON, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
 
 // ==================== AUDITORIA ====================
 export const auditService = {
@@ -86,6 +82,15 @@ export const authService = {
     if (error && !perfil) return { data: { session: null }, error };
     return { data: { session: perfil ? { user: session.user, perfil } : null } };
   },
+  // Link de redefinição sempre aponta para o site (o e-mail abre no navegador, não no app)
+  recuperarSenha: async (email) => {
+    const base = import.meta.env.VITE_APP_URL || window.location.origin;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${base}/redefinir-senha` });
+    // não revela se o e-mail existe; só falha em erro de rede/limite
+    if (error && (error.status === 0 || error.status === 429 || /fetch|network/i.test(error.message || ''))) {
+      throw new Error(error.status === 429 ? 'Muitas tentativas. Aguarde alguns minutos.' : 'Sem conexão com o servidor.');
+    }
+  },
   alterarSenha: async (novaSenha) => {
     const { error } = await supabase.auth.updateUser({ password: novaSenha });
     if (error) throw new Error(error.message);
@@ -158,18 +163,23 @@ export const usuariosService = {
   },
   // Admin redefine a senha na hora (via Edge Function)
   resetSenhaAdmin: async (user_id, nova_senha) => {
-    const { data, error } = await supabase.functions.invoke('bright-worker', {
+    const { data, error } = await supabase.functions.invoke(import.meta.env.VITE_FN_RESET_SENHA || 'admin-reset-senha', {
       body: { user_id, nova_senha },
     });
-    if (error) throw new Error(error.message || 'Erro ao redefinir senha');
+    if (error) {
+      let msg = error.message;
+      try { msg = (await error.context?.json())?.error || msg; } catch { /* noop */ }
+      throw new Error(msg || 'Erro ao redefinir senha');
+    }
     if (data?.error) throw new Error(data.error);
     auditService.log({ acao: 'senha_resetada', entidade: 'usuarios', entidade_id: user_id });
     return true;
   },
   // Envia e-mail de redefinição de senha
   enviarEmailReset: async (email) => {
+    const base = import.meta.env.VITE_APP_URL || 'https://app.mkorp.com.br';
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://app.mkorp.com.br',
+      redirectTo: `${base}/redefinir-senha`,
     });
     if (error) throw new Error(error.message);
     return true;
@@ -186,23 +196,17 @@ export const usuariosService = {
     await supabase.from('usuarios').update({ avatar_url: url }).eq('id', id);
     return url;
   },
-  // Cria usuário COM login (auth + perfil), sem derrubar sessão do admin
-  criarComLogin: async ({ email, senha, nome, cargo, matricula, telefone, cpf, data_admissao }) => {
-    const { data: signup, error: signupError } = await supabaseSignup.auth.signUp({
-      email, password: senha,
-    });
-    if (signupError) throw new Error('Erro ao criar login: ' + signupError.message);
-    const novoId = signup.user?.id;
-    if (!novoId) throw new Error('Não foi possível criar a conta de acesso.');
-    const { data, error } = await supabase.from('usuarios').insert({
-      id: novoId, email, nome, cargo, matricula: matricula || null, telefone: telefone || null,
-      data_admissao: data_admissao || null, ativo: true,
-    }).select().single();
-    if (error) throw new Error('Login criado, mas erro ao salvar perfil: ' + error.message);
-    // CPF vai para a tabela protegida
-    if (cpf) await supabase.from('usuarios_documentos').insert({ usuario_id: novoId, cpf });
-    auditService.log({ acao: 'funcionario_criado', entidade: 'usuarios', entidade_id: novoId, dados_novos: { nome, cargo, email } });
-    return data;
+  // Cria usuário COM login (auth + perfil + CPF) pela Edge Function `admin-criar-usuario`
+  // (antes usava o signup público, o que obrigava a deixar o auto-cadastro aberto no Supabase)
+  criarComLogin: async (dados) => {
+    const { data, error } = await supabase.functions.invoke('admin-criar-usuario', { body: dados });
+    if (error) {
+      let msg = error.message;
+      try { msg = (await error.context?.json())?.error || msg; } catch { /* noop */ }
+      throw new Error(msg || 'Erro ao criar funcionário');
+    }
+    if (data?.error) throw new Error(data.error);
+    return data.usuario;
   },
 };
 

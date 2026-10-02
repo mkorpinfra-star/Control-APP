@@ -6,6 +6,7 @@ import './index.css';
 
 import TenantRoutes from './routes/TenantRoutes';
 import AnimatedSplash from './components/AnimatedSplash';
+import BotaoVoltarAndroid from './components/BotaoVoltarAndroid';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -23,6 +24,7 @@ function App() {
     <QueryProvider>
       <BrowserRouter>
         <AuthProvider>
+          <BotaoVoltarAndroid />
           {showSplash ? (
             <AnimatedSplash onComplete={() => setShowSplash(false)} />
           ) : (

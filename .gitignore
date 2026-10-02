@@ -24,3 +24,4 @@ tests/local/stack/auth
 tests/local/stack/gotrue
 tests/local/stack/migrations/
 .env.local
+!android/gradle/wrapper/gradle-wrapper.jar

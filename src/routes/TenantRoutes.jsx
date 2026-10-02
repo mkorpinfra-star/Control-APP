@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Auth
 import Login from '../pages/Login';
+import RedefinirSenha from '../pages/RedefinirSenha';
 
 // Funcionário de campo
 const BaterPonto = lazy(() => import('../pages/BaterPonto'));
@@ -86,6 +87,7 @@ export default function TenantRoutes() {
     <Routes>
       <Route path="/" element={isAuthenticated ? <HomeRouter /> : <Navigate to="/login" replace />} />
       <Route path="/login" element={isAuthenticated ? <HomeRouter /> : <Login />} />
+      <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
       <Route element={
         <ProtectedRoute>
