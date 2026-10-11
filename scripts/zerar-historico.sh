@@ -19,7 +19,7 @@ if ! git rev-parse --verify -q app-zerado >/dev/null; then
   git branch app-zerado "$SHA"
 fi
 [ "$(git rev-list --count app-zerado)" = "1" ] || { echo "app-zerado deveria ter 1 commit"; exit 1; }
-if git grep -Iil "j2s" app-zerado -- . ':!package-lock.json' | grep -q .; then
+if git grep -Iil "j2s" app-zerado -- . ':!package-lock.json' ':!scripts/zerar-historico.sh' | grep -q .; then
   echo "Ainda há referência ao projeto anterior na árvore — abortado"; exit 1
 fi
 
