@@ -1,27 +1,36 @@
+# Dependências e builds
 node_modules
 dist
+test-results/
+playwright-report/
+
+# Segredos e ambiente (nunca versionar)
 .env
 .env.*
 !.env.example
-nul
-jdk*
+android/keystore.properties
+*.keystore
+*.jks
+
+# Binários e pacotes
+*.aab
+*.apk
+*.jar
+!android/gradle/wrapper/gradle-wrapper.jar
 *.zip
 *.exe
 *.iso
-*.aab
-*.jar
+jdk*
 openjdk*
-android/keystore.properties
-*.keystore
-qa-runner.mjs
-test-results/
-playwright-report/
-qa-cleanup.mjs
-qa-check-schema.mjs
-qa-evidencias/screens/*.tmp
+
+# Ferramentas locais
+.claude/
+.idea/
+android/.idea/
+nul
+
+# Ambiente local de testes (binários baixados)
 tests/local/stack/postgrest
 tests/local/stack/auth
 tests/local/stack/gotrue
 tests/local/stack/migrations/
-.env.local
-!android/gradle/wrapper/gradle-wrapper.jar

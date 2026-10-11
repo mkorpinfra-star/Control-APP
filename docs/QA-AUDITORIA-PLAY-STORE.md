@@ -56,7 +56,7 @@ Legenda de evidência: **[E]** executado, **[L]** verificado por leitura de cód
 |---|---|---|---|---|---|
 | B-01 | RLS `auth_all_*` (`SUPABASE_PRODUCAO.sql`): qualquer autenticado lê/escreve todas as tabelas | Funcionário vira admin (`update usuarios set cargo='admin'`), lê CPF de todos, aprova o próprio ponto, altera ponto alheio, zera estoque, apaga auditoria | `tests/local/seguranca.test.mjs` S1–S12 contra schema original: **20/20 reprovados** (`qa-evidencias/api-antes-das-correcoes.txt`) | `supabase/migrations/20261002000000_seguranca_rls_estoque_ponto.sql`: políticas por papel, triggers que bloqueiam campos sensíveis, auditoria *append-only* | [E] 32/32 aprovados após a migração (aplicada 2× para provar idempotência). **Produção: pendente** |
 | B-02 | Senha do admin de produção no repo (`tests/e2e/helpers.js`) | Acesso total ao sistema | leitura | Removida; testes usam env/credenciais fictícias | [L] corrigido no código — **trocar a senha** |
-| B-03 | `4.aab` versionado é do app **J2S Obras** e contém planilha/CSV de **folha de pagamento** | Vazamento de dados pessoais/financeiros de terceiros (LGPD) | `bundletool dump` (conteúdo da planilha **não foi aberto**) | Removido do índice | [E] — **purgar do histórico** (`git filter-repo`) e avaliar incidente |
+| B-03 | Arquivos de um projeto anterior de terceiros estavam no repositório e no histórico (APKs/AABs, keystore, `.env`, credenciais, planilha de **folha de pagamento**) | Vazamento de dados pessoais/financeiros de terceiros (LGPD) | inspeção do histórico (conteúdo da planilha **não foi aberto**) | Tudo removido; **histórico zerado** (repositório novo com um único commit limpo) | [E] — publicar o histórico zerado (force-push) e avaliar o incidente |
 | B-04 | Senha da keystore de upload no histórico (`android/keystore.properties`, commit `702642a2`) | Assinatura de builds por terceiros (com o arquivo `.keystore`) | `git show` | Já fora do índice desde `c9af258b` | [L] — **resetar chave de upload** na Play Console |
 | B-05 | Chave OpenRouter embutida no bundle (`VITE_OPENROUTER_KEY`) | Qualquer um extrai a chave do JS e gera custo | leitura | Edge Function `ia-imagem` (chave só no servidor, exige papel); variável removida do workflow | [E] bundle sem `openrouter.ai`; função [L] não implantada — **revogar a chave antiga** |
 | B-06 | Ponto não gravava: horários vazios (`''`) enviados para colunas `time` | "Iniciar/Encerrar expediente" mostrava a hora na tela, mas **nada era salvo**, sem aviso | E2E P1 no código original: 0 linhas em `controle_ponto` | `pontoService.registrar` converte `''`→`NULL` e usa `upsert` | [E] P1 aprovado |
@@ -178,13 +178,14 @@ Evidências: `qa-evidencias/` (saídas de teste antes/depois, `antes-P1-R1-C1-R2
 - **Banco:** `supabase/migrations/20261002000000_seguranca_rls_estoque_ponto.sql`, `20261002010000_indices_storage.sql` (novos)
 - **Edge Functions:** `ia-imagem`, `admin-criar-usuario` (novas), `admin-reset-senha` (checa `ativo`, senha ≥ 8)
 - **Android:** Capacitor 8.5 (`package.json`, `android/variables.gradle`, `build.gradle`, `app/build.gradle`, wrapper 8.14.3, manifest), `capacitor.config.json` (SystemBars)
-- **Novos:** `src/lib/jornada.js`, `src/lib/voltar.js`, `src/components/BotaoVoltarAndroid.jsx`, `src/pages/RedefinirSenha.jsx`, `scripts/limpar-historico.sh`, `docs/DEPLOY-PLAY.md`
+- **Novos:** `src/lib/jornada.js`, `src/lib/voltar.js`, `src/components/BotaoVoltarAndroid.jsx`, `src/pages/RedefinirSenha.jsx`, `scripts/zerar-historico.sh`, `docs/DEPLOY-PLAY.md`
 - **Serviços:** `src/services/supabase.js`, `src/services/openrouter.js`, `src/lib/datas.js` (novo), `src/providers/QueryProvider.jsx`
 - **Auth/rotas:** `src/contexts/AuthContext.jsx`, `src/routes/TenantRoutes.jsx`, `src/pages/Login.jsx`
 - **Telas:** BaterPonto, Requisicoes, RegistroCampo, Timesheet, Monitoramento, OrdensServico, EntradaNF, Settings, Employees, `components/AvisoConexao.jsx` (novo), contraste em 25 arquivos
 - **Android/config:** `capacitor.config.json`, `AndroidManifest.xml`, `index.html`, `package.json`, `eslint.config.js`, `.gitignore`, `.env.example`, workflow de deploy
 - **Testes:** `tests/unit/` (11), `tests/local/` (stack local + seed + 37 testes de API/funções + policies de Storage), `tests/e2e-local/` (15 E2E), `playwright.local.config.js`
 - **Removidos do índice:** `node_modules/`, `dist/`, `4.aab`, `bundletool.jar`, `MainActivity` duplicada
+- **Sobras do projeto anterior removidas (app zerado):** `.claude/` (comandos de site/SEO e caminhos do outro projeto), `android/.idea/`, `eas.json`, `.htaccess` da raiz e regra `/backend/` + CORS `*` do `public/.htaccess`, `src/data/paises.js`, `src/services/mockData.js`, 4 CSS sem uso, `src/lib/utils.js`, `App.css`, `react.svg`, `vite.svg`, imagem de banco em `assets/`, guias desatualizados do protótipo (`COMO-COLOCAR-NO-AR.*`, `ROADMAP-MVP-DEPLOY.md`), `clsx`/`tailwind-merge`. Splash do Android trocado do padrão do Capacitor para a marca MKORP. Textos de marketing movidos para `docs/marketing/`.
 
 ## 7. Resultados finais (02/10/2026)
 
@@ -198,7 +199,7 @@ Evidências: `qa-evidencias/` (saídas de teste antes/depois, `antes-P1-R1-C1-R2
 | `vite build` | OK (entrada 664 KB) |
 | `npm audit --omit=dev` | 0 vulnerabilidades |
 | `npx cap sync android` / `cap doctor` | OK |
-| Limpeza do histórico (cópia local) | OK — 169 MB → 36 MB, 0 commits com os arquivos sensíveis |
+| Histórico zerado (branch `app-zerado`) | 1 commit, nenhum arquivo ou referência do projeto anterior |
 | Build Android / AAB / release | **Não executado** (SDK e Maven do Google bloqueados no ambiente) |
 
 ## 8. Pendências e checklist para publicar
@@ -206,7 +207,7 @@ Evidências: `qa-evidencias/` (saídas de teste antes/depois, `antes-P1-R1-C1-R2
 Passo a passo detalhado em [`docs/DEPLOY-PLAY.md`](DEPLOY-PLAY.md).
 
 **Impeditivas (fora do repositório)**
-- [ ] Trocar a senha do admin; revogar a chave OpenRouter; resetar a chave de upload; rodar `scripts/limpar-historico.sh` + force-push combinado com a equipe; avaliar o vazamento da folha de terceiros.
+- [ ] Trocar a senha do admin; revogar a chave OpenRouter; resetar a chave de upload; publicar o histórico zerado com `scripts/zerar-historico.sh` (force-push); avaliar o vazamento da folha de terceiros.
 - [ ] Exportar o schema real de produção e comparar com o do repositório.
 - [ ] Aplicar as 2 migrações **primeiro em homologação**, rodar `npm run test:api` contra ela e só depois em produção, **junto** com o deploy do site.
 - [ ] Publicar as 3 Edge Functions e o secret `OPENROUTER_KEY`; desligar o signup público; cadastrar `…/redefinir-senha` nas Redirect URLs; configurar SMTP.

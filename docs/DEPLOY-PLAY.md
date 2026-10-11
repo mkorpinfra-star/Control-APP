@@ -6,7 +6,7 @@ Siga **nesta ordem**. O app novo depende das funções do banco, e o app antigo 
 1. Troque a senha do admin `felipe.garcia@mkorp.com.br` (estava no repositório).
 2. Na OpenRouter, revogue a chave antiga e crie uma nova (ela estava no bundle público do site).
 3. Na Play Console → *Integridade do app* → *Assinatura do app*, peça o **reset da chave de upload** (a senha estava no histórico do git). Gere um keystore novo e guarde-o fora do repositório.
-4. Envie a branch `qa/auditoria-play-store` para o GitHub e só então limpe o histórico com `scripts/limpar-historico.sh` (o script explica). O procedimento foi testado numa cópia: o repositório caiu de 169 MB para 36 MB.
+4. **Zere o histórico do GitHub** com `scripts/zerar-historico.sh`: a branch `app-zerado` tem **um único commit** com o app MKORP limpo, sem nenhum arquivo do projeto anterior. Ela substitui a `main` e as outras branches remotas são apagadas. Faça antes um backup espelhado (o script mostra o comando) e guarde-o fora do GitHub.
 
 ## 1. Banco (Supabase) — homologação primeiro
 1. Crie um projeto Supabase de homologação e restaure nele um dump da produção:
